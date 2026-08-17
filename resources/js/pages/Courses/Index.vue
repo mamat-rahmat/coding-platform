@@ -1,4 +1,7 @@
 <script setup lang="ts">
+import { Link } from '@inertiajs/vue3';
+import courseRoutes from '@/routes/courses';
+
 interface Course {
     id: number;
     title: string;
@@ -98,12 +101,12 @@ defineProps<{
                             </span>
                         </div>
 
-                        <button
-                            type="button"
-                            class="mt-5 w-full rounded-lg bg-gray-900 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-gray-700"
+                        <Link
+                            :href="courseRoutes.show.url(course.slug)"
+                            class="mt-5 block w-full rounded-lg bg-gray-900 px-4 py-2.5 text-center text-sm font-medium text-white transition hover:bg-gray-700"
                         >
                             Mulai Belajar
-                        </button>
+                        </Link>
                     </div>
                 </article>
             </div>
