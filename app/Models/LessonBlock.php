@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\LessonBlockType;
 use App\Models\Lesson;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -21,6 +22,7 @@ class LessonBlock extends Model
     protected function casts(): array
     {
         return [
+            'type' => LessonBlockType::class,
             'content' => 'array',
         ];
     }

@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\LessonBlockType;
 use App\Models\Lesson;
 use App\Models\LessonBlock;
 use Illuminate\Database\Eloquent\Factories\Factory;
@@ -17,7 +18,7 @@ class LessonBlockFactory extends Factory
     {
         return [
             'lesson_id' => Lesson::factory(),
-            'type' => 'TEXT',
+            'type' => LessonBlockType::TEXT,
             'content' => [
                 'text' => fake()->paragraph(),
             ],

@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\LessonBlockType;
 use App\Models\Course;
 use Illuminate\Database\Seeder;
 
@@ -35,7 +36,7 @@ class DatabaseSeeder extends Seeder
         ]);
 
         $helloPython->blocks()->create([
-            'type' => 'TEXT',
+            'type' => LessonBlockType::TEXT,
             'content' => [
                 'text' => 'Python adalah bahasa pemrograman yang mudah dipelajari. Mari kita mulai dengan program pertama.',
             ],
@@ -43,7 +44,7 @@ class DatabaseSeeder extends Seeder
         ]);
 
         $helloPython->blocks()->create([
-            'type' => 'CODE_EXAMPLE',
+            'type' => LessonBlockType::CODE_EXAMPLE,
             'content' => [
                 'language' => 'python',
                 'code' => 'print("Hello, World!")',
@@ -60,7 +61,7 @@ class DatabaseSeeder extends Seeder
         ]);
 
         $variables->blocks()->create([
-            'type' => 'TEXT',
+            'type' => LessonBlockType::TEXT,
             'content' => [
                 'text' => 'Variabel digunakan untuk menyimpan nilai yang dapat digunakan kembali dalam program.',
             ],
@@ -68,7 +69,7 @@ class DatabaseSeeder extends Seeder
         ]);
 
         $variables->blocks()->create([
-            'type' => 'CODE_EXAMPLE',
+            'type' => LessonBlockType::CODE_EXAMPLE,
             'content' => [
                 'language' => 'python',
                 'code' => 'name = "Budi"\\nage = 13\\n\\nprint(name)\\nprint(age)',
@@ -92,7 +93,7 @@ class DatabaseSeeder extends Seeder
         ]);
 
         $ifStatements->blocks()->create([
-            'type' => 'TEXT',
+            'type' => LessonBlockType::TEXT,
             'content' => [
                 'text' => 'Statement if memungkinkan program menjalankan kode hanya ketika kondisi tertentu terpenuhi.',
             ],
@@ -100,7 +101,7 @@ class DatabaseSeeder extends Seeder
         ]);
 
         $ifStatements->blocks()->create([
-            'type' => 'CODE_EXAMPLE',
+            'type' => LessonBlockType::CODE_EXAMPLE,
             'content' => [
                 'language' => 'python',
                 'code' => 'age = 13\\n\\nif age >= 13:\\n    print("Teenager")',
