@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { Link } from '@inertiajs/vue3';
-import courses from '@/routes/courses';
+import courseRoutes from '@/routes/courses';
+import lessonRoutes from '@/routes/lessons';
 
 interface Lesson {
     id: number;
@@ -40,7 +41,7 @@ defineProps<{
     <div class="min-h-screen bg-gray-50">
         <div class="mx-auto max-w-5xl px-6 py-12">
             <Link
-                :href="courses.index.url()"
+                :href="courseRoutes.index.url()"
                 class="text-sm text-gray-500 hover:text-gray-900"
             >
                 ← Kembali ke Courses
@@ -127,7 +128,7 @@ defineProps<{
                             </div>
 
                             <Link
-                                type="button"
+                                :href="lessonRoutes.show.url(lesson.slug)"
                                 class="rounded-lg border px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
                             >
                                 Mulai
