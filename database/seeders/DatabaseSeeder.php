@@ -72,7 +72,13 @@ class DatabaseSeeder extends Seeder
             'type' => LessonBlockType::CODE_EXAMPLE,
             'content' => [
                 'language' => 'python',
-                'code' => 'name = "Budi"\\nage = 13\\n\\nprint(name)\\nprint(age)',
+                'code' => <<<'PYTHON'
+name = "Budi"
+age = 13
+
+print(name)
+print(age)
+PYTHON,
             ],
             'sort_order' => 2,
         ]);
@@ -104,7 +110,12 @@ class DatabaseSeeder extends Seeder
             'type' => LessonBlockType::CODE_EXAMPLE,
             'content' => [
                 'language' => 'python',
-                'code' => 'age = 13\\n\\nif age >= 13:\\n    print("Teenager")',
+                'code' => <<<'PYTHON'
+age = 13
+
+if age >= 13:
+    print("Teenager")
+PYTHON,
             ],
             'sort_order' => 2,
         ]);

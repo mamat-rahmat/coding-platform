@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { Link } from '@inertiajs/vue3';
 import courseRoutes from '@/routes/courses';
+import LessonBlockRenderer from '@/components/lesson/LessonBlockRenderer.vue';
 
 interface LessonBlock {
     id: number;
@@ -74,34 +75,7 @@ defineProps<{
                     :key="block.id"
                     class="rounded-xl border bg-white p-6 shadow-sm"
                 >
-                    <!-- TEXT -->
-                    <template v-if="block.type === 'TEXT'">
-                        <p class="leading-8 text-gray-700">
-                            {{ block.content.text }}
-                        </p>
-                    </template>
-
-                    <!-- CODE EXAMPLE -->
-                    <template v-else-if="block.type === 'CODE_EXAMPLE'">
-                        <div class="overflow-hidden rounded-lg bg-gray-900">
-                            <div
-                                class="border-b border-gray-700 px-4 py-2 text-xs text-gray-400"
-                            >
-                                {{ block.content.language }}
-                            </div>
-
-                            <pre
-                                class="overflow-x-auto p-5 text-sm leading-6 text-gray-100"
-                            ><code>{{ block.content.code }}</code></pre>
-                        </div>
-                    </template>
-
-                    <!-- Unknown block -->
-                    <template v-else>
-                        <p class="text-sm text-gray-500">
-                            Block type "{{ block.type }}" belum didukung.
-                        </p>
-                    </template>
+                    <LessonBlockRenderer :block="block" />
                 </section>
             </main>
 
