@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Course;
+use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -31,7 +32,7 @@ class CourseController extends Controller
         ]);
     }
 
-    public function show(Course $course): Response
+    public function show(Request $request, Course $course): Response
     {
         abort_unless($course->is_published, 404);
 
@@ -53,8 +54,45 @@ class CourseController extends Controller
                 ]),
         ]);
 
+        $course->load([
+            'modules.lessons',
+        ]);
+        
+        $lessons = $course->modules
+            ->flatMap(fn ($module) => $module->lessons)
+            ->sortBy('sort_order')
+            ->values();
+
+        $completedLessonIds = $request->user()
+            ->lessonProgresses()
+            ->whereIn('lesson_id', $lessons->pluck('id'))
+            ->whereNotNull('completed_at')
+            ->pluck('lesson_id');
+        
+        $course->modules->each(function ($module) use ($completedLessonIds) {
+            $module->lessons->each(function ($lesson) use ($completedLessonIds) {
+                $lesson->is_completed = $completedLessonIds->contains($lesson->id);
+            });
+        });
+        
+        $totalLessons = $lessons->count();
+
+        $completedLessons = $lessons
+            ->whereIn('id', $completedLessonIds)
+            ->count();
+
+        $progressPercentage = $totalLessons > 0
+            ? (int) round(($completedLessons / $totalLessons) * 100)
+            : 0;
+        
         return Inertia::render('Courses/Show', [
             'course' => $course,
+            'lessons' => $lessons,
+            'progress' => [
+                'totalLessons' => $totalLessons,
+                'completedLessons' => $completedLessons,
+                'percentage' => $progressPercentage,
+            ],
         ]);
     }
 }

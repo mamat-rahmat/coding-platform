@@ -9,6 +9,8 @@ interface Lesson {
     slug: string;
     description: string | null;
     sort_order: number;
+    is_published: boolean;
+    is_completed: boolean;
 }
 
 interface CourseModule {
@@ -32,9 +34,18 @@ interface Course {
     modules: CourseModule[];
 }
 
+interface CourseProgress {
+    totalLessons: number;
+    completedLessons: number;
+    percentage: number;
+}
+
 defineProps<{
     course: Course;
+    progress: CourseProgress;
 }>();
+
+
 </script>
 
 <template>
@@ -75,6 +86,30 @@ defineProps<{
                 <p class="mt-4 max-w-3xl text-lg text-gray-600">
                     {{ course.description }}
                 </p>
+
+                <div class="mt-6">
+                    <div class="mb-2 flex items-center justify-between text-sm">
+                        <span class="font-medium text-gray-700">
+                            Progress
+                        </span>
+
+                        <span class="text-gray-500">
+                            {{ progress.completedLessons }} /
+                            {{ progress.totalLessons }} lessons
+                        </span>
+                    </div>
+
+                    <div class="h-2 overflow-hidden rounded-full bg-gray-200">
+                        <div
+                            class="h-full rounded-full bg-gray-900 transition-all"
+                            :style="{ width: `${progress.percentage}%` }"
+                        />
+                    </div>
+
+                    <p class="mt-2 text-sm text-gray-500">
+                        {{ progress.percentage }}% selesai
+                    </p>
+                </div>
             </header>
 
             <div class="mt-12 space-y-6">
@@ -107,11 +142,22 @@ defineProps<{
                             class="flex items-center justify-between px-6 py-4"
                         >
                             <div class="flex items-center gap-4">
-                                <div
-                                    class="flex h-9 w-9 items-center justify-center rounded-full bg-gray-100 text-sm font-medium text-gray-600"
-                                >
+                            <div
+                                class="flex h-9 w-9 items-center justify-center rounded-full text-sm font-medium"
+                                :class="
+                                    lesson.is_completed
+                                        ? 'bg-green-100 text-green-700'
+                                        : 'bg-gray-100 text-gray-600'
+                                "
+                            >
+                                <span v-if="lesson.is_completed">
+                                    ✓
+                                </span>
+
+                                <span v-else>
                                     {{ lessonIndex + 1 }}
-                                </div>
+                                </span>
+                            </div>
 
                                 <div>
                                     <h3 class="font-medium text-gray-900">
@@ -129,9 +175,14 @@ defineProps<{
 
                             <Link
                                 :href="lessonRoutes.show.url(lesson.slug)"
-                                class="rounded-lg border px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+                                class="rounded-lg border px-4 py-2 text-sm font-medium hover:bg-gray-50"
+                                :class="
+                                    lesson.is_completed
+                                        ? 'border-green-200 text-green-700'
+                                        : 'text-gray-700'
+                                "
                             >
-                                Mulai
+                                {{ lesson.is_completed ? 'Selesai' : 'Mulai' }}
                             </Link>
                         </div>
                     </div>
