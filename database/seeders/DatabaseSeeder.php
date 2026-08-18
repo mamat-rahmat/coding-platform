@@ -10,6 +10,12 @@ class DatabaseSeeder extends Seeder
 {
     public function run(): void
     {
+        $user = \App\Models\User::create([
+            'name' => 'Coder Bodoh',
+            'email' => 'coderbodoh@gmail.com',
+            'password' => bcrypt('pass123'),
+        ]);
+
         $course = Course::create([
             'title' => 'Python Fundamentals',
             'slug' => 'python-fundamentals',
@@ -50,6 +56,36 @@ class DatabaseSeeder extends Seeder
                 'code' => 'print("Hello, World!")',
             ],
             'sort_order' => 2,
+        ]);
+
+        $helloPython->blocks()->create([
+            'type' => LessonBlockType::QUIZ,
+            'content' => [
+                'question' => 'Apa output dari kode berikut?',
+                'code' => <<<'PYTHON'
+        print("Hello World")
+        PYTHON,
+                'options' => [
+                    [
+                        'id' => 'a',
+                        'text' => 'Hello',
+                    ],
+                    [
+                        'id' => 'b',
+                        'text' => 'World',
+                    ],
+                    [
+                        'id' => 'c',
+                        'text' => 'Hello World',
+                    ],
+                    [
+                        'id' => 'd',
+                        'text' => 'Error',
+                    ],
+                ],
+                'correct_answer' => 'c',
+            ],
+            'sort_order' => 3,
         ]);
 
         $variables = $basics->lessons()->create([
