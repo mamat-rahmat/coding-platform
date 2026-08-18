@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { Link } from '@inertiajs/vue3';
 import courseRoutes from '@/routes/courses';
+import lessonRoutes from '@/routes/lessons';
 import LessonBlockRenderer from '@/components/lesson/LessonBlockRenderer.vue';
 
 interface LessonBlock {
@@ -31,8 +32,16 @@ interface Lesson {
     };
 }
 
+interface LessonSummary {
+    id: number;
+    title: string;
+    slug: string;
+}
+
 defineProps<{
     lesson: Lesson;
+    previousLesson: LessonSummary | null;
+    nextLesson: LessonSummary | null;
 }>();
 </script>
 
@@ -80,13 +89,26 @@ defineProps<{
             </main>
 
             <!-- Navigation -->
-            <div class="mt-10 flex justify-end border-t pt-6">
-                <button
-                    type="button"
+            <div
+                class="mt-10 flex items-center justify-between border-t pt-6"
+            >
+                <Link
+                    v-if="previousLesson"
+                    :href="lessonRoutes.show.url(previousLesson.slug)"
+                    class="rounded-lg border px-5 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50"
+                >
+                    ← Sebelumnya
+                </Link>
+
+                <div v-else />
+
+                <Link
+                    v-if="nextLesson"
+                    :href="lessonRoutes.show.url(nextLesson.slug)"
                     class="rounded-lg bg-gray-900 px-5 py-2.5 text-sm font-medium text-white hover:bg-gray-700"
                 >
                     Lanjut →
-                </button>
+                </Link>
             </div>
         </div>
     </div>
