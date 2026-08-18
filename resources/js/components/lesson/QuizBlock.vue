@@ -59,16 +59,16 @@ const reset = () => {
                 v-for="option in content.options"
                 :key="option.id"
                 type="button"
-                class="flex w-full items-center gap-3 rounded-lg border p-4 text-left text-gray-900 transition"
+                class="flex w-full items-center gap-3 rounded-lg border border-gray-300 bg-white p-4 text-left text-gray-900 transition hover:bg-gray-50"
                 :class="{
-                    'border-gray-900 bg-gray-300':
+                    'border-gray-900 bg-gray-100':
                         selectedAnswer === option.id && !submitted,
 
-                    'border-green-500 bg-green-100':
+                    'border-green-500 bg-green-50 text-green-900':
                         submitted &&
                         option.id === content.correct_answer,
 
-                    'border-red-500 bg-red-100':
+                    'border-red-500 bg-red-50 text-red-900':
                         submitted &&
                         option.id === selectedAnswer &&
                         option.id !== content.correct_answer,
