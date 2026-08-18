@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Link } from '@inertiajs/vue3';
+import { Link, router } from '@inertiajs/vue3';
 import courseRoutes from '@/routes/courses';
 import lessonRoutes from '@/routes/lessons';
 import LessonBlockRenderer from '@/components/lesson/LessonBlockRenderer.vue';
@@ -42,7 +42,18 @@ defineProps<{
     lesson: Lesson;
     previousLesson: LessonSummary | null;
     nextLesson: LessonSummary | null;
+    isCompleted: boolean;
 }>();
+
+const completeLesson = (lessonSlug: string) => {
+    router.post(
+        lessonRoutes.complete.url(lessonSlug),
+        {},
+        {
+            preserveScroll: true,
+        },
+    );
+};
 </script>
 
 <template>
@@ -67,7 +78,7 @@ defineProps<{
             <header class="mb-10">
                 <h1 class="text-3xl font-bold tracking-tight text-gray-900">
                     {{ lesson.title }}
-                </h1>
+            </h1>
 
                 <p
                     v-if="lesson.description"
@@ -102,13 +113,29 @@ defineProps<{
 
                 <div v-else />
 
+                <button
+                    v-if="!isCompleted"
+                    type="button"
+                    class="rounded-lg bg-gray-900 px-5 py-2.5 text-sm font-medium text-white hover:bg-gray-700"
+                    @click="completeLesson(lesson.slug)"
+                >
+                    Tandai selesai
+                </button>
+
                 <Link
-                    v-if="nextLesson"
+                    v-else-if="nextLesson"
                     :href="lessonRoutes.show.url(nextLesson.slug)"
                     class="rounded-lg bg-gray-900 px-5 py-2.5 text-sm font-medium text-white hover:bg-gray-700"
                 >
                     Lanjut →
                 </Link>
+
+                <span
+                    v-else
+                    class="rounded-lg bg-green-100 px-5 py-2.5 text-sm font-medium text-green-700"
+                >
+                    ✓ Lesson selesai
+                </span>
             </div>
         </div>
     </div>

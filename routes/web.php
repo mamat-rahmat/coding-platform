@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\CourseController;
 use App\Http\Controllers\LessonController;
+use App\Http\Controllers\LessonProgressController;
 use Illuminate\Support\Facades\Route;
 
 Route::inertia('/', 'Welcome')->name('home');
@@ -14,6 +15,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ->name('courses.show');
     Route::get('/lessons/{lesson:slug}', [LessonController::class, 'show'])
         ->name('lessons.show');
+    Route::post('/lessons/{lesson:slug}/complete', [
+        LessonProgressController::class,
+        'complete',
+    ])->name('lessons.complete');
 });
 
 

@@ -39,4 +39,8 @@ class Lesson extends Model
         return $this->hasMany(LessonBlock::class);
     }
 
+    public function progresses(): HasMany
+    {
+        return $this->hasMany(LessonProgress::class);
+    }
 }

@@ -3,12 +3,13 @@
 namespace App\Http\Controllers;
 
 use App\Models\Lesson;
+use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
 
 class LessonController extends Controller
 {
-    public function show(Lesson $lesson): Response
+    public function show(Request $request, Lesson $lesson): Response
     {
         abort_unless($lesson->is_published, 404);
 
@@ -31,11 +32,17 @@ class LessonController extends Controller
             ->orderBy('sort_order')
             ->first();
 
+        $isCompleted = $request->user()
+            ->lessonProgresses()
+            ->where('lesson_id', $lesson->id)
+            ->whereNotNull('completed_at')
+            ->exists();
 
         return Inertia::render('Lessons/Show', [
             'lesson' => $lesson,
             'previousLesson' => $previousLesson,
             'nextLesson' => $nextLesson,
+            'isCompleted' => $isCompleted,
         ]);
     }
 }
