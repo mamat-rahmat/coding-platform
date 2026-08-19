@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\LessonBlockType;
 use App\Models\BlockAttempt;
 use App\Models\LessonBlock;
+use App\Models\LessonProgress;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 
@@ -46,12 +47,68 @@ class BlockAttemptController extends Controller
             'answered_at' => now(),
         ]);
 
+        if ($payload['is_correct']) {
+            $this->maybeCompleteLesson($request, $lessonBlock);
+        }
+
         return back()->with('attempt_result', [
             'block_id' => $lessonBlock->id,
             'selected_answer' => $payload['answer'],
             'is_correct' => $payload['is_correct'],
         ]);
     }
+
+    /**
+     * Mark the lesson complete if every graded block in it
+     * has at least one correct attempt by the user.
+     */
+    private function maybeCompleteLesson(Request $request, LessonBlock $block): void
+    {
+        $gradedTypes = [
+            LessonBlockType::MCQ_SINGLE,
+            LessonBlockType::MCQ_MULTIPLE,
+            LessonBlockType::CODE_FILL,
+            LessonBlockType::CODE_REORDER,
+            LessonBlockType::CODE_CHALLENGE,
+        ];
+
+        $lesson = $block->lesson()->first();
+
+        if (! $lesson) {
+            return;
+        }
+
+        $gradedBlockIds = $lesson
+            ->blocks()
+            ->whereIn('type', array_map(fn ($t) => $t->value, $gradedTypes))
+            ->pluck('id');
+
+        if ($gradedBlockIds->isEmpty()) {
+            return;
+        }
+
+        $correctBlockIds = $request->user()
+            ->blockAttempts()
+            ->whereIn('lesson_block_id', $gradedBlockIds)
+            ->where('is_correct', true)
+            ->pluck('lesson_block_id')
+            ->unique();
+
+        if ($correctBlockIds->count() !== $gradedBlockIds->count()) {
+            return;
+        }
+
+        LessonProgress::updateOrCreate(
+            [
+                'user_id' => $request->user()->id,
+                'lesson_id' => $lesson->id,
+            ],
+            [
+                'completed_at' => now(),
+            ],
+        );
+    }
+
 
     /**
      * @return array{answer: string, is_correct: bool}
