@@ -1,12 +1,14 @@
 <script setup lang="ts">
-import { Link } from '@inertiajs/vue3';
+import { Link, usePage } from '@inertiajs/vue3';
 import {
     BookOpen,
     FolderGit2,
     GraduationCap,
     LayoutGrid,
+    ShieldCheck,
     Terminal,
 } from '@lucide/vue';
+import { computed } from 'vue';
 import AppLogo from '@/components/AppLogo.vue';
 import NavFooter from '@/components/NavFooter.vue';
 import NavMain from '@/components/NavMain.vue';
@@ -21,9 +23,16 @@ import {
     SidebarMenuItem,
 } from '@/components/ui/sidebar';
 import { dashboard } from '@/routes';
+import adminRoutes from '@/routes/admin';
 import courseRoutes from '@/routes/courses';
 import playgroundRoutes from '@/routes/playground';
 import type { NavItem } from '@/types';
+
+const page = usePage();
+
+const isAdmin = computed(() =>
+    Boolean((page.props.auth?.user as { is_admin?: boolean })?.is_admin),
+);
 
 const mainNavItems: NavItem[] = [
     {
@@ -40,6 +49,14 @@ const mainNavItems: NavItem[] = [
         title: 'Playground',
         href: playgroundRoutes.index.url(),
         icon: Terminal,
+    },
+];
+
+const adminNavItems: NavItem[] = [
+    {
+        title: 'Admin Dashboard',
+        href: adminRoutes.dashboard(),
+        icon: ShieldCheck,
     },
 ];
 
@@ -73,6 +90,16 @@ const footerNavItems: NavItem[] = [
 
         <SidebarContent>
             <NavMain :items="mainNavItems" />
+
+            <div v-if="isAdmin" class="px-2 py-1">
+                <div
+                    class="flex items-center gap-2 px-2 py-1.5 text-xs font-medium tracking-wide text-gray-500 uppercase"
+                >
+                    <ShieldCheck class="h-3.5 w-3.5" />
+                    Admin
+                </div>
+                <NavMain :items="adminNavItems" />
+            </div>
         </SidebarContent>
 
         <SidebarFooter>
