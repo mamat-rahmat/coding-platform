@@ -27,6 +27,32 @@ composer setup        # install + migrate + build
 composer dev          # server + queue + vite (concurrent)
 ```
 
+### First-run notes
+
+Jika environment belum pernah disiapkan (fresh clone), `composer setup`
+menjalankan semua langkah yang diperlukan: install composer + npm deps,
+generate app key, migrate, dan build Vite assets.
+
+Langkah manual yang kadang perlu dijalankan terpisah:
+
+- `php artisan wayfinder:generate` — generate typed route helpers di
+  `resources/js/routes/` & `resources/js/actions/`. Wajib dijalankan
+  setelah menambah/mengubah route Laravel agar frontend bisa import
+  helper baru.
+- `npm run build` — build Vite assets. Wajib sebelum menjalankan
+  `php artisan test` agar Inertia pages bisa render (butuh
+  `public/build/manifest.json`).
+- `php -d memory_limit=512M vendor/bin/phpstan analyse --memory-limit=512M`
+  — PHPStan butuh memory >128MB default.
+
+### Pyodide (Python runtime via WASM)
+
+Pyodide dimuat dari CDN `jsdelivr` dengan version pin di
+`resources/js/composables/usePyodide.ts` (konstanta `PYODIDE_VERSION`).
+Tidak ada npm package Pyodide; load dilakukan lazy saat pertama kali
+`loadPyodide()` dipanggil. Butuh koneksi internet saat runtime untuk
+fetch WASM binary (~10MB, di-cache browser setelahnya).
+
 ## Commit Policy
 
 - **Granularity**: commit per sub-task lengkap (bukan per file, bukan per fase).
