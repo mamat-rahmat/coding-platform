@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import Markdown from '@/components/Markdown.vue';
+
 interface TextContent {
     text: string;
 }
@@ -9,7 +11,8 @@ defineProps<{
 </script>
 
 <template>
-    <p class="leading-8 text-gray-700">
-        {{ content.text }}
-    </p>
+    <Markdown
+        :content="content.text"
+        class="prose prose-sm max-w-none text-gray-700"
+    />
 </template>
