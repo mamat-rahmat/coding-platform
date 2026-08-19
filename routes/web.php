@@ -4,6 +4,7 @@ use App\Http\Controllers\BlockAttemptController;
 use App\Http\Controllers\CourseController;
 use App\Http\Controllers\LessonController;
 use App\Http\Controllers\LessonProgressController;
+use App\Http\Controllers\PlaygroundController;
 use Illuminate\Support\Facades\Route;
 
 Route::inertia('/', 'Welcome')->name('home');
@@ -29,6 +30,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
         BlockAttemptController::class,
         'store',
     ])->name('lesson-blocks.attempts.store');
+
+    Route::get('/playground', [PlaygroundController::class, 'index'])
+        ->name('playground.index');
 });
 
 
