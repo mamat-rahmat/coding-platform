@@ -62,15 +62,17 @@ const submitAnswer = () => {
         {
             preserveScroll: true,
             onSuccess: (page) => {
-                const flash = page.props.flash as {
-                    attempt_result?: {
-                        block_id: number;
-                        selected_answer: string;
-                        is_correct: boolean;
-                    };
-                };
-
-                const result = flash.attempt_result;
+                const result = (
+                    page.props.flash as
+                        | {
+                              attempt_result?: {
+                                  block_id: number;
+                                  selected_answer: string;
+                                  is_correct: boolean;
+                              };
+                          }
+                        | undefined
+                )?.attempt_result;
 
                 if (!result || result.block_id !== props.blockId) {
                     return;
