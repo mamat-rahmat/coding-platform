@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { Link, router } from '@inertiajs/vue3';
+import { computed } from 'vue';
 import LessonBlockRenderer from '@/components/lesson/LessonBlockRenderer.vue';
 import courseRoutes from '@/routes/courses';
 import lessonRoutes from '@/routes/lessons';
@@ -28,12 +29,35 @@ interface LessonSummary {
     slug: string;
 }
 
-defineProps<{
+interface BlockStatus {
+    totalGraded: number;
+    correctGraded: number;
+    allCorrect: boolean;
+}
+
+const props = defineProps<{
     lesson: Lesson;
     previousLesson: LessonSummary | null;
     nextLesson: LessonSummary | null;
     isCompleted: boolean;
+    blockStatus: BlockStatus;
 }>();
+
+const hasGradedBlocks = computed(() => props.blockStatus.totalGraded > 0);
+
+const showManualComplete = computed(
+    () => !props.isCompleted && !hasGradedBlocks.value,
+);
+
+const progressPercentage = computed(() => {
+    if (props.blockStatus.totalGraded === 0) {
+        return props.isCompleted ? 100 : 0;
+    }
+
+    return Math.round(
+        (props.blockStatus.correctGraded / props.blockStatus.totalGraded) * 100,
+    );
+});
 
 const completeLesson = (lessonSlug: string) => {
     router.post(
@@ -64,7 +88,7 @@ const completeLesson = (lessonSlug: string) => {
             </div>
 
             <!-- Lesson Header -->
-            <header class="mb-10">
+            <header class="mb-8">
                 <h1 class="text-3xl font-bold tracking-tight text-gray-900">
                     {{ lesson.title }}
                 </h1>
@@ -72,6 +96,26 @@ const completeLesson = (lessonSlug: string) => {
                 <p v-if="lesson.description" class="mt-3 text-lg text-gray-600">
                     {{ lesson.description }}
                 </p>
+
+                <div v-if="hasGradedBlocks" class="mt-4">
+                    <div
+                        class="mb-1 flex items-center justify-between text-xs text-gray-500"
+                    >
+                        <span>Progress soal</span>
+
+                        <span>
+                            {{ blockStatus.correctGraded }} /
+                            {{ blockStatus.totalGraded }} benar
+                        </span>
+                    </div>
+
+                    <div class="h-1.5 overflow-hidden rounded-full bg-gray-200">
+                        <div
+                            class="h-full rounded-full bg-green-500 transition-all"
+                            :style="{ width: `${progressPercentage}%` }"
+                        />
+                    </div>
+                </div>
             </header>
 
             <!-- Lesson Blocks -->
@@ -98,7 +142,7 @@ const completeLesson = (lessonSlug: string) => {
                 <div v-else />
 
                 <button
-                    v-if="!isCompleted"
+                    v-if="showManualComplete"
                     type="button"
                     class="rounded-lg bg-gray-900 px-5 py-2.5 text-sm font-medium text-white hover:bg-gray-700"
                     @click="completeLesson(lesson.slug)"
@@ -107,7 +151,7 @@ const completeLesson = (lessonSlug: string) => {
                 </button>
 
                 <Link
-                    v-else-if="nextLesson"
+                    v-else-if="isCompleted && nextLesson"
                     :href="lessonRoutes.show.url(nextLesson.slug)"
                     class="rounded-lg bg-gray-900 px-5 py-2.5 text-sm font-medium text-white hover:bg-gray-700"
                 >
@@ -115,10 +159,17 @@ const completeLesson = (lessonSlug: string) => {
                 </Link>
 
                 <span
-                    v-else
+                    v-else-if="isCompleted"
                     class="rounded-lg bg-green-100 px-5 py-2.5 text-sm font-medium text-green-700"
                 >
                     ✓ Lesson selesai
+                </span>
+
+                <span
+                    v-else
+                    class="rounded-lg bg-gray-100 px-5 py-2.5 text-sm font-medium text-gray-500"
+                >
+                    Selesaikan semua soal untuk lanjut
                 </span>
             </div>
         </div>

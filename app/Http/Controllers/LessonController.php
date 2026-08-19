@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\LessonBlockType;
 use App\Models\Lesson;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -38,11 +39,51 @@ class LessonController extends Controller
             ->whereNotNull('completed_at')
             ->exists();
 
+        $gradedTypes = [
+            LessonBlockType::MCQ_SINGLE,
+            LessonBlockType::MCQ_MULTIPLE,
+            LessonBlockType::CODE_FILL,
+            LessonBlockType::CODE_REORDER,
+            LessonBlockType::CODE_CHALLENGE,
+        ];
+
+        $gradedBlockIds = $lesson->blocks
+            ->filter(fn ($block) => in_array($block->type, $gradedTypes, true))
+            ->pluck('id')
+            ->all();
+
+        $latestAttempts = $request->user()
+            ->blockAttempts()
+            ->whereIn('lesson_block_id', $gradedBlockIds)
+            ->orderByDesc('answered_at')
+            ->get()
+            ->keyBy('lesson_block_id');
+
+        $lesson->blocks->each(function ($block) use ($latestAttempts) {
+            $attempt = $latestAttempts->get($block->id);
+
+            $block->is_answered = $attempt !== null;
+            $block->is_correct = $attempt?->is_correct;
+        });
+
+        $totalGraded = count($gradedBlockIds);
+        $correctGraded = $latestAttempts
+            ->filter(fn ($attempt) => $attempt->is_correct)
+            ->count();
+
+        $allGradedCorrect = $totalGraded > 0
+            && $correctGraded === $totalGraded;
+
         return Inertia::render('Lessons/Show', [
             'lesson' => $lesson,
             'previousLesson' => $previousLesson,
             'nextLesson' => $nextLesson,
             'isCompleted' => $isCompleted,
+            'blockStatus' => [
+                'totalGraded' => $totalGraded,
+                'correctGraded' => $correctGraded,
+                'allCorrect' => $allGradedCorrect,
+            ],
         ]);
     }
 }
