@@ -1,6 +1,12 @@
 <script setup lang="ts">
 import { Link } from '@inertiajs/vue3';
-import { BookOpen, FolderGit2, GraduationCap, LayoutGrid } from '@lucide/vue';
+import {
+    BookOpen,
+    FolderGit2,
+    GraduationCap,
+    LayoutGrid,
+    Terminal,
+} from '@lucide/vue';
 import AppLogo from '@/components/AppLogo.vue';
 import NavFooter from '@/components/NavFooter.vue';
 import NavMain from '@/components/NavMain.vue';
@@ -16,6 +22,7 @@ import {
 } from '@/components/ui/sidebar';
 import { dashboard } from '@/routes';
 import courseRoutes from '@/routes/courses';
+import playgroundRoutes from '@/routes/playground';
 import type { NavItem } from '@/types';
 
 const mainNavItems: NavItem[] = [
@@ -28,6 +35,11 @@ const mainNavItems: NavItem[] = [
         title: 'Courses',
         href: courseRoutes.index.url(),
         icon: GraduationCap,
+    },
+    {
+        title: 'Playground',
+        href: playgroundRoutes.index.url(),
+        icon: Terminal,
     },
 ];
 
