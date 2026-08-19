@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue';
+import { router } from '@inertiajs/vue3';
 
 interface QuizOption {
     id: string;
@@ -10,29 +11,50 @@ interface QuizContent {
     question: string;
     code?: string;
     options: QuizOption[];
-    correct_answer: string;
 }
 
 const props = defineProps<{
+    blockId: number;
     content: QuizContent;
 }>();
 
 const selectedAnswer = ref<string | null>(null);
 const submitted = ref(false);
 
-const isCorrect = computed(() => {
-    return (
-        submitted.value &&
-        selectedAnswer.value === props.content.correct_answer
-    );
-});
+const isCorrect = ref<boolean | null>(null);
 
 const submitAnswer = () => {
     if (!selectedAnswer.value) {
         return;
     }
 
-    submitted.value = true;
+    router.post(
+        `/lesson-blocks/${props.blockId}/quiz`,
+        {
+            answer: selectedAnswer.value,
+        },
+        {
+            preserveScroll: true,
+            onSuccess: (page) => {
+                const flash = page.props.flash as {
+                    quiz_result?: {
+                        block_id: number;
+                        selected_answer: string;
+                        is_correct: boolean;
+                    };
+                };
+
+                const result = flash.quiz_result;
+
+                if (!result || result.block_id !== props.blockId) {
+                    return;
+                }
+
+                submitted.value = true;
+                isCorrect.value = result.is_correct;
+            },
+        },
+    );
 };
 
 const reset = () => {

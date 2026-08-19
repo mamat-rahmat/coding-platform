@@ -23,6 +23,7 @@ defineProps<{
 
     <QuizBlock
         v-else-if="block.type === 'QUIZ'"
+        :block-id="block.id"
         :content="block.content"
     />
 
