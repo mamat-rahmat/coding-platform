@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\AdminCourseController;
+use App\Http\Controllers\AdminLessonBlockController;
 use App\Http\Controllers\AdminLessonController;
 use App\Http\Controllers\AdminModuleController;
 use Illuminate\Support\Facades\Route;
@@ -22,4 +23,14 @@ Route::middleware(['auth', 'verified', 'admin'])->group(function () {
         'admin/modules.lessons',
         AdminLessonController::class,
     )->names('admin.lessons')->shallow();
+
+    Route::resource(
+        'admin/lessons.blocks',
+        AdminLessonBlockController::class,
+    )->names('admin.blocks')->shallow()->except(['show']);
+
+    Route::patch(
+        'admin/lessons/{lesson}/blocks/reorder',
+        [AdminLessonBlockController::class, 'reorder'],
+    )->name('admin.blocks.reorder');
 });
