@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue';
 import { router } from '@inertiajs/vue3';
+import { ref } from 'vue';
 
 interface QuizOption {
     id: string;
@@ -11,6 +11,7 @@ interface QuizContent {
     question: string;
     code?: string;
     options: QuizOption[];
+    correct_answer: string;
 }
 
 const props = defineProps<{
@@ -89,8 +90,7 @@ const reset = () => {
                         selectedAnswer === option.id && !submitted,
 
                     'border-green-500 bg-green-50 text-green-900':
-                        submitted &&
-                        option.id === content.correct_answer,
+                        submitted && option.id === content.correct_answer,
 
                     'border-red-500 bg-red-50 text-red-900':
                         submitted &&
@@ -100,11 +100,11 @@ const reset = () => {
                 :disabled="submitted"
                 @click="selectedAnswer = option.id"
             >
-            <span
-                class="flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-gray-300 text-sm font-medium text-gray-700"
-            >
-                {{ option.id.toUpperCase() }}
-            </span>
+                <span
+                    class="flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-gray-300 text-sm font-medium text-gray-700"
+                >
+                    {{ option.id.toUpperCase() }}
+                </span>
 
                 <span>
                     {{ option.text }}
@@ -146,10 +146,7 @@ const reset = () => {
                 {{ isCorrect ? '✓ Jawaban benar!' : '✗ Jawaban belum benar.' }}
             </p>
 
-            <p
-                v-if="!isCorrect"
-                class="mt-1 text-sm"
-            >
+            <p v-if="!isCorrect" class="mt-1 text-sm">
                 Coba perhatikan kembali soal dan pilih jawaban yang tepat.
             </p>
         </div>

@@ -59,7 +59,7 @@ class DatabaseSeeder extends Seeder
         ]);
 
         $helloPython->blocks()->create([
-            'type' => LessonBlockType::QUIZ,
+            'type' => LessonBlockType::MCQ_SINGLE,
             'content' => [
                 'question' => 'Apa output dari kode berikut?',
                 'code' => <<<'PYTHON'

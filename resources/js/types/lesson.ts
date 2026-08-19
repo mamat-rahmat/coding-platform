@@ -18,8 +18,8 @@ export interface CodeExampleLessonBlock extends BaseLessonBlock {
     };
 }
 
-export interface QuizLessonBlock extends BaseLessonBlock {
-    type: 'QUIZ';
+export interface McqSingleLessonBlock extends BaseLessonBlock {
+    type: 'MCQ_SINGLE';
     content: {
         question: string;
         code?: string;
@@ -32,6 +32,4 @@ export interface QuizLessonBlock extends BaseLessonBlock {
 }
 
 export type LessonBlock =
-    | TextLessonBlock
-    | CodeExampleLessonBlock
-    | QuizLessonBlock;
+    TextLessonBlock | CodeExampleLessonBlock | McqSingleLessonBlock;

@@ -1,19 +1,9 @@
 <script setup lang="ts">
 import { Link, router } from '@inertiajs/vue3';
+import LessonBlockRenderer from '@/components/lesson/LessonBlockRenderer.vue';
 import courseRoutes from '@/routes/courses';
 import lessonRoutes from '@/routes/lessons';
-import LessonBlockRenderer from '@/components/lesson/LessonBlockRenderer.vue';
-
-interface LessonBlock {
-    id: number;
-    type: string;
-    content: {
-        text?: string;
-        language?: string;
-        code?: string;
-    };
-    sort_order: number;
-}
+import type { LessonBlock } from '@/types/lesson';
 
 interface Lesson {
     id: number;
@@ -59,7 +49,6 @@ const completeLesson = (lessonSlug: string) => {
 <template>
     <div class="min-h-screen bg-gray-50">
         <div class="mx-auto max-w-4xl px-6 py-10">
-
             <!-- Breadcrumb -->
             <div class="mb-8 text-sm text-gray-500">
                 <Link
@@ -78,12 +67,9 @@ const completeLesson = (lessonSlug: string) => {
             <header class="mb-10">
                 <h1 class="text-3xl font-bold tracking-tight text-gray-900">
                     {{ lesson.title }}
-            </h1>
+                </h1>
 
-                <p
-                    v-if="lesson.description"
-                    class="mt-3 text-lg text-gray-600"
-                >
+                <p v-if="lesson.description" class="mt-3 text-lg text-gray-600">
                     {{ lesson.description }}
                 </p>
             </header>
@@ -100,9 +86,7 @@ const completeLesson = (lessonSlug: string) => {
             </main>
 
             <!-- Navigation -->
-            <div
-                class="mt-10 flex items-center justify-between border-t pt-6"
-            >
+            <div class="mt-10 flex items-center justify-between border-t pt-6">
                 <Link
                     v-if="previousLesson"
                     :href="lessonRoutes.show.url(previousLesson.slug)"

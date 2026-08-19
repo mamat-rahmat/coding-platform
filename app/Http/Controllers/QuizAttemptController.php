@@ -14,7 +14,7 @@ class QuizAttemptController extends Controller
         Request $request,
         LessonBlock $lessonBlock,
     ): RedirectResponse {
-        abort_unless($lessonBlock->type->value === 'QUIZ', 404);
+        abort_unless($lessonBlock->type->value === 'MCQ_SINGLE', 404);
 
         $validated = $request->validate([
             'answer' => ['required', 'string', 'max:10'],
