@@ -25,4 +25,22 @@ class LessonBlockFactory extends Factory
             'sort_order' => 1,
         ];
     }
+
+    public function mcqSingle(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'type' => LessonBlockType::MCQ_SINGLE,
+            'content' => [
+                'question' => 'Apa output dari kode berikut?',
+                'code' => 'print("Hello World")',
+                'options' => [
+                    ['id' => 'a', 'text' => 'Hello'],
+                    ['id' => 'b', 'text' => 'World'],
+                    ['id' => 'c', 'text' => 'Hello World'],
+                    ['id' => 'd', 'text' => 'Error'],
+                ],
+                'correct_answer' => 'c',
+            ],
+        ]);
+    }
 }
