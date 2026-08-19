@@ -4,16 +4,25 @@ namespace Database\Seeders;
 
 use App\LessonBlockType;
 use App\Models\Course;
+use App\Models\User;
 use Illuminate\Database\Seeder;
 
 class DatabaseSeeder extends Seeder
 {
     public function run(): void
     {
-        $user = \App\Models\User::create([
+        User::create([
+            'name' => 'Admin Demo',
+            'email' => 'admin@example.com',
+            'password' => bcrypt('password'),
+            'is_admin' => true,
+        ]);
+
+        User::create([
             'name' => 'Coder Bodoh',
             'email' => 'coderbodoh@gmail.com',
             'password' => bcrypt('pass123'),
+            'is_admin' => false,
         ]);
 
         $course = Course::create([
@@ -44,7 +53,7 @@ class DatabaseSeeder extends Seeder
         $helloPython->blocks()->create([
             'type' => LessonBlockType::TEXT,
             'content' => [
-                'text' => 'Python adalah bahasa pemrograman yang mudah dipelajari. Mari kita mulai dengan program pertama.',
+                'text' => 'Python adalah bahasa pemrograman yang **mudah dipelajari**. Mari kita mulai dengan program pertama.\n\n## Tujuan\n\n- Memahami fungsi `print()`\n- Menjalankan kode Python pertama',
             ],
             'sort_order' => 1,
         ]);
@@ -59,33 +68,30 @@ class DatabaseSeeder extends Seeder
         ]);
 
         $helloPython->blocks()->create([
+            'type' => LessonBlockType::HINT,
+            'content' => [
+                'title' => 'Petunjuk Print',
+                'text' => 'Fungsi `print()` otomatis menambahkan newline di akhir output.',
+            ],
+            'sort_order' => 3,
+        ]);
+
+        $helloPython->blocks()->create([
             'type' => LessonBlockType::MCQ_SINGLE,
             'content' => [
                 'question' => 'Apa output dari kode berikut?',
                 'code' => <<<'PYTHON'
-        print("Hello World")
-        PYTHON,
+print("Hello World")
+PYTHON,
                 'options' => [
-                    [
-                        'id' => 'a',
-                        'text' => 'Hello',
-                    ],
-                    [
-                        'id' => 'b',
-                        'text' => 'World',
-                    ],
-                    [
-                        'id' => 'c',
-                        'text' => 'Hello World',
-                    ],
-                    [
-                        'id' => 'd',
-                        'text' => 'Error',
-                    ],
+                    ['id' => 'a', 'text' => 'Hello'],
+                    ['id' => 'b', 'text' => 'World'],
+                    ['id' => 'c', 'text' => 'Hello World'],
+                    ['id' => 'd', 'text' => 'Error'],
                 ],
                 'correct_answer' => 'c',
             ],
-            'sort_order' => 3,
+            'sort_order' => 4,
         ]);
 
         $variables = $basics->lessons()->create([
@@ -119,6 +125,32 @@ PYTHON,
             'sort_order' => 2,
         ]);
 
+        $variables->blocks()->create([
+            'type' => LessonBlockType::MCQ_MULTIPLE,
+            'content' => [
+                'question' => 'Mana yang termasuk tipe data Python?',
+                'options' => [
+                    ['id' => 'a', 'text' => 'int'],
+                    ['id' => 'b', 'text' => 'string'],
+                    ['id' => 'c', 'text' => 'loop'],
+                    ['id' => 'd', 'text' => 'float'],
+                ],
+                'correct_answers' => ['a', 'b', 'd'],
+            ],
+            'sort_order' => 3,
+        ]);
+
+        $variables->blocks()->create([
+            'type' => LessonBlockType::CODE_FILL,
+            'content' => [
+                'code_template' => 'name = {{A}}\nprint({{A}})',
+                'blanks' => [
+                    ['id' => 'A', 'answer' => '"Budi"'],
+                ],
+            ],
+            'sort_order' => 4,
+        ]);
+
         $controlFlow = $course->modules()->create([
             'title' => 'Control Flow',
             'slug' => 'control-flow',
@@ -137,7 +169,7 @@ PYTHON,
         $ifStatements->blocks()->create([
             'type' => LessonBlockType::TEXT,
             'content' => [
-                'text' => 'Statement if memungkinkan program menjalankan kode hanya ketika kondisi tertentu terpenuhi.',
+                'text' => 'Statement `if` memungkinkan program menjalankan kode hanya ketika kondisi tertentu terpenuhi.',
             ],
             'sort_order' => 1,
         ]);
@@ -152,6 +184,64 @@ age = 13
 if age >= 13:
     print("Teenager")
 PYTHON,
+            ],
+            'sort_order' => 2,
+        ]);
+
+        $ifStatements->blocks()->create([
+            'type' => LessonBlockType::CODE_REORDER,
+            'content' => [
+                'lines' => [
+                    'age = 13',
+                    'if age >= 13:',
+                    '    print("Teenager")',
+                ],
+                'correct_order' => [0, 1, 2],
+            ],
+            'sort_order' => 3,
+        ]);
+
+        $functions = $controlFlow->lessons()->create([
+            'title' => 'Functions',
+            'slug' => 'functions',
+            'description' => 'Belajar membuat fungsi sendiri.',
+            'sort_order' => 2,
+            'is_published' => true,
+        ]);
+
+        $functions->blocks()->create([
+            'type' => LessonBlockType::TEXT,
+            'content' => [
+                'text' => 'Fungsi adalah blok kode reusable. Didefinisikan dengan `def`.',
+            ],
+            'sort_order' => 1,
+        ]);
+
+        $functions->blocks()->create([
+            'type' => LessonBlockType::CODE_CHALLENGE,
+            'content' => [
+                'prompt' => 'Buat fungsi `greet(name)` yang mencetak "Hello, <name>!" lalu panggil dengan nama "Budi".',
+                'starter_code' => <<<'PYTHON'
+def greet(name):
+    # lengkapi fungsi ini
+    pass
+
+# panggil greet("Budi")
+PYTHON,
+                'testcases' => [
+                    [
+                        'id' => 'tc1',
+                        'input' => '',
+                        'expected_output' => 'Hello, Budi!',
+                        'hidden' => false,
+                    ],
+                    [
+                        'id' => 'tc2',
+                        'input' => '',
+                        'expected_output' => 'Hello, Andi!',
+                        'hidden' => true,
+                    ],
+                ],
             ],
             'sort_order' => 2,
         ]);
