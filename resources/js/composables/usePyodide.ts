@@ -124,14 +124,14 @@ export async function runCode(
     let stderrBuffer = '';
 
     pyodide.setStdout({
-        batched: (message: string) => {
-            stdoutBuffer += message;
+        raw: (charCode: number) => {
+            stdoutBuffer += String.fromCharCode(charCode);
         },
     });
 
     pyodide.setStderr({
-        batched: (message: string) => {
-            stderrBuffer += message;
+        raw: (charCode: number) => {
+            stderrBuffer += String.fromCharCode(charCode);
         },
     });
 
