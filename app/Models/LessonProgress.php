@@ -4,11 +4,14 @@ namespace App\Models;
 
 use App\Models\Lesson;
 use App\Models\User;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class LessonProgress extends Model
 {
+    use HasFactory;
+
     protected $fillable = [
         'user_id',
         'lesson_id',
