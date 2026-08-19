@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\AdminCourseController;
+use App\Http\Controllers\AdminLessonController;
 use App\Http\Controllers\AdminModuleController;
 use Illuminate\Support\Facades\Route;
 
@@ -16,4 +17,9 @@ Route::middleware(['auth', 'verified', 'admin'])->group(function () {
         'admin/courses.modules',
         AdminModuleController::class,
     )->names('admin.modules')->shallow();
+
+    Route::resource(
+        'admin/modules.lessons',
+        AdminLessonController::class,
+    )->names('admin.lessons')->shallow();
 });
