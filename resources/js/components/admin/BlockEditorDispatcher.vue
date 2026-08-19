@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import type { Component } from 'vue';
 import { computed } from 'vue';
 import CodeChallengeBlockEditor from './blockEditors/CodeChallengeBlockEditor.vue';
 import CodeExampleBlockEditor from './blockEditors/CodeExampleBlockEditor.vue';
@@ -9,7 +10,7 @@ import McqMultipleBlockEditor from './blockEditors/McqMultipleBlockEditor.vue';
 import McqSingleBlockEditor from './blockEditors/McqSingleBlockEditor.vue';
 import TextBlockEditor from './blockEditors/TextBlockEditor.vue';
 
-const model = defineModel<Record<string, unknown>>({ required: true });
+const model = defineModel<{ [key: string]: unknown }>({ required: true });
 
 const props = defineProps<{
     type: string;
@@ -37,10 +38,12 @@ const componentName = computed(() => {
             return null;
     }
 });
+
+const Editor = computed(() => componentName.value as unknown as Component);
 </script>
 
 <template>
-    <component :is="componentName" v-if="componentName" v-model="model" />
+    <component :is="Editor" v-if="Editor" v-model="model" />
 
     <p v-else class="text-sm text-gray-500">Tipe block belum didukung.</p>
 </template>

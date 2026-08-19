@@ -243,7 +243,6 @@ defineOptions({
                                     <Link
                                         :href="
                                             adminBlockRoutes.edit.url({
-                                                lesson: lesson.id,
                                                 block: element.id,
                                             })
                                         "
