@@ -4,16 +4,21 @@ namespace App\Models;
 
 use App\Models\LessonBlock;
 use App\Models\User;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-class QuizAttempt extends Model
+class BlockAttempt extends Model
 {
+    use HasFactory;
+
     protected $fillable = [
         'user_id',
         'lesson_block_id',
         'selected_answer',
         'is_correct',
+        'attempt_data',
+        'score',
         'answered_at',
     ];
 
@@ -21,6 +26,8 @@ class QuizAttempt extends Model
     {
         return [
             'is_correct' => 'boolean',
+            'attempt_data' => 'array',
+            'score' => 'integer',
             'answered_at' => 'datetime',
         ];
     }

@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { router } from '@inertiajs/vue3';
 import { ref } from 'vue';
+import attemptRoutes from '@/routes/lesson-blocks/attempts';
 
 interface QuizOption {
     id: string;
@@ -30,7 +31,7 @@ const submitAnswer = () => {
     }
 
     router.post(
-        `/lesson-blocks/${props.blockId}/quiz`,
+        attemptRoutes.store.url(props.blockId),
         {
             answer: selectedAnswer.value,
         },
@@ -38,14 +39,14 @@ const submitAnswer = () => {
             preserveScroll: true,
             onSuccess: (page) => {
                 const flash = page.props.flash as {
-                    quiz_result?: {
+                    attempt_result?: {
                         block_id: number;
                         selected_answer: string;
                         is_correct: boolean;
                     };
                 };
 
-                const result = flash.quiz_result;
+                const result = flash.attempt_result;
 
                 if (!result || result.block_id !== props.blockId) {
                     return;

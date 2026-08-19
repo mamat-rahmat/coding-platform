@@ -52,8 +52,8 @@ class User extends Authenticatable
         return $this->hasMany(LessonProgress::class);
     }
 
-    public function quizAttempts(): HasMany
+    public function blockAttempts(): HasMany
     {
-        return $this->hasMany(QuizAttempt::class);
+        return $this->hasMany(BlockAttempt::class);
     }
 }

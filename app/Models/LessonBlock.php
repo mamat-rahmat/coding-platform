@@ -33,8 +33,8 @@ class LessonBlock extends Model
         return $this->belongsTo(Lesson::class);
     }
 
-    public function quizAttempts(): HasMany
+    public function blockAttempts(): HasMany
     {
-        return $this->hasMany(QuizAttempt::class);
+        return $this->hasMany(BlockAttempt::class);
     }
 }

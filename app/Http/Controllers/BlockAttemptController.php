@@ -3,12 +3,12 @@
 namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use App\Models\BlockAttempt;
 use App\Models\LessonBlock;
-use App\Models\QuizAttempt;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 
-class QuizAttemptController extends Controller
+class BlockAttemptController extends Controller
 {
     public function store(
         Request $request,
@@ -17,7 +17,7 @@ class QuizAttemptController extends Controller
         abort_unless($lessonBlock->type->value === 'MCQ_SINGLE', 404);
 
         $validated = $request->validate([
-            'answer' => ['required', 'string', 'max:10'],
+            'answer' => ['required', 'string', 'max:255'],
         ]);
 
         $correctAnswer = $lessonBlock->content['correct_answer'] ?? null;
@@ -26,7 +26,7 @@ class QuizAttemptController extends Controller
 
         $isCorrect = $validated['answer'] === $correctAnswer;
 
-        QuizAttempt::create([
+        BlockAttempt::create([
             'user_id' => $request->user()->id,
             'lesson_block_id' => $lessonBlock->id,
             'selected_answer' => $validated['answer'],
@@ -34,7 +34,7 @@ class QuizAttemptController extends Controller
             'answered_at' => now(),
         ]);
 
-        return back()->with('quiz_result', [
+        return back()->with('attempt_result', [
             'block_id' => $lessonBlock->id,
             'selected_answer' => $validated['answer'],
             'is_correct' => $isCorrect,
