@@ -3,43 +3,7 @@ import TextBlock from './TextBlock.vue';
 import CodeExampleBlock from './CodeExampleBlock.vue';
 import QuizBlock from './QuizBlock.vue';
 
-interface BaseLessonBlock {
-    id: number;
-    sort_order: number;
-}
-
-interface TextBlock extends BaseLessonBlock {
-    type: 'TEXT';
-    content: {
-        text: string;
-    };
-}
-
-interface CodeExampleBlock extends BaseLessonBlock {
-    type: 'CODE_EXAMPLE';
-    content: {
-        language: string;
-        code: string;
-    };
-}
-
-interface QuizBlock extends BaseLessonBlock {
-    type: 'QUIZ';
-    content: {
-        question: string;
-        code?: string;
-        options: {
-            id: string;
-            text: string;
-        }[];
-        correct_answer: string;
-    };
-}
-
-type LessonBlock =
-    | TextBlock
-    | CodeExampleBlock
-    | QuizBlock;
+import type { LessonBlock } from '@/types/lesson';
 
 defineProps<{
     block: LessonBlock;

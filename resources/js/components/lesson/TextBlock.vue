@@ -1,8 +1,10 @@
 <script setup lang="ts">
+interface TextContent {
+    text: string;
+}
+
 defineProps<{
-    content: {
-        text?: string;
-    };
+    content: TextContent;
 }>();
 </script>
 

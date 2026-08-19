@@ -1,9 +1,11 @@
 <script setup lang="ts">
+interface CodeExampleContent {
+    language: string;
+    code: string;
+}
+
 defineProps<{
-    content: {
-        language?: string;
-        code?: string;
-    };
+    content: CodeExampleContent;
 }>();
 </script>
 

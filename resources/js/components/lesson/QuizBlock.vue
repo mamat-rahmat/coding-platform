@@ -6,13 +6,15 @@ interface QuizOption {
     text: string;
 }
 
+interface QuizContent {
+    question: string;
+    code?: string;
+    options: QuizOption[];
+    correct_answer: string;
+}
+
 const props = defineProps<{
-    content: {
-        question: string;
-        code?: string;
-        options: QuizOption[];
-        correct_answer: string;
-    };
+    content: QuizContent;
 }>();
 
 const selectedAnswer = ref<string | null>(null);
