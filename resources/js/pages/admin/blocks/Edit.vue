@@ -60,7 +60,7 @@ defineOptions({
 <template>
     <Head title="Admin - Edit Block" />
 
-    <div class="mx-auto max-w-5xl p-4">
+    <div class="p-4">
         <Link
             :href="adminBlockRoutes.index.url({ lesson: lesson.id })"
             class="mb-4 inline-flex items-center gap-1 text-sm text-gray-500 hover:text-gray-900"
