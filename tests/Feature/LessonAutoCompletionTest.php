@@ -1,6 +1,5 @@
 <?php
 
-use App\LessonBlockType;
 use App\Models\Lesson;
 use App\Models\LessonBlock;
 use App\Models\LessonProgress;

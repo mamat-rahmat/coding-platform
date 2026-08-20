@@ -25,5 +25,4 @@ class CourseModuleFactory extends Factory
             'sort_order' => fake()->numberBetween(1, 10),
         ];
     }
-
 }

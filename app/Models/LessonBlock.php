@@ -3,7 +3,6 @@
 namespace App\Models;
 
 use App\LessonBlockType;
-use App\Models\Lesson;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;

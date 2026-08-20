@@ -27,5 +27,4 @@ class CourseFactory extends Factory
             'is_published' => true,
         ];
     }
-
 }
