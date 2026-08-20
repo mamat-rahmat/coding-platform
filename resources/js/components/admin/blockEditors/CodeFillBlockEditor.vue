@@ -77,7 +77,7 @@ function placeholder(id: string): string {
                     :key="index"
                     class="flex items-center gap-2"
                 >
-                    <span class="w-8 font-mono text-xs uppercase">
+                    <span class="font-mono text-xs whitespace-nowrap uppercase">
                         {{ placeholder(blank.id) }}
                     </span>
                     <input
