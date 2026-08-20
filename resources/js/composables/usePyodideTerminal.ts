@@ -3,10 +3,132 @@ import { WebLinksAddon } from '@xterm/addon-web-links';
 import { Terminal } from '@xterm/xterm';
 import { ref, onUnmounted } from 'vue';
 import '@xterm/xterm/css/xterm.css';
-import PyodideWorker from '../workers/pyodide.worker.ts?worker&inline';
 
 const STDIN_BUFFER_SIZE = 1024;
 const SAB_TOTAL_SIZE = 8 + STDIN_BUFFER_SIZE;
+
+const PYODIDE_VERSION = '0.26.4';
+const PYODIDE_BASE_URL = `https://cdn.jsdelivr.net/pyodide/v${PYODIDE_VERSION}/full/`;
+
+const WORKER_CODE = `
+const PYODIDE_BASE_URL = "${PYODIDE_BASE_URL}";
+let pyodide = null;
+let sab = null;
+let sabView = null;
+const STDIN_BUFFER_SIZE = ${STDIN_BUFFER_SIZE};
+
+async function loadPyodideInstance() {
+    if (pyodide) return;
+    importScripts(PYODIDE_BASE_URL + "pyodide.js");
+    pyodide = await globalThis.loadPyodide({ indexURL: PYODIDE_BASE_URL });
+}
+
+function setupStdinWithSAB(buffer) {
+    sab = buffer;
+    sabView = new Int32Array(buffer);
+    pyodide.setStdin({
+        stdin: () => {
+            if (!sabView) return null;
+            Atomics.store(sabView, 0, 0);
+            self.postMessage({ type: "stdin_request" });
+            Atomics.wait(sabView, 0, 0);
+            const length = Atomics.load(sabView, 1);
+            if (length < 0) return null;
+            const bytes = new Uint8Array(sab, 8, length);
+            return new TextDecoder().decode(bytes);
+        },
+        isatty: true,
+    });
+}
+
+function setupStdout() {
+    pyodide.setStdout({
+        raw: (charCode) => self.postMessage({ type: "stdout", data: String.fromCharCode(charCode) }),
+    });
+    pyodide.setStderr({
+        raw: (charCode) => self.postMessage({ type: "stderr", data: String.fromCharCode(charCode) }),
+    });
+}
+
+async function runCode(code) {
+    try {
+        await pyodide.loadPackagesFromImports(code);
+        await pyodide.runPythonAsync(code);
+        self.postMessage({ type: "done" });
+    } catch (err) {
+        self.postMessage({ type: "error", data: err instanceof Error ? err.message : String(err) });
+    }
+}
+
+async function runTestcase(code, input, expectedOutput, testcaseId) {
+    const lines = input.split("\\n");
+    let lineIndex = 0;
+    pyodide.setStdin({
+        stdin: () => lineIndex < lines.length ? lines[lineIndex++] : null,
+        isatty: false,
+    });
+    let output = "";
+    pyodide.setStdout({ raw: (c) => { output += String.fromCharCode(c); } });
+    pyodide.setStderr({ raw: () => {} });
+    let error = null;
+    try {
+        await pyodide.loadPackagesFromImports(code);
+        await pyodide.runPythonAsync(code);
+    } catch (err) {
+        error = err instanceof Error ? err.message : String(err);
+    }
+    const passed = !error && output.trimEnd() === expectedOutput.trimEnd();
+    self.postMessage({ type: "testcase_result", testcaseId, passed, actual: output.trimEnd(), expected: expectedOutput.trimEnd(), error });
+}
+
+self.onmessage = async (e) => {
+    const { type, data, buffer, code, input, expectedOutput, testcaseId } = e.data;
+    switch (type) {
+        case "init_sab":
+            await loadPyodideInstance();
+            setupStdinWithSAB(buffer);
+            setupStdout();
+            self.postMessage({ type: "ready" });
+            break;
+        case "init_no_sab":
+            await loadPyodideInstance();
+            setupStdout();
+            self.postMessage({ type: "ready" });
+            break;
+        case "run":
+            await runCode(data);
+            break;
+        case "run_testcase":
+            await runTestcase(code, input, expectedOutput, testcaseId);
+            break;
+        case "stdin_response":
+            if (!sabView) break;
+            {
+                const encoded = new TextEncoder().encode(data);
+                const length = Math.min(encoded.length, STDIN_BUFFER_SIZE);
+                const bytes = new Uint8Array(sab, 8, length);
+                bytes.set(encoded.subarray(0, length));
+                Atomics.store(sabView, 1, length);
+                Atomics.store(sabView, 0, 1);
+                Atomics.notify(sabView, 0);
+            }
+            break;
+        case "stdin_eof":
+            if (!sabView) break;
+            Atomics.store(sabView, 1, -1);
+            Atomics.store(sabView, 0, 1);
+            Atomics.notify(sabView, 0);
+            break;
+    }
+};
+`;
+
+function createWorker(): Worker {
+    const blob = new Blob([WORKER_CODE], { type: 'application/javascript' });
+    const url = URL.createObjectURL(blob);
+
+    return new Worker(url);
+}
 
 export interface TestcaseResult {
     testcaseId: string;
@@ -101,7 +223,7 @@ export function usePyodideTerminal(): UsePyodideTerminalReturn {
         isInteractive.value = sabAvailable;
 
         try {
-            worker = new PyodideWorker();
+            worker = createWorker();
         } catch (err) {
             const msg = err instanceof Error ? err.message : String(err);
             pyodideError.value = `Gagal membuat Worker: ${msg}`;

@@ -7,9 +7,6 @@ import { bunny } from 'laravel-vite-plugin/fonts';
 import { defineConfig } from 'vite';
 
 export default defineConfig({
-    worker: {
-        format: 'iife',
-    },
     plugins: [
         laravel({
             input: ['resources/css/app.css', 'resources/js/app.ts'],
