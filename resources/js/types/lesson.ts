@@ -15,6 +15,7 @@ export interface CodeExampleLessonBlock extends BaseLessonBlock {
     content: {
         language: string;
         code: string;
+        markdown?: string;
     };
 }
 

@@ -4,7 +4,6 @@ namespace Database\Seeders;
 
 use App\LessonBlockType;
 use App\Models\Course;
-use App\Models\CourseModule;
 use App\Models\Lesson;
 use App\Models\User;
 use Illuminate\Database\Seeder;
@@ -73,7 +72,12 @@ MD);
 
         $this->codeExample($lesson, 2, <<<'PYTHON'
 print("Hello, World!")
-PYTHON);
+PYTHON,
+            language: 'python',
+            markdown: <<<'MD'
+Fungsi `print()` akan menampilkan teks ke layar. Perhatikan bahwa teks yang
+dicetak diapit tanda **kutip dua** (`"`).
+MD);
 
         $this->hint($lesson, 3, 'Petunjuk Print', <<<'MD'
 Fungsi `print()` otomatis menambahkan **newline** di akhir output. Jika ingin tanpa newline, gunakan parameter `end`:
@@ -827,11 +831,16 @@ PYTHON, [
         ]);
     }
 
-    private function codeExample(Lesson $lesson, int $sort, string $code, string $language = 'python'): void
+    private function codeExample(Lesson $lesson, int $sort, string $code, string $language = 'python', string $markdown = ''): void
     {
+        $content = ['language' => $language, 'code' => $code];
+        if ($markdown !== '') {
+            $content['markdown'] = $markdown;
+        }
+
         $lesson->blocks()->create([
             'type' => LessonBlockType::CODE_EXAMPLE,
-            'content' => ['language' => $language, 'code' => $code],
+            'content' => $content,
             'sort_order' => $sort,
         ]);
     }
