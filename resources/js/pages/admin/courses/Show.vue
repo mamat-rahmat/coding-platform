@@ -1,10 +1,17 @@
 <script setup lang="ts">
-import { Head, Link } from '@inertiajs/vue3';
-import { Pencil, ArrowLeft, Folder } from '@lucide/vue';
+import { Head, Link, router } from '@inertiajs/vue3';
+import {
+    Pencil,
+    ArrowLeft,
+    Folder,
+    Trash2,
+    FolderPlus,
+} from '@lucide/vue';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import adminRoutes from '@/routes/admin';
 import adminCourseRoutes from '@/routes/admin/courses';
+import adminModuleRoutes from '@/routes/admin/modules';
 import courseRoutes from '@/routes/courses';
 
 interface Module {
@@ -33,6 +40,14 @@ interface Course {
 defineProps<{
     course: Course;
 }>();
+
+function destroy(module: Module) {
+    if (!confirm(`Hapus module "${module.title}"?`)) {
+        return;
+    }
+
+    router.delete(adminModuleRoutes.destroy.url(module.id));
+}
 
 defineOptions({
     layout: {
@@ -96,7 +111,22 @@ defineOptions({
 
         <Card>
             <CardHeader>
-                <CardTitle>Modules</CardTitle>
+                <div class="flex items-center justify-between">
+                    <CardTitle>Modules</CardTitle>
+
+                    <Button as-child size="sm">
+                        <Link
+                            :href="
+                                adminModuleRoutes.create.url({
+                                    course: course.id,
+                                })
+                            "
+                        >
+                            <FolderPlus class="h-3.5 w-3.5" />
+                            Module Baru
+                        </Link>
+                    </Button>
+                </div>
             </CardHeader>
 
             <CardContent>
@@ -104,24 +134,58 @@ defineOptions({
                     v-if="course.modules.length === 0"
                     class="py-6 text-center text-sm text-gray-500"
                 >
-                    Belum ada module. CRUD module akan ditambahkan.
+                    Belum ada module.
                 </div>
 
                 <div v-else class="divide-y">
                     <div
                         v-for="module in course.modules"
                         :key="module.id"
-                        class="flex items-center gap-3 py-3"
+                        class="flex items-center justify-between py-3"
                     >
-                        <Folder class="h-4 w-4 text-gray-400" />
+                        <div class="flex items-center gap-3">
+                            <Folder class="h-4 w-4 text-gray-400" />
 
-                        <div class="flex-1">
-                            <div class="font-medium text-gray-900">
-                                {{ module.title }}
+                            <div>
+                                <div class="font-medium text-gray-900">
+                                    {{ module.title }}
+                                </div>
+                                <div class="text-xs text-gray-500">
+                                    Sort order: {{ module.sort_order }} · /{{
+                                        module.slug
+                                    }}
+                                </div>
                             </div>
-                            <div class="text-xs text-gray-500">
-                                Sort order: {{ module.sort_order }}
-                            </div>
+                        </div>
+
+                        <div class="flex gap-1">
+                            <Button as-child variant="ghost" size="icon-sm">
+                                <Link
+                                    :href="
+                                        adminModuleRoutes.show.url(module.id)
+                                    "
+                                >
+                                    Kelola
+                                </Link>
+                            </Button>
+
+                            <Button as-child variant="ghost" size="icon-sm">
+                                <Link
+                                    :href="
+                                        adminModuleRoutes.edit.url(module.id)
+                                    "
+                                >
+                                    <Pencil class="h-4 w-4" />
+                                </Link>
+                            </Button>
+
+                            <Button
+                                variant="ghost"
+                                size="icon-sm"
+                                @click="destroy(module)"
+                            >
+                                <Trash2 class="h-4 w-4 text-red-600" />
+                            </Button>
                         </div>
                     </div>
                 </div>
