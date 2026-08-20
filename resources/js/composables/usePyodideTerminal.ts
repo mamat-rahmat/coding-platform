@@ -3,6 +3,7 @@ import { WebLinksAddon } from '@xterm/addon-web-links';
 import { Terminal } from '@xterm/xterm';
 import { ref, onUnmounted } from 'vue';
 import '@xterm/xterm/css/xterm.css';
+import PyodideWorker from '../workers/pyodide.worker.ts?worker&inline';
 
 const STDIN_BUFFER_SIZE = 1024;
 const SAB_TOTAL_SIZE = 8 + STDIN_BUFFER_SIZE;
@@ -100,10 +101,7 @@ export function usePyodideTerminal(): UsePyodideTerminalReturn {
         isInteractive.value = sabAvailable;
 
         try {
-            worker = new Worker(
-                new URL('../workers/pyodide.worker.ts', import.meta.url),
-                { type: 'module' },
-            );
+            worker = new PyodideWorker();
         } catch (err) {
             const msg = err instanceof Error ? err.message : String(err);
             pyodideError.value = `Gagal membuat Worker: ${msg}`;
@@ -190,8 +188,8 @@ export function usePyodideTerminal(): UsePyodideTerminalReturn {
 
     function handleTerminalInput(data: string): void {
         if (!stdinResolve) {
-return;
-}
+            return;
+        }
 
         for (const ch of data) {
             if (ch === '\r') {
