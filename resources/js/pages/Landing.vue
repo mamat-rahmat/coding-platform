@@ -21,7 +21,7 @@ const features = [
         icon: Terminal,
         title: 'Jalankan Kode di Browser',
         description:
-            'Setiap contoh kode bisa langsung dijalankan tanpa install apa pun. Eksekusi Python berjalan di browser-mu via Pyodide (WASM).',
+            'Setiap contoh kode bisa langsung dijalankan tanpa install apa pun. Eksekusi kode berjalan di browser-mu via Pyodide (WASM).',
     },
     {
         icon: CheckCircle2,
@@ -47,7 +47,7 @@ const steps = [
     {
         number: '01',
         title: 'Pilih Course',
-        description: 'Pilih course Python yang sesuai levelmu.',
+        description: 'Pilih course yang sesuai levelmu.',
     },
     {
         number: '02',
@@ -81,7 +81,7 @@ const steps = [
                         <AppLogoIcon class="size-5 fill-current" />
                     </div>
                     <span class="text-lg font-semibold tracking-tight">
-                        CodePioneer
+                        Berinformatika
                     </span>
                 </Link>
 
@@ -125,13 +125,13 @@ const steps = [
                 <span
                     class="inline-flex items-center gap-1.5 rounded-full border border-gray-200 bg-gray-50 px-3 py-1 text-xs font-medium text-gray-600"
                 >
-                    Belajar Python · Interaktif · Tanpa Setup
+                    Belajar Coding · Interaktif · Tanpa Setup
                 </span>
 
                 <h1
                     class="mx-auto mt-6 max-w-3xl text-5xl font-bold tracking-tight text-balance"
                 >
-                    Belajar Python dengan
+                    Belajar Coding dengan
                     <span class="text-gray-400">Menulis & Menjalankan</span>
                     Kode Nyata
                 </h1>
@@ -184,13 +184,13 @@ const steps = [
                         class="overflow-x-auto p-6 font-mono text-sm leading-7 text-gray-100"
                     ><code><span class="text-fuchsia-400">print</span>(<span class="text-green-400">"Hello, World!"</span>)
 <span class="text-blue-400">for</span> i <span class="text-blue-400">in</span> <span class="text-yellow-300">range</span>(<span class="text-orange-300">1</span>, <span class="text-orange-300">4</span>):
-    <span class="text-fuchsia-400">print</span>(f<span class="text-green-400">"Halo dari Python #{i}"</span>)
+    <span class="text-fuchsia-400">print</span>(f<span class="text-green-400">"Halo dari Coding #{i}"</span>)
 
 <span class="text-gray-500"># Output:</span>
 <span class="text-gray-300">Hello, World!</span>
-<span class="text-gray-300">Halo dari Python #1</span>
-<span class="text-gray-300">Halo dari Python #2</span>
-<span class="text-gray-300">Halo dari Python #3</span></code></pre>
+<span class="text-gray-300">Halo dari Coding #1</span>
+<span class="text-gray-300">Halo dari Coding #2</span>
+<span class="text-gray-300">Halo dari Coding #3</span></code></pre>
                 </div>
             </section>
 
@@ -269,7 +269,7 @@ const steps = [
             >
                 <div class="flex items-center gap-2">
                     <GraduationCap class="h-4 w-4" />
-                    <span>CodePioneer — Belajar Python interaktif</span>
+                    <span>Berinformatika — Belajar Coding interaktif</span>
                 </div>
 
                 <div class="flex items-center gap-6">
