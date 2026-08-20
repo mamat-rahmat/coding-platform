@@ -18,6 +18,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/courses/{course:slug}', [CourseController::class, 'show'])
         ->name('courses.show');
 
+    Route::get('/courses/{course:slug}/leaderboard', [
+        CourseController::class,
+        'leaderboard',
+    ])->name('courses.leaderboard');
+
     Route::get('/lessons/{lesson:slug}', [LessonController::class, 'show'])
         ->name('lessons.show');
 

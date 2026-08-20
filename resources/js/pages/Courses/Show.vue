@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Link } from '@inertiajs/vue3';
-import { Lock } from '@lucide/vue';
+import { Lock, Trophy } from '@lucide/vue';
 import courseRoutes from '@/routes/courses';
 import lessonRoutes from '@/routes/lessons';
 
@@ -111,6 +111,16 @@ defineProps<{
                     <p class="mt-2 text-sm text-gray-500">
                         {{ progress.percentage }}% selesai
                     </p>
+                </div>
+
+                <div class="mt-6">
+                    <Link
+                        :href="courseRoutes.leaderboard.url(course.slug)"
+                        class="inline-flex items-center gap-2 rounded-lg border border-gray-200 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+                    >
+                        <Trophy class="h-4 w-4" />
+                        Lihat Peringkat
+                    </Link>
                 </div>
             </header>
 

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Course;
+use App\Models\LessonProgress;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -99,6 +100,55 @@ class CourseController extends Controller
                 'completedLessons' => $completedLessons,
                 'percentage' => $progressPercentage,
             ],
+        ]);
+    }
+
+    public function leaderboard(Request $request, Course $course): Response
+    {
+        abort_unless($course->is_published, 404);
+
+        $lessonIds = $course->lessons()
+            ->where('is_published', true)
+            ->pluck('lessons.id');
+
+        $totalLessons = $lessonIds->count();
+
+        $participants = LessonProgress::query()
+            ->whereIn('lesson_id', $lessonIds)
+            ->whereNotNull('completed_at')
+            ->selectRaw(
+                'user_id, count(*) as completed_count, max(completed_at) as last_completed_at',
+            )
+            ->groupBy('user_id')
+            ->with('user:id,name')
+            ->orderByDesc('completed_count')
+            ->orderBy('last_completed_at')
+            ->get();
+
+        $currentUserId = $request->user()->id;
+
+        $leaderboard = $participants->map(function ($participant, int $index) use ($totalLessons, $course, $currentUserId) {
+            $percentage = $totalLessons > 0
+                ? (int) round(($participant->completed_count / $totalLessons) * 100)
+                : 0;
+
+            return [
+                'rank' => $index + 1,
+                'name' => $participant->user->name,
+                'completed_lessons' => $participant->completed_count,
+                'total_lessons' => $totalLessons,
+                'percentage' => $percentage,
+                'xp' => round($course->xp_reward * ($percentage / 100)),
+                'is_current_user' => $participant->user_id === $currentUserId,
+            ];
+        });
+
+        $currentUserEntry = $leaderboard->firstWhere('is_current_user', true);
+
+        return Inertia::render('Courses/Leaderboard', [
+            'course' => $course->only(['id', 'title', 'slug']),
+            'leaderboard' => $leaderboard->values(),
+            'currentUserRank' => $currentUserEntry['rank'] ?? null,
         ]);
     }
 }
