@@ -85,7 +85,7 @@ export function usePyodideTerminal(): UsePyodideTerminalReturn {
 
         worker = new Worker(
             new URL('../workers/pyodide.worker.ts', import.meta.url),
-            { type: 'classic' },
+            { type: 'module' },
         );
 
         worker.onmessage = handleWorkerMessage;
@@ -186,8 +186,8 @@ export function usePyodideTerminal(): UsePyodideTerminalReturn {
 
     function promptStdin(): void {
         if (!worker || !sabView) {
-return;
-}
+            return;
+        }
 
         new Promise<string>((resolve) => {
             stdinResolve = resolve;
@@ -207,8 +207,8 @@ return;
 
     async function runCode(code: string): Promise<void> {
         if (!worker || !pyodideReady.value) {
-return;
-}
+            return;
+        }
 
         isRunning.value = true;
         worker.postMessage({ type: 'run', data: code });

@@ -13,10 +13,10 @@ async function loadPyodideInstance(): Promise<void> {
 return;
 }
 
-    importScripts(`${PYODIDE_BASE_URL}pyodide.js`);
-
-    // @ts-expect-error - loadPyodide is injected by the script
-    pyodide = await globalThis.loadPyodide({
+    const mod = await import(
+        /* @vite-ignore */ `${PYODIDE_BASE_URL}pyodide.mjs`
+    );
+    pyodide = await mod.loadPyodide({
         indexURL: PYODIDE_BASE_URL,
     });
 }
@@ -35,12 +35,13 @@ return null;
 
             self.postMessage({ type: 'stdin_request' });
 
-            Atomics.wait(sabView, 0, 0, 0);
             Atomics.wait(sabView, 0, 0);
 
             const length = Atomics.load(sabView, 1);
 
-            if (length < 0) return null;
+            if (length < 0) {
+return null;
+}
 
             const bytes = new Uint8Array(sab!, 8, length);
             const line = new TextDecoder().decode(bytes);
@@ -140,11 +141,6 @@ self.onmessage = async (e: MessageEvent) => {
         e.data;
 
     switch (type) {
-        case 'load':
-            await loadPyodideInstance();
-            self.postMessage({ type: 'loaded' });
-            break;
-
         case 'init_sab':
             await loadPyodideInstance();
             setupStdinWithSAB(buffer);
@@ -165,15 +161,16 @@ self.onmessage = async (e: MessageEvent) => {
 break;
 }
 
-            const encoded = new TextEncoder().encode(data);
-            const length = Math.min(encoded.length, STDIN_BUFFER_SIZE);
+            {
+                const encoded = new TextEncoder().encode(data);
+                const length = Math.min(encoded.length, STDIN_BUFFER_SIZE);
+                const bytes = new Uint8Array(sab!, 8, length);
+                bytes.set(encoded.subarray(0, length));
 
-            const bytes = new Uint8Array(sab!, 8, length);
-            bytes.set(encoded.subarray(0, length));
-
-            Atomics.store(sabView, 1, length);
-            Atomics.store(sabView, 0, 1);
-            Atomics.notify(sabView, 0);
+                Atomics.store(sabView, 1, length);
+                Atomics.store(sabView, 0, 1);
+                Atomics.notify(sabView, 0);
+            }
             break;
 
         case 'stdin_eof':
