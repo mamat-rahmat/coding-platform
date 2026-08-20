@@ -51,25 +51,24 @@ class AdminLessonBlockController extends Controller
         $block = $lesson->blocks()->create($request->validated());
 
         return redirect()
-            ->route('admin.blocks.edit', [$lesson, $block])
+            ->route('admin.blocks.edit', $block)
             ->with('success', 'Block berhasil dibuat.');
     }
 
-    public function edit(Lesson $lesson, LessonBlock $block): Response
+    public function edit(LessonBlock $block): Response
     {
         $this->authorize('update', $block);
 
         $block->load(['lesson.module.course']);
 
         return Inertia::render('admin/blocks/Edit', [
-            'lesson' => $lesson,
+            'lesson' => $block->lesson,
             'block' => $block,
         ]);
     }
 
     public function update(
         UpdateLessonBlockRequest $request,
-        Lesson $lesson,
         LessonBlock $block,
     ): RedirectResponse {
         $this->authorize('update', $block);
@@ -77,20 +76,20 @@ class AdminLessonBlockController extends Controller
         $block->update($request->validated());
 
         return redirect()
-            ->route('admin.blocks.index', $lesson)
+            ->route('admin.blocks.index', $block->lesson)
             ->with('success', 'Block berhasil diperbarui.');
     }
 
-    public function destroy(
-        Lesson $lesson,
-        LessonBlock $block,
-    ): RedirectResponse {
+    public function destroy(LessonBlock $block): RedirectResponse
+    {
         $this->authorize('delete', $block);
+
+        $lessonId = $block->lesson_id;
 
         $block->delete();
 
         return redirect()
-            ->route('admin.blocks.index', $lesson)
+            ->route('admin.blocks.index', $lessonId)
             ->with('success', 'Block berhasil dihapus.');
     }
 

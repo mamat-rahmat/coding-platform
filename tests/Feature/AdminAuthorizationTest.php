@@ -5,6 +5,7 @@ use App\Models\CourseModule;
 use App\Models\Lesson;
 use App\Models\LessonBlock;
 use App\Models\User;
+use Inertia\Testing\AssertableInertia as Assert;
 
 function adminUser(): User
 {
@@ -240,4 +241,36 @@ test('reorder only affects blocks belonging to the lesson', function () {
 
     expect($ownBlock->fresh()->sort_order)->toBe(5)
         ->and($foreignBlock->fresh()->sort_order)->toBe(99);
+});
+
+test('module show page resolves course from module with shallow routes', function () {
+    $course = Course::factory()->create();
+    $module = CourseModule::factory()->create([
+        'course_id' => $course->id,
+    ]);
+
+    $this->actingAs(adminUser())
+        ->get(route('admin.modules.show', $module))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->component('admin/modules/Show')
+            ->where('course.id', $course->id)
+            ->where('course.title', $course->title)
+            ->where('module.id', $module->id));
+});
+
+test('block edit page resolves lesson from block with shallow routes', function () {
+    $lesson = Lesson::factory()->create();
+    $block = LessonBlock::factory()->create([
+        'lesson_id' => $lesson->id,
+    ]);
+
+    $this->actingAs(adminUser())
+        ->get(route('admin.blocks.edit', $block))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->component('admin/blocks/Edit')
+            ->where('lesson.id', $lesson->id)
+            ->where('lesson.title', $lesson->title)
+            ->where('block.id', $block->id));
 });

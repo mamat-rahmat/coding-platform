@@ -50,38 +50,39 @@ class AdminModuleController extends Controller
         $module = $course->modules()->create($request->validated());
 
         return redirect()
-            ->route('admin.modules.show', [$course, $module])
+            ->route('admin.modules.show', $module)
             ->with('success', 'Module berhasil dibuat.');
     }
 
-    public function show(Course $course, CourseModule $module): Response
+    public function show(CourseModule $module): Response
     {
-        $this->authorize('view', $course);
         $this->authorize('view', $module);
 
         $module->load([
+            'course',
             'lessons' => fn ($q) => $q->orderBy('sort_order'),
         ]);
 
         return Inertia::render('admin/modules/Show', [
-            'course' => $course,
+            'course' => $module->course,
             'module' => $module,
         ]);
     }
 
-    public function edit(Course $course, CourseModule $module): Response
+    public function edit(CourseModule $module): Response
     {
         $this->authorize('update', $module);
 
+        $module->load('course');
+
         return Inertia::render('admin/modules/Edit', [
-            'course' => $course,
+            'course' => $module->course,
             'module' => $module,
         ]);
     }
 
     public function update(
         UpdateModuleRequest $request,
-        Course $course,
         CourseModule $module,
     ): RedirectResponse {
         $this->authorize('update', $module);
@@ -89,20 +90,20 @@ class AdminModuleController extends Controller
         $module->update($request->validated());
 
         return redirect()
-            ->route('admin.modules.show', [$course, $module])
+            ->route('admin.modules.show', $module)
             ->with('success', 'Module berhasil diperbarui.');
     }
 
-    public function destroy(
-        Course $course,
-        CourseModule $module,
-    ): RedirectResponse {
+    public function destroy(CourseModule $module): RedirectResponse
+    {
         $this->authorize('delete', $module);
+
+        $courseId = $module->course_id;
 
         $module->delete();
 
         return redirect()
-            ->route('admin.modules.index', $course)
+            ->route('admin.modules.index', $courseId)
             ->with('success', 'Module berhasil dihapus.');
     }
 }
