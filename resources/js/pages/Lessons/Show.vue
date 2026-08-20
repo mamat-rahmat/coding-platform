@@ -56,8 +56,34 @@ const gradedTypes = [
 
 const isGraded = (block: LessonBlock) => gradedTypes.includes(block.type);
 
-const currentBlockIndex = ref(0);
 const answeredBlockIds = ref<Set<number>>(new Set());
+
+function readBlockFromUrl(): number {
+    if (props.lesson.blocks.length === 0) {
+        return 0;
+    }
+
+    const params = new URLSearchParams(window.location.search);
+    const block = Number(params.get('block'));
+
+    if (!Number.isInteger(block) || block < 1) {
+        return 0;
+    }
+
+    return Math.min(block - 1, props.lesson.blocks.length - 1);
+}
+
+const currentBlockIndex = ref(readBlockFromUrl());
+
+function navigateToBlock(index: number) {
+    currentBlockIndex.value = index;
+
+    const url = lessonRoutes.show.url(props.lesson.slug, {
+        query: { block: index + 1 },
+    });
+
+    router.get(url, {}, { preserveState: true, preserveScroll: true });
+}
 
 for (const block of props.lesson.blocks) {
     if ((block as LessonBlock & { is_answered?: boolean }).is_answered) {
@@ -114,8 +140,8 @@ const showManualComplete = computed(
 
 const progressPercentage = computed(() => {
     if (totalBlocks.value === 0) {
-return 0;
-}
+        return 0;
+    }
 
     return Math.round(
         ((currentBlockIndex.value + 1) / totalBlocks.value) * 100,
@@ -128,25 +154,32 @@ const blockProgressText = computed(
 
 function goNext() {
     if (!canGoNext.value) {
-return;
-}
+        return;
+    }
 
     if (isLastBlock.value) {
-return;
-}
+        return;
+    }
 
-    currentBlockIndex.value++;
+    navigateToBlock(currentBlockIndex.value + 1);
     window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
 function goPrev() {
     if (isFirstBlock.value) {
-return;
-}
+        return;
+    }
 
-    currentBlockIndex.value--;
+    navigateToBlock(currentBlockIndex.value - 1);
     window.scrollTo({ top: 0, behavior: 'smooth' });
 }
+
+watch(
+    () => page.url,
+    () => {
+        currentBlockIndex.value = readBlockFromUrl();
+    },
+);
 
 const completeLesson = (lessonSlug: string) => {
     router.post(
