@@ -10,6 +10,9 @@ export default defineConfig({
     worker: {
         format: 'es',
     },
+    server: {
+        origin: 'http://localhost:8000',
+    },
     plugins: [
         laravel({
             input: ['resources/css/app.css', 'resources/js/app.ts'],
