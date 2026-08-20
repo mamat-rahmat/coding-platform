@@ -9,6 +9,11 @@ use Illuminate\Support\Facades\Route;
 
 Route::inertia('/', 'Welcome')->name('home');
 
+Route::get('/courses/{course:slug}/leaderboard', [
+    CourseController::class,
+    'leaderboard',
+])->name('courses.leaderboard');
+
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::inertia('dashboard', 'Dashboard')->name('dashboard');
 
@@ -17,11 +22,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::get('/courses/{course:slug}', [CourseController::class, 'show'])
         ->name('courses.show');
-
-    Route::get('/courses/{course:slug}/leaderboard', [
-        CourseController::class,
-        'leaderboard',
-    ])->name('courses.leaderboard');
 
     Route::get('/lessons/{lesson:slug}', [LessonController::class, 'show'])
         ->name('lessons.show');
@@ -39,7 +39,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/playground', [PlaygroundController::class, 'index'])
         ->name('playground.index');
 });
-
 
 require __DIR__.'/settings.php';
 require __DIR__.'/admin.php';

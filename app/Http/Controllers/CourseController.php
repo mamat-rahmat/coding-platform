@@ -125,7 +125,7 @@ class CourseController extends Controller
             ->orderBy('last_completed_at')
             ->get();
 
-        $currentUserId = $request->user()->id;
+        $currentUserId = $request->user()?->id ?? null;
 
         $leaderboard = $participants->map(function ($participant, int $index) use ($totalLessons, $course, $currentUserId) {
             $percentage = $totalLessons > 0

@@ -38,11 +38,14 @@ function completeLessons(User $user, Collection $lessons, int $count): void
     });
 }
 
-test('guests are redirected from the leaderboard', function () {
-    $course = Course::factory()->create();
+test('guests can view the leaderboard', function () {
+    [$course, $lessons] = leaderboardCourse(2);
 
     $this->get(route('courses.leaderboard', $course->slug))
-        ->assertRedirect(route('login'));
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->component('Courses/Leaderboard')
+            ->where('currentUserRank', null));
 });
 
 test('leaderboard shows 404 for unpublished courses', function () {
