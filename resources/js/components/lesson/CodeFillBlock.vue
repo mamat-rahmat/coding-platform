@@ -70,8 +70,8 @@ const usedOptionIndices = computed(() => {
 
     for (const p of optionPlacements.value) {
         if (p !== null) {
-used.add(p);
-}
+            used.add(p);
+        }
     }
 
     return used;
@@ -82,7 +82,7 @@ const isOptionUsed = (optIndex: number) =>
 
 const templateParts = computed<TemplatePart[]>(() => {
     const parts: TemplatePart[] = [];
-    const regex = /\{\{(\w+)\}\}/g;
+    const regex = /\{\{\s*(\w+)\s*\}\}/g;
     let lastIndex = 0;
     let match: RegExpExecArray | null;
     let blankIdx = 0;
@@ -119,8 +119,8 @@ function getBlankDisplayValue(blankIndex: number): string {
     const optIdx = optionPlacements.value[blankIndex];
 
     if (optIdx === null) {
-return '_____';
-}
+        return '_____';
+    }
 
     const opt = shuffledOptions.value.find((o) => o.index === optIdx);
 
@@ -137,20 +137,20 @@ function isBlankFilled(blankIndex: number): boolean {
 
 function selectOption(optIndex: number) {
     if (submitted.value || isOptionUsed(optIndex)) {
-return;
-}
+        return;
+    }
 
     if (activeBlankIndex.value === null) {
-return;
-}
+        return;
+    }
 
     optionPlacements.value[activeBlankIndex.value] = optIndex;
 }
 
 function clearBlank(blankIndex: number) {
     if (submitted.value) {
-return;
-}
+        return;
+    }
 
     optionPlacements.value[blankIndex] = null;
 }
@@ -163,8 +163,8 @@ function checkBlank(blankIndex: number): boolean {
     const blank = props.content.blanks[blankIndex];
 
     if (!blank) {
-return false;
-}
+        return false;
+    }
 
     const placedValue = getBlankDisplayValue(blankIndex).trim();
     const correct = [blank.answer, ...(blank.alternatives ?? [])].map((v) =>
@@ -176,8 +176,8 @@ return false;
 
 function submitAnswer() {
     if (!allBlanksFilled.value) {
-return;
-}
+        return;
+    }
 
     const results = props.content.blanks.map((_, i) => checkBlank(i));
     const allCorrect = results.every(Boolean);
@@ -208,8 +208,8 @@ return;
                 )?.attempt_result;
 
                 if (!result || result.block_id !== props.blockId) {
-return;
-}
+                    return;
+                }
 
                 submitted.value = true;
                 isCorrect.value = result.is_correct;
