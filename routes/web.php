@@ -7,7 +7,7 @@ use App\Http\Controllers\LessonProgressController;
 use App\Http\Controllers\PlaygroundController;
 use Illuminate\Support\Facades\Route;
 
-Route::inertia('/', 'Welcome')->name('home');
+Route::inertia('/', 'Landing')->name('home');
 
 Route::get('/courses', [CourseController::class, 'index'])
     ->name('courses.index');
