@@ -4,7 +4,6 @@ import {
     BookOpen,
     FolderGit2,
     GraduationCap,
-    LayoutGrid,
     ShieldCheck,
     Terminal,
 } from '@lucide/vue';
@@ -22,7 +21,6 @@ import {
     SidebarMenuButton,
     SidebarMenuItem,
 } from '@/components/ui/sidebar';
-import { dashboard } from '@/routes';
 import adminRoutes from '@/routes/admin';
 import courseRoutes from '@/routes/courses';
 import playgroundRoutes from '@/routes/playground';
@@ -35,11 +33,6 @@ const isAdmin = computed(() =>
 );
 
 const mainNavItems: NavItem[] = [
-    {
-        title: 'Dashboard',
-        href: dashboard(),
-        icon: LayoutGrid,
-    },
     {
         title: 'Courses',
         href: courseRoutes.index.url(),
@@ -80,7 +73,7 @@ const footerNavItems: NavItem[] = [
             <SidebarMenu>
                 <SidebarMenuItem>
                     <SidebarMenuButton size="lg" as-child>
-                        <Link :href="dashboard()">
+                        <Link :href="courseRoutes.index.url()">
                             <AppLogo />
                         </Link>
                     </SidebarMenuButton>
