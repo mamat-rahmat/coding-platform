@@ -59,7 +59,7 @@ defineOptions({
 <template>
     <Head title="Admin - Edit Lesson" />
 
-    <div class="mx-auto max-w-2xl p-4">
+    <div class="mx-auto max-w-3xl p-4">
         <Link
             :href="adminLessonRoutes.show.url(lesson.id)"
             class="mb-4 inline-flex items-center gap-1 text-sm text-gray-500 hover:text-gray-900"
