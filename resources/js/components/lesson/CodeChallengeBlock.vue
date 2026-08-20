@@ -60,6 +60,12 @@ const passedCount = computed(
 
 const totalCount = computed(() => props.content.testcases.length);
 
+const firstVisibleInput = computed(
+    () =>
+        props.content.testcases.find((tc) => !tc.hidden && tc.input)?.input ??
+        null,
+);
+
 async function runUserCode() {
     isRunning.value = true;
     runOutput.value = null;
@@ -69,7 +75,10 @@ async function runUserCode() {
             await loadPyodide();
         }
 
-        runOutput.value = await runCode(userCode.value);
+        runOutput.value = await runCode(
+            userCode.value,
+            firstVisibleInput.value ?? undefined,
+        );
     } finally {
         isRunning.value = false;
     }
@@ -227,11 +236,22 @@ function reset() {
                 class="border-b border-gray-700 px-4 py-2 text-xs text-gray-400"
             >
                 Output
+                <span v-if="firstVisibleInput" class="ml-2 text-gray-500">
+                    (stdin dari testcase pertama)
+                </span>
             </div>
 
             <pre
                 class="overflow-x-auto p-4 text-sm text-gray-100"
             ><code>{{ runOutput.stdout || '(kosong)' }}{{ runOutput.stderr }}{{ runOutput.error ? '\n--- Error ---\n' + runOutput.error : '' }}</code></pre>
+
+            <div
+                v-if="runOutput.error && runOutput.error.includes('EOFError')"
+                class="border-t border-gray-700 px-4 py-2 text-xs text-amber-400"
+            >
+                Kode memanggil `input()` tapi tidak ada stdin. Gunakan tombol
+                "Run Testcases" untuk menjalankan dengan input testcase.
+            </div>
         </div>
 
         <div v-if="hasRunTests">
