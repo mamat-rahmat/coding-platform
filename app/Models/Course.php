@@ -2,10 +2,10 @@
 
 namespace App\Models;
 
-use App\Models\CourseModule;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 
 class Course extends Model
 {
@@ -34,4 +34,13 @@ class Course extends Model
         return $this->hasMany(CourseModule::class);
     }
 
+    public function lessons(): HasManyThrough
+    {
+        return $this->hasManyThrough(
+            Lesson::class,
+            CourseModule::class,
+            'course_id',
+            'course_module_id',
+        );
+    }
 }
