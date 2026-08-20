@@ -10,13 +10,13 @@ const STDIN_BUFFER_SIZE = 1024;
 
 async function loadPyodideInstance(): Promise<void> {
     if (pyodide) {
-        return;
-    }
+return;
+}
 
-    const mod = await import(
-        /* @vite-ignore */ `${PYODIDE_BASE_URL}pyodide.mjs`
-    );
-    pyodide = await mod.loadPyodide({
+    importScripts(`${PYODIDE_BASE_URL}pyodide.js`);
+
+    // @ts-expect-error - loadPyodide is injected by importScripts
+    pyodide = await globalThis.loadPyodide({
         indexURL: PYODIDE_BASE_URL,
     });
 }
@@ -28,8 +28,8 @@ function setupStdinWithSAB(buffer: SharedArrayBuffer): void {
     pyodide.setStdin({
         stdin: () => {
             if (!sabView) {
-                return null;
-            }
+return null;
+}
 
             Atomics.store(sabView, 0, 0);
 
@@ -40,8 +40,8 @@ function setupStdinWithSAB(buffer: SharedArrayBuffer): void {
             const length = Atomics.load(sabView, 1);
 
             if (length < 0) {
-                return null;
-            }
+return null;
+}
 
             const bytes = new Uint8Array(sab!, 8, length);
             const line = new TextDecoder().decode(bytes);
@@ -164,8 +164,8 @@ self.onmessage = async (e: MessageEvent) => {
 
         case 'stdin_response':
             if (!sabView) {
-                break;
-            }
+break;
+}
 
             {
                 const encoded = new TextEncoder().encode(data);
@@ -181,8 +181,8 @@ self.onmessage = async (e: MessageEvent) => {
 
         case 'stdin_eof':
             if (!sabView) {
-                break;
-            }
+break;
+}
 
             Atomics.store(sabView, 1, -1);
             Atomics.store(sabView, 0, 1);

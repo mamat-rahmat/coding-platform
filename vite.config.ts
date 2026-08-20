@@ -8,10 +8,7 @@ import { defineConfig } from 'vite';
 
 export default defineConfig({
     worker: {
-        format: 'es',
-    },
-    server: {
-        origin: 'http://localhost:8000',
+        format: 'iife',
     },
     plugins: [
         laravel({
