@@ -4,34 +4,44 @@ namespace App\Http\Controllers;
 
 use App\LessonBlockType;
 use App\Models\Lesson;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
 
 class LessonController extends Controller
 {
-    public function show(Request $request, Lesson $lesson): Response
+    public function show(Request $request, Lesson $lesson): Response|RedirectResponse
     {
         abort_unless($lesson->is_published, 404);
+
+        if (! $lesson->isUnlockedFor($request->user())) {
+            return redirect()
+                ->route('courses.show', $lesson->module->course->slug)
+                ->with('toast', [
+                    'type' => 'error',
+                    'message' => 'Selesaikan lesson sebelumnya untuk membuka lesson ini.',
+                ]);
+        }
 
         $lesson->load([
             'module.course',
             'blocks' => fn ($query) => $query->orderBy('sort_order'),
         ]);
 
-        $previousLesson = Lesson::query()
-            ->where('course_module_id', $lesson->course_module_id)
-            ->where('sort_order', '<', $lesson->sort_order)
-            ->where('is_published', true)
-            ->orderByDesc('sort_order')
-            ->first();
+        $orderedLessons = $lesson->orderedInCourse();
 
-        $nextLesson = Lesson::query()
-            ->where('course_module_id', $lesson->course_module_id)
-            ->where('sort_order', '>', $lesson->sort_order)
-            ->where('is_published', true)
-            ->orderBy('sort_order')
-            ->first();
+        $position = $orderedLessons->search(
+            fn (Lesson $ordered) => $ordered->id === $lesson->id,
+        );
+
+        $previousLesson = $position === false || $position === 0
+            ? null
+            : $orderedLessons[$position - 1];
+
+        $nextLesson = $position !== false && $position < $orderedLessons->count() - 1
+            ? $orderedLessons[$position + 1]
+            : null;
 
         $isCompleted = $request->user()
             ->lessonProgresses()

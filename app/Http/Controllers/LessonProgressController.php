@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Controllers\Controller;
 use App\Models\Lesson;
 use App\Models\LessonProgress;
 use Illuminate\Http\RedirectResponse;
@@ -15,6 +14,15 @@ class LessonProgressController extends Controller
         Lesson $lesson
     ): RedirectResponse {
         abort_unless($lesson->is_published, 404);
+
+        if (! $lesson->isUnlockedFor($request->user())) {
+            return redirect()
+                ->route('courses.show', $lesson->module->course->slug)
+                ->with('toast', [
+                    'type' => 'error',
+                    'message' => 'Selesaikan lesson sebelumnya untuk membuka lesson ini.',
+                ]);
+        }
 
         LessonProgress::updateOrCreate(
             [

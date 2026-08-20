@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { Link } from '@inertiajs/vue3';
+import { Lock } from '@lucide/vue';
 import courseRoutes from '@/routes/courses';
 import lessonRoutes from '@/routes/lessons';
 
@@ -11,6 +12,7 @@ interface Lesson {
     sort_order: number;
     is_published: boolean;
     is_completed: boolean;
+    is_locked: boolean;
 }
 
 interface CourseModule {
@@ -44,8 +46,6 @@ defineProps<{
     course: Course;
     progress: CourseProgress;
 }>();
-
-
 </script>
 
 <template>
@@ -79,7 +79,9 @@ defineProps<{
                     </span>
                 </div>
 
-                <h1 class="mt-4 text-4xl font-bold tracking-tight text-gray-900">
+                <h1
+                    class="mt-4 text-4xl font-bold tracking-tight text-gray-900"
+                >
                     {{ course.title }}
                 </h1>
 
@@ -119,7 +121,9 @@ defineProps<{
                     class="overflow-hidden rounded-xl border bg-white"
                 >
                     <div class="border-b px-6 py-5">
-                        <p class="text-xs font-medium uppercase tracking-wide text-gray-500">
+                        <p
+                            class="text-xs font-medium tracking-wide text-gray-500 uppercase"
+                        >
                             Module {{ moduleIndex + 1 }}
                         </p>
 
@@ -142,22 +146,27 @@ defineProps<{
                             class="flex items-center justify-between px-6 py-4"
                         >
                             <div class="flex items-center gap-4">
-                            <div
-                                class="flex h-9 w-9 items-center justify-center rounded-full text-sm font-medium"
-                                :class="
-                                    lesson.is_completed
-                                        ? 'bg-green-100 text-green-700'
-                                        : 'bg-gray-100 text-gray-600'
-                                "
-                            >
-                                <span v-if="lesson.is_completed">
-                                    ✓
-                                </span>
+                                <div
+                                    class="flex h-9 w-9 items-center justify-center rounded-full text-sm font-medium"
+                                    :class="
+                                        lesson.is_completed
+                                            ? 'bg-green-100 text-green-700'
+                                            : lesson.is_locked
+                                              ? 'bg-gray-100 text-gray-400'
+                                              : 'bg-gray-100 text-gray-600'
+                                    "
+                                >
+                                    <span v-if="lesson.is_completed">✓</span>
 
-                                <span v-else>
-                                    {{ lessonIndex + 1 }}
-                                </span>
-                            </div>
+                                    <Lock
+                                        v-else-if="lesson.is_locked"
+                                        class="h-4 w-4"
+                                    />
+
+                                    <span v-else>
+                                        {{ lessonIndex + 1 }}
+                                    </span>
+                                </div>
 
                                 <div>
                                     <h3 class="font-medium text-gray-900">
@@ -173,7 +182,15 @@ defineProps<{
                                 </div>
                             </div>
 
+                            <span
+                                v-if="lesson.is_locked"
+                                class="cursor-not-allowed rounded-lg border border-gray-200 px-4 py-2 text-sm font-medium text-gray-400"
+                            >
+                                Terkunci
+                            </span>
+
                             <Link
+                                v-else
                                 :href="lessonRoutes.show.url(lesson.slug)"
                                 class="rounded-lg border px-4 py-2 text-sm font-medium hover:bg-gray-50"
                                 :class="
