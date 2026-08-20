@@ -6,6 +6,7 @@ import {
     Folder,
     Trash2,
     FolderPlus,
+    Eye,
 } from '@lucide/vue';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -165,7 +166,7 @@ defineOptions({
                                         adminModuleRoutes.show.url(module.id)
                                     "
                                 >
-                                    Kelola
+                                    <Eye class="h-4 w-4" />
                                 </Link>
                             </Button>
 
