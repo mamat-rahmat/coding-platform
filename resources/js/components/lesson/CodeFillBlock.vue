@@ -2,6 +2,7 @@
 import { router } from '@inertiajs/vue3';
 import { X } from '@lucide/vue';
 import { computed, ref } from 'vue';
+import Markdown from '@/components/Markdown.vue';
 import attemptRoutes from '@/routes/lesson-blocks/attempts';
 
 interface Blank {
@@ -13,6 +14,7 @@ interface Blank {
 interface CodeFillContent {
     code_template: string;
     blanks: Blank[];
+    markdown?: string;
 }
 
 interface Option {
@@ -238,6 +240,12 @@ function reset() {
 <template>
     <div>
         <h3 class="text-lg font-semibold text-gray-900">Lengkapi Kode</h3>
+
+        <Markdown
+            v-if="content.markdown"
+            :content="content.markdown"
+            class="mt-2"
+        />
 
         <p class="mt-1 text-xs text-gray-500">
             Klik opsi di bawah untuk mengisi bagian kosong secara berurutan.

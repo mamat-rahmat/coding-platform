@@ -11,6 +11,7 @@ interface Blank {
 interface CodeFillContent {
     code_template: string;
     blanks: Blank[];
+    markdown?: string;
 }
 
 const model = defineModel<CodeFillContent>({ required: true });
@@ -21,6 +22,10 @@ if (typeof model.value.code_template !== 'string') {
 
 if (!Array.isArray(model.value.blanks)) {
     model.value.blanks = [];
+}
+
+if (typeof model.value.markdown !== 'string') {
+    model.value.markdown = '';
 }
 
 function addBlank() {
@@ -39,6 +44,18 @@ function placeholder(id: string): string {
 
 <template>
     <div class="space-y-4">
+        <div>
+            <label class="mb-1 block text-sm font-medium text-gray-700">
+                Judul / Penjelasan (Markdown)
+            </label>
+            <textarea
+                v-model="model.markdown"
+                class="w-full rounded-md border border-gray-300 p-3 font-mono text-sm focus:border-gray-900 focus:outline-none"
+                rows="3"
+                placeholder="Apa yang diminta untuk dilengkapi?"
+            />
+        </div>
+
         <div>
             <label class="mb-1 block text-sm font-medium text-gray-700">
                 Code Template

@@ -146,7 +146,9 @@ print(age)
 PYTHON, [
             ['id' => 'A', 'answer' => '"Andi"'],
             ['id' => 'B', 'answer' => '15'],
-        ]);
+        ],
+            markdown: 'Lengkapi kode agar nama dan umur tersimpan lalu dicetak.',
+        );
 
         $lesson = $module->lessons()->create([
             'title' => 'Input & Output',
@@ -890,11 +892,16 @@ PYTHON, [
         ]);
     }
 
-    private function codeFill(Lesson $lesson, int $sort, string $template, array $blanks): void
+    private function codeFill(Lesson $lesson, int $sort, string $template, array $blanks, string $markdown = ''): void
     {
+        $content = ['code_template' => $template, 'blanks' => $blanks];
+        if ($markdown !== '') {
+            $content['markdown'] = $markdown;
+        }
+
         $lesson->blocks()->create([
             'type' => LessonBlockType::CODE_FILL,
-            'content' => ['code_template' => $template, 'blanks' => $blanks],
+            'content' => $content,
             'sort_order' => $sort,
         ]);
     }

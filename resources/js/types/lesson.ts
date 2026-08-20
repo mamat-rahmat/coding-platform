@@ -56,6 +56,7 @@ export interface CodeFillLessonBlock extends BaseLessonBlock {
             answer: string;
             alternatives?: string[];
         }[];
+        markdown?: string;
     };
 }
 
