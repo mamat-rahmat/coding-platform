@@ -3,6 +3,7 @@ import { router } from '@inertiajs/vue3';
 import { Play, CheckCircle2, XCircle, Loader2 } from '@lucide/vue';
 import { computed, ref } from 'vue';
 import CodeEditor from '@/components/CodeEditor.vue';
+import Markdown from '@/components/Markdown.vue';
 import { Button } from '@/components/ui/button';
 import { usePyodide } from '@/composables/usePyodide';
 import type { RunResult } from '@/composables/usePyodide';
@@ -164,7 +165,9 @@ function reset() {
         <div>
             <h3 class="text-lg font-semibold text-gray-900">Tantangan Kode</h3>
 
-            <p class="mt-2 text-sm text-gray-600">{{ content.prompt }}</p>
+            <p class="mt-2 text-sm text-gray-600">
+                <Markdown :content="content.prompt" />
+            </p>
         </div>
 
         <div>
