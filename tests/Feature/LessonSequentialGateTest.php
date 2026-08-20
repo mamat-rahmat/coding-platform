@@ -75,9 +75,15 @@ test('a lesson unlocks after the previous lesson is completed', function () {
         ->assertOk();
 });
 
-test('sequential lock crosses module boundaries', function () {
+test('previous module must be fully completed before crossing the module boundary', function () {
     $user = User::factory()->create();
     $lessons = lessonSequence(2, 2);
+
+    LessonProgress::create([
+        'user_id' => $user->id,
+        'lesson_id' => $lessons[1]->id,
+        'completed_at' => now(),
+    ]);
 
     $this->actingAs($user)
         ->get(route('lessons.show', $lessons[2]->slug))
@@ -85,7 +91,7 @@ test('sequential lock crosses module boundaries', function () {
 
     LessonProgress::create([
         'user_id' => $user->id,
-        'lesson_id' => $lessons[1]->id,
+        'lesson_id' => $lessons[0]->id,
         'completed_at' => now(),
     ]);
 

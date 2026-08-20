@@ -2,9 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Controllers\Controller;
 use App\LessonBlockType;
 use App\Models\BlockAttempt;
+use App\Models\Lesson;
 use App\Models\LessonBlock;
 use App\Models\LessonProgress;
 use Illuminate\Http\RedirectResponse;
@@ -27,6 +27,12 @@ class BlockAttemptController extends Controller
         ];
 
         abort_unless(in_array($type, $gradedTypes, true), 404);
+
+        $lesson = Lesson::query()->findOrFail($lessonBlock->lesson_id);
+
+        abort_unless($lesson->is_published, 404);
+
+        abort_unless($lesson->isUnlockedFor($request->user()), 403);
 
         $payload = match ($type) {
             LessonBlockType::MCQ_SINGLE => $this->verifyMcqSingle($request, $lessonBlock),
@@ -108,7 +114,6 @@ class BlockAttemptController extends Controller
             ],
         );
     }
-
 
     /**
      * @return array{answer: string, is_correct: bool}

@@ -73,13 +73,26 @@ class CourseController extends Controller
             $module->lessons->each(function ($lesson) use ($completedLessonIds) {
                 $lesson->is_completed = $completedLessonIds->contains($lesson->id);
             });
+
+            $module->is_completed = $module->lessons->isNotEmpty()
+                && $module->lessons->every(fn ($lesson) => $lesson->is_completed);
         });
 
-        $previousCompleted = true;
+        $moduleBlocked = false;
 
-        $lessons->each(function ($lesson) use (&$previousCompleted, $completedLessonIds) {
-            $lesson->is_locked = ! $previousCompleted;
-            $previousCompleted = $completedLessonIds->contains($lesson->id);
+        $course->modules->each(function ($module) use (&$moduleBlocked, $completedLessonIds) {
+            $module->is_locked = $moduleBlocked;
+
+            $previousInModule = true;
+
+            $module->lessons->each(function ($lesson) use (&$previousInModule, $completedLessonIds, $module) {
+                $lesson->is_locked = $module->is_locked || ! $previousInModule;
+                $previousInModule = $completedLessonIds->contains($lesson->id);
+            });
+
+            if (! $module->is_completed) {
+                $moduleBlocked = true;
+            }
         });
 
         $totalLessons = $lessons->count();

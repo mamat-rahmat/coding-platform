@@ -16,11 +16,15 @@ class LessonProgressController extends Controller
         abort_unless($lesson->is_published, 404);
 
         if (! $lesson->isUnlockedFor($request->user())) {
+            $message = $lesson->module->isUnlockedFor($request->user())
+                ? 'Selesaikan lesson sebelumnya untuk membuka lesson ini.'
+                : 'Selesaikan semua pelajaran di modul sebelumnya untuk membuka modul ini.';
+
             return redirect()
                 ->route('courses.show', $lesson->module->course->slug)
                 ->with('toast', [
                     'type' => 'error',
-                    'message' => 'Selesaikan lesson sebelumnya untuk membuka lesson ini.',
+                    'message' => $message,
                 ]);
         }
 

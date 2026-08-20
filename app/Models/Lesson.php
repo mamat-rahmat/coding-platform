@@ -68,15 +68,24 @@ class Lesson extends Model
 
     public function isUnlockedFor(User $user): bool
     {
-        $ordered = $this->orderedInCourse();
+        if (! $this->module->isUnlockedFor($user)) {
+            return false;
+        }
 
-        $position = $ordered->search(fn (Lesson $lesson) => $lesson->id === $this->id);
+        $siblings = Lesson::query()
+            ->where('course_module_id', $this->course_module_id)
+            ->where('is_published', true)
+            ->orderBy('sort_order')
+            ->orderBy('id')
+            ->get();
+
+        $position = $siblings->search(fn (Lesson $lesson) => $lesson->id === $this->id);
 
         if ($position === false || $position === 0) {
             return true;
         }
 
-        $previous = $ordered[$position - 1];
+        $previous = $siblings[$position - 1];
 
         return $user->lessonProgresses()
             ->where('lesson_id', $previous->id)

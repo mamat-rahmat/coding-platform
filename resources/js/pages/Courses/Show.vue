@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Link } from '@inertiajs/vue3';
-import { Lock, Trophy } from '@lucide/vue';
+import { Lock, LockKeyhole, Trophy } from '@lucide/vue';
 import courseRoutes from '@/routes/courses';
 import lessonRoutes from '@/routes/lessons';
 
@@ -21,6 +21,8 @@ interface CourseModule {
     slug: string;
     description: string | null;
     sort_order: number;
+    is_locked: boolean;
+    is_completed: boolean;
     lessons: Lesson[];
 }
 
@@ -129,24 +131,47 @@ defineProps<{
                     v-for="(module, moduleIndex) in course.modules"
                     :key="module.id"
                     class="overflow-hidden rounded-xl border bg-white"
+                    :class="module.is_locked ? 'opacity-80' : ''"
                 >
-                    <div class="border-b px-6 py-5">
-                        <p
-                            class="text-xs font-medium tracking-wide text-gray-500 uppercase"
-                        >
-                            Module {{ moduleIndex + 1 }}
-                        </p>
+                    <div
+                        class="flex items-start justify-between gap-4 border-b px-6 py-5"
+                        :class="module.is_locked ? 'bg-gray-50' : ''"
+                    >
+                        <div>
+                            <p
+                                class="text-xs font-medium tracking-wide text-gray-500 uppercase"
+                            >
+                                Module {{ moduleIndex + 1 }}
+                            </p>
 
-                        <h2 class="mt-1 text-xl font-semibold text-gray-900">
-                            {{ module.title }}
-                        </h2>
+                            <h2
+                                class="mt-1 text-xl font-semibold text-gray-900"
+                            >
+                                {{ module.title }}
+                            </h2>
 
-                        <p
-                            v-if="module.description"
-                            class="mt-1 text-sm text-gray-600"
+                            <p
+                                v-if="module.description"
+                                class="mt-1 text-sm text-gray-600"
+                            >
+                                {{ module.description }}
+                            </p>
+                        </div>
+
+                        <span
+                            v-if="module.is_locked"
+                            class="inline-flex shrink-0 items-center gap-2 rounded-full bg-gray-100 px-3 py-1 text-xs font-medium text-gray-500"
                         >
-                            {{ module.description }}
-                        </p>
+                            <LockKeyhole class="h-3.5 w-3.5" />
+                            Terkunci — selesaikan modul sebelumnya
+                        </span>
+
+                        <span
+                            v-else-if="module.is_completed"
+                            class="inline-flex shrink-0 items-center gap-1.5 rounded-full bg-green-100 px-3 py-1 text-xs font-medium text-green-700"
+                        >
+                            Selesai
+                        </span>
                     </div>
 
                     <div class="divide-y">
