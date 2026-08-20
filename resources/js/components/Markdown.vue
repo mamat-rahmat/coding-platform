@@ -3,7 +3,7 @@ import { marked } from 'marked';
 import { computed } from 'vue';
 
 const props = defineProps<{
-    content: string;
+    content: string | null;
 }>();
 
 marked.setOptions({
@@ -23,7 +23,9 @@ function sanitize(html: string): string {
         );
 }
 
-const html = computed(() => sanitize(marked.parse(props.content) as string));
+const html = computed(() =>
+    sanitize(marked.parse(props.content ?? '') as string),
+);
 </script>
 
 <template>

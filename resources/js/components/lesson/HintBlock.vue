@@ -10,7 +10,7 @@ import {
 
 interface HintContent {
     title: string;
-    text: string;
+    text: string | null;
 }
 
 defineProps<{
