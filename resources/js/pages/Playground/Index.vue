@@ -25,6 +25,8 @@ const props = defineProps<{
 const {
     pyodideReady,
     pyodideLoading,
+    pyodideError,
+    isInteractive,
     isRunning,
     init,
     runCode,
@@ -51,8 +53,8 @@ onUnmounted(() => {
 
 async function run() {
     if (!pyodideReady.value || isRunning.value) {
-return;
-}
+        return;
+    }
 
     clear();
     write('\x1b[33m--- Running ---\x1b[0m\r\n');
@@ -108,6 +110,13 @@ function reset() {
             Memuat Pyodide di Web Worker (~10MB)...
         </div>
 
+        <div
+            v-if="pyodideError"
+            class="rounded-lg bg-red-50 p-3 text-sm text-red-700"
+        >
+            Error: {{ pyodideError }}
+        </div>
+
         <div class="grid flex-1 gap-4 lg:grid-cols-2">
             <div class="flex flex-col gap-2">
                 <div
@@ -118,7 +127,7 @@ function reset() {
                         v-if="pyodideReady"
                         class="rounded-full bg-green-100 px-2 py-0.5 text-xs text-green-700"
                     >
-                        Pyodide siap
+                        {{ isInteractive ? 'Interaktif' : 'Siap' }}
                     </span>
                 </div>
 

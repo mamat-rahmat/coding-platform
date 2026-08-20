@@ -5,11 +5,8 @@ import { computed, onMounted, onUnmounted, ref } from 'vue';
 import CodeEditor from '@/components/CodeEditor.vue';
 import Markdown from '@/components/Markdown.vue';
 import { Button } from '@/components/ui/button';
-import {
-    usePyodideTerminal
-    
-} from '@/composables/usePyodideTerminal';
-import type {TestcaseResult} from '@/composables/usePyodideTerminal';
+import { usePyodideTerminal } from '@/composables/usePyodideTerminal';
+import type { TestcaseResult } from '@/composables/usePyodideTerminal';
 import attemptRoutes from '@/routes/lesson-blocks/attempts';
 
 interface Testcase {
@@ -34,6 +31,8 @@ const props = defineProps<{
 const {
     pyodideReady,
     pyodideLoading,
+    pyodideError,
+    isInteractive,
     isRunning,
     init,
     runCode,
@@ -71,20 +70,31 @@ const passedCount = computed(
 
 const totalCount = computed(() => props.content.testcases.length);
 
+const firstVisibleInput = computed(
+    () =>
+        props.content.testcases.find((tc) => !tc.hidden && tc.input)?.input ??
+        null,
+);
+
 async function runUserCode() {
     if (!pyodideReady.value || isRunning.value) {
-return;
-}
+        return;
+    }
 
     clear();
     write('\x1b[33m--- Running ---\x1b[0m\r\n');
-    await runCode(userCode.value);
+
+    if (!isInteractive.value && firstVisibleInput.value) {
+        await runCode(userCode.value, firstVisibleInput.value);
+    } else {
+        await runCode(userCode.value);
+    }
 }
 
 async function runAllTestcases() {
     if (!pyodideReady.value || isRunning.value) {
-return;
-}
+        return;
+    }
 
     testcaseResults.value = {};
     hasRunTests.value = false;
@@ -126,8 +136,8 @@ return;
 
 function submitResult() {
     if (!hasRunTests.value) {
-return;
-}
+        return;
+    }
 
     const isCorrect = allTestcasesPassed.value;
     const attemptData = Object.fromEntries(
@@ -161,8 +171,8 @@ return;
                 )?.attempt_result;
 
                 if (!result || result.block_id !== props.blockId) {
-return;
-}
+                    return;
+                }
 
                 submitted.value = true;
             },
@@ -233,12 +243,31 @@ function reset() {
             Memuat Pyodide di Web Worker (~10MB)...
         </div>
 
+        <div
+            v-if="pyodideError"
+            class="rounded-lg bg-red-50 p-3 text-sm text-red-700"
+        >
+            Error: {{ pyodideError }}
+        </div>
+
         <div class="space-y-2">
             <div
                 class="flex items-center gap-2 text-sm font-medium text-gray-700"
             >
                 <Terminal class="h-4 w-4" />
                 Terminal
+                <span
+                    v-if="pyodideReady && isInteractive"
+                    class="rounded-full bg-green-100 px-2 py-0.5 text-xs text-green-700"
+                >
+                    Interaktif
+                </span>
+                <span
+                    v-else-if="pyodideReady && !isInteractive"
+                    class="rounded-full bg-yellow-100 px-2 py-0.5 text-xs text-yellow-700"
+                >
+                    Non-interaktif (gunakan Run Testcases)
+                </span>
                 <span
                     v-if="pyodideReady"
                     class="rounded-full bg-green-100 px-2 py-0.5 text-xs text-green-700"
