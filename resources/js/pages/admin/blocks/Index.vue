@@ -9,7 +9,7 @@ import {
     Eye,
     Save,
 } from '@lucide/vue';
-import { ref } from 'vue';
+import { ref, watch } from 'vue';
 import draggable from 'vuedraggable';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -43,6 +43,14 @@ const props = defineProps<{
 const blocks = ref([...props.lesson.blocks]);
 const isDirty = ref(false);
 const isSaving = ref(false);
+
+watch(
+    () => props.lesson.blocks,
+    (val) => {
+        blocks.value = [...val];
+        isDirty.value = false;
+    },
+);
 
 const blockTypeLabels: Record<string, string> = {
     TEXT: 'Text (Markdown)',
@@ -88,7 +96,9 @@ function destroy(block: Block) {
         return;
     }
 
-    router.delete(adminBlockRoutes.destroy.url(block.id));
+    router.delete(adminBlockRoutes.destroy.url(block.id), {
+        preserveScroll: true,
+    });
 }
 
 function blockSummary(block: Block): string {
