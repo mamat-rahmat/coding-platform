@@ -63,7 +63,7 @@ async function runCode(code) {
 }
 
 async function runTestcase(code, input, expectedOutput, testcaseId) {
-    const lines = input.split("\\n");
+    const lines = (input ?? "").split("\\n");
     let lineIndex = 0;
     pyodide.setStdin({
         stdin: () => lineIndex < lines.length ? lines[lineIndex++] : null,
@@ -79,8 +79,8 @@ async function runTestcase(code, input, expectedOutput, testcaseId) {
     } catch (err) {
         error = err instanceof Error ? err.message : String(err);
     }
-    const passed = !error && output.trimEnd() === expectedOutput.trimEnd();
-    self.postMessage({ type: "testcase_result", testcaseId, passed, actual: output.trimEnd(), expected: expectedOutput.trimEnd(), error });
+    const passed = !error && output.trimEnd() === (expectedOutput ?? "").trimEnd();
+    self.postMessage({ type: "testcase_result", testcaseId, passed, actual: output.trimEnd(), expected: (expectedOutput ?? "").trimEnd(), error });
 }
 
 self.onmessage = async (e) => {
