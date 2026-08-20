@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { router } from '@inertiajs/vue3';
+import { X } from '@lucide/vue';
 import { computed, ref } from 'vue';
-import { Input } from '@/components/ui/input';
 import attemptRoutes from '@/routes/lesson-blocks/attempts';
 
 interface Blank {
@@ -15,70 +15,175 @@ interface CodeFillContent {
     blanks: Blank[];
 }
 
+interface Option {
+    index: number;
+    value: string;
+}
+
+interface TemplatePart {
+    type: 'text' | 'blank';
+    value: string;
+    blankIndex: number;
+}
+
 const props = defineProps<{
     blockId: number;
     content: CodeFillContent;
 }>();
 
-const blankInputs = ref<Record<string, string>>(
-    Object.fromEntries(props.content.blanks.map((b) => [b.id, ''])),
-);
 const submitted = ref(false);
 const isCorrect = ref<boolean | null>(null);
-const blankResults = ref<Record<string, boolean>>({});
+const blankResults = ref<boolean[]>([]);
 
-const filledBlanks = computed(
-    () =>
-        Object.values(blankInputs.value).filter((v) => v.trim() !== '').length,
+const shuffledOptions = ref<Option[]>(
+    (() => {
+        const opts: Option[] = props.content.blanks.map((b, i) => ({
+            index: i,
+            value: b.answer,
+        }));
+
+        for (let i = opts.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [opts[i], opts[j]] = [opts[j], opts[i]];
+        }
+
+        return opts;
+    })(),
 );
 
-const allBlanksFilled = computed(
-    () => filledBlanks.value === props.content.blanks.length,
+const optionPlacements = ref<(number | null)[]>(
+    props.content.blanks.map(() => null),
 );
 
-const renderedCode = computed(() => {
-    let code = props.content.code_template;
+const activeBlankIndex = computed(() => {
+    const idx = optionPlacements.value.indexOf(null);
 
-    for (const blank of props.content.blanks) {
-        const value = blankInputs.value[blank.id] || '_____';
-        const isWrong = submitted.value && !blankResults.value[blank.id];
-        const display = isWrong
-            ? `${value} (✗)`
-            : submitted.value && blankResults.value[blank.id]
-              ? `${value} (✓)`
-              : value;
-
-        code = code.replace(`{{${blank.id}}}`, display);
-    }
-
-    return code;
+    return idx === -1 ? null : idx;
 });
 
-const checkBlank = (blank: Blank, value: string): boolean => {
-    const trimmed = value.trim();
+const allBlanksFilled = computed(() =>
+    optionPlacements.value.every((p) => p !== null),
+);
+
+const usedOptionIndices = computed(() => {
+    const used = new Set<number>();
+
+    for (const p of optionPlacements.value) {
+        if (p !== null) {
+used.add(p);
+}
+    }
+
+    return used;
+});
+
+const isOptionUsed = (optIndex: number) =>
+    usedOptionIndices.value.has(optIndex);
+
+const templateParts = computed<TemplatePart[]>(() => {
+    const parts: TemplatePart[] = [];
+    const regex = /\{\{(\w+)\}\}/g;
+    let lastIndex = 0;
+    let match: RegExpExecArray | null;
+    let blankIdx = 0;
+
+    while ((match = regex.exec(props.content.code_template)) !== null) {
+        if (match.index > lastIndex) {
+            parts.push({
+                type: 'text',
+                value: props.content.code_template.slice(
+                    lastIndex,
+                    match.index,
+                ),
+                blankIndex: -1,
+            });
+        }
+
+        parts.push({ type: 'blank', value: match[1], blankIndex: blankIdx });
+        lastIndex = regex.lastIndex;
+        blankIdx++;
+    }
+
+    if (lastIndex < props.content.code_template.length) {
+        parts.push({
+            type: 'text',
+            value: props.content.code_template.slice(lastIndex),
+            blankIndex: -1,
+        });
+    }
+
+    return parts;
+});
+
+function getBlankDisplayValue(blankIndex: number): string {
+    const optIdx = optionPlacements.value[blankIndex];
+
+    if (optIdx === null) {
+return '_____';
+}
+
+    const opt = shuffledOptions.value.find((o) => o.index === optIdx);
+
+    return opt?.value ?? '_____';
+}
+
+function isBlankActive(blankIndex: number): boolean {
+    return activeBlankIndex.value === blankIndex && !submitted.value;
+}
+
+function isBlankFilled(blankIndex: number): boolean {
+    return optionPlacements.value[blankIndex] !== null;
+}
+
+function selectOption(optIndex: number) {
+    if (submitted.value || isOptionUsed(optIndex)) {
+return;
+}
+
+    if (activeBlankIndex.value === null) {
+return;
+}
+
+    optionPlacements.value[activeBlankIndex.value] = optIndex;
+}
+
+function clearBlank(blankIndex: number) {
+    if (submitted.value) {
+return;
+}
+
+    optionPlacements.value[blankIndex] = null;
+}
+
+function getBlankAnswer(blankIndex: number): string {
+    return props.content.blanks[blankIndex]?.answer ?? '';
+}
+
+function checkBlank(blankIndex: number): boolean {
+    const blank = props.content.blanks[blankIndex];
+
+    if (!blank) {
+return false;
+}
+
+    const placedValue = getBlankDisplayValue(blankIndex).trim();
     const correct = [blank.answer, ...(blank.alternatives ?? [])].map((v) =>
         v.trim(),
     );
 
-    return correct.includes(trimmed);
-};
+    return correct.includes(placedValue);
+}
 
-const submitAnswer = () => {
+function submitAnswer() {
     if (!allBlanksFilled.value) {
-        return;
-    }
+return;
+}
 
-    const results: Record<string, boolean> = {};
-
-    for (const blank of props.content.blanks) {
-        results[blank.id] = checkBlank(blank, blankInputs.value[blank.id]);
-    }
-
-    const correctCount = Object.values(results).filter(Boolean).length;
-    const allCorrect = correctCount === props.content.blanks.length;
+    const results = props.content.blanks.map((_, i) => checkBlank(i));
+    const allCorrect = results.every(Boolean);
 
     const answersPayload = props.content.blanks
-        .map((b) => `${b.id}:${blankInputs.value[b.id]}`)
+        .map((b, i) => `${b.id}:${getBlankDisplayValue(i)}`)
         .join('|');
 
     router.post(
@@ -103,8 +208,8 @@ const submitAnswer = () => {
                 )?.attempt_result;
 
                 if (!result || result.block_id !== props.blockId) {
-                    return;
-                }
+return;
+}
 
                 submitted.value = true;
                 isCorrect.value = result.is_correct;
@@ -112,17 +217,22 @@ const submitAnswer = () => {
             },
         },
     );
-};
+}
 
-const reset = () => {
-    for (const blank of props.content.blanks) {
-        blankInputs.value[blank.id] = '';
-    }
-
+function reset() {
+    optionPlacements.value = props.content.blanks.map(() => null);
     submitted.value = false;
     isCorrect.value = null;
-    blankResults.value = {};
-};
+    blankResults.value = [];
+
+    for (let i = shuffledOptions.value.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [shuffledOptions.value[i], shuffledOptions.value[j]] = [
+            shuffledOptions.value[j],
+            shuffledOptions.value[i],
+        ];
+    }
+}
 </script>
 
 <template>
@@ -130,40 +240,62 @@ const reset = () => {
         <h3 class="text-lg font-semibold text-gray-900">Lengkapi Kode</h3>
 
         <p class="mt-1 text-xs text-gray-500">
-            Isi bagian yang kosong untuk melengkapi kode.
+            Klik opsi di bawah untuk mengisi bagian kosong secara berurutan.
+            Klik bagian yang terisi untuk menghapusnya.
         </p>
 
-        <div class="mt-4 overflow-hidden rounded-lg bg-gray-900 p-5">
+        <!-- Code with blanks -->
+        <div class="mt-4 overflow-x-auto rounded-lg bg-gray-900 p-5">
             <pre
-                class="overflow-x-auto text-sm leading-6 text-gray-100"
-            ><code>{{ renderedCode }}</code></pre>
+                class="text-sm leading-7 text-gray-100"
+            ><code><template v-for="(part, i) in templateParts" :key="i"><span v-if="part.type === 'text'">{{ part.value }}</span><span
+    v-else
+    class="inline-flex items-center rounded mx-0.5 px-1.5 py-0.5 font-mono text-xs cursor-pointer transition"
+    :class="{
+        'border-2 border-dashed border-gray-500 text-gray-400': !isBlankFilled(part.blankIndex) && !submitted,
+        'border-2 border-yellow-400 bg-yellow-400/20 text-yellow-200': isBlankActive(part.blankIndex),
+        'border border-gray-600 bg-gray-700 text-gray-100': isBlankFilled(part.blankIndex) && !submitted,
+        'border border-green-500 bg-green-500/20 text-green-200': submitted && blankResults[part.blankIndex],
+        'border border-red-500 bg-red-500/20 text-red-200': submitted && !blankResults[part.blankIndex],
+    }"
+    @click="clearBlank(part.blankIndex)"
+>{{ getBlankDisplayValue(part.blankIndex) }}</span></template></code></pre>
         </div>
 
-        <div class="mt-5 space-y-4">
-            <div v-for="blank in content.blanks" :key="blank.id">
-                <label
-                    :for="`blank-${blank.id}`"
-                    class="mb-1 block text-sm font-medium text-gray-700"
+        <!-- Available options -->
+        <div v-if="!submitted" class="mt-5">
+            <p class="mb-2 text-xs font-medium text-gray-600">Pilihan:</p>
+            <div class="flex flex-wrap gap-2">
+                <button
+                    v-for="opt in shuffledOptions"
+                    :key="opt.index"
+                    type="button"
+                    :disabled="isOptionUsed(opt.index)"
+                    class="rounded-lg border bg-white px-3 py-2 font-mono text-sm text-gray-900 transition enabled:hover:border-gray-900 enabled:hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-30"
+                    @click="selectOption(opt.index)"
                 >
-                    Isian {{ blank.id.toUpperCase() }}
-                </label>
-
-                <Input
-                    :id="`blank-${blank.id}`"
-                    v-model="blankInputs[blank.id]"
-                    :disabled="submitted"
-                    placeholder="Ketik jawaban..."
-                    class="max-w-xs"
-                    :class="{
-                        'border-green-500 bg-green-50':
-                            submitted && blankResults[blank.id],
-                        'border-red-500 bg-red-50':
-                            submitted && !blankResults[blank.id],
-                    }"
-                />
+                    {{ opt.value }}
+                </button>
             </div>
         </div>
 
+        <!-- After submit: show correct answers for wrong blanks -->
+        <div v-if="submitted && !isCorrect" class="mt-4">
+            <p class="mb-2 text-xs font-medium text-gray-600">
+                Jawaban yang benar:
+            </p>
+            <div class="flex flex-wrap gap-2">
+                <span
+                    v-for="(blank, i) in content.blanks"
+                    :key="blank.id"
+                    class="rounded border border-green-300 bg-green-50 px-2 py-1 font-mono text-xs text-green-800"
+                >
+                    {{ blank.id }}: {{ getBlankAnswer(i) }}
+                </span>
+            </div>
+        </div>
+
+        <!-- Action buttons -->
         <div class="mt-5">
             <button
                 v-if="!submitted"
@@ -178,13 +310,15 @@ const reset = () => {
             <button
                 v-else
                 type="button"
-                class="rounded-lg border px-5 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50"
+                class="flex items-center gap-1.5 rounded-lg border px-5 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50"
                 @click="reset"
             >
+                <X class="h-4 w-4" />
                 Coba lagi
             </button>
         </div>
 
+        <!-- Feedback -->
         <div
             v-if="submitted"
             class="mt-5 rounded-lg p-4"
@@ -201,9 +335,9 @@ const reset = () => {
                         : '✗ Beberapa jawaban belum benar.'
                 }}
             </p>
-
             <p v-if="!isCorrect" class="mt-1 text-sm">
-                Periksa kembali isian yang ditandai merah.
+                Bagian yang salah ditandai merah. Lihat jawaban yang benar di
+                atas.
             </p>
         </div>
     </div>
