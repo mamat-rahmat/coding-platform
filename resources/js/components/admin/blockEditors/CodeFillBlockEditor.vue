@@ -31,6 +31,10 @@ function addBlank() {
 function removeBlank(index: number) {
     model.value.blanks.splice(index, 1);
 }
+
+function placeholder(id: string): string {
+    return `{{ ${id} }}`;
+}
 </script>
 
 <template>
@@ -73,8 +77,8 @@ function removeBlank(index: number) {
                     :key="index"
                     class="flex items-center gap-2"
                 >
-                    <span v-pre class="w-8 font-mono text-xs uppercase">
-                        {{{{ blank.id }}}}
+                    <span class="w-8 font-mono text-xs uppercase">
+                        {{ placeholder(blank.id) }}
                     </span>
                     <input
                         v-model="blank.answer"
