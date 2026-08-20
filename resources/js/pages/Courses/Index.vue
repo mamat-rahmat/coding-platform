@@ -1,5 +1,7 @@
 <script setup lang="ts">
-import { Link } from '@inertiajs/vue3';
+import { Link, usePage } from '@inertiajs/vue3';
+import { Trophy } from '@lucide/vue';
+import { computed } from 'vue';
 import courseRoutes from '@/routes/courses';
 
 interface Course {
@@ -17,6 +19,8 @@ interface Course {
 defineProps<{
     courses: Course[];
 }>();
+
+const isAuthenticated = computed(() => Boolean(usePage().props.auth?.user));
 </script>
 
 <template>
@@ -36,15 +40,10 @@ defineProps<{
                 v-if="courses.length === 0"
                 class="rounded-xl border border-dashed bg-white p-12 text-center"
             >
-                <p class="text-gray-500">
-                    Belum ada course yang tersedia.
-                </p>
+                <p class="text-gray-500">Belum ada course yang tersedia.</p>
             </div>
 
-            <div
-                v-else
-                class="grid gap-6 md:grid-cols-2 lg:grid-cols-3"
-            >
+            <div v-else class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
                 <article
                     v-for="course in courses"
                     :key="course.id"
@@ -92,21 +91,30 @@ defineProps<{
                         <div
                             class="mt-4 flex items-center justify-between text-sm text-gray-500"
                         >
-                            <span>
-                                {{ course.modules_count }} modules
-                            </span>
+                            <span> {{ course.modules_count }} modules </span>
 
-                            <span>
-                                {{ course.xp_reward }} XP
-                            </span>
+                            <span> {{ course.xp_reward }} XP </span>
                         </div>
 
-                        <Link
-                            :href="courseRoutes.show.url(course.slug)"
-                            class="mt-5 block w-full rounded-lg bg-gray-900 px-4 py-2.5 text-center text-sm font-medium text-white transition hover:bg-gray-700"
-                        >
-                            Mulai Belajar
-                        </Link>
+                        <div class="mt-5 flex flex-col gap-2">
+                            <Link
+                                v-if="isAuthenticated"
+                                :href="courseRoutes.show.url(course.slug)"
+                                class="block w-full rounded-lg bg-gray-900 px-4 py-2.5 text-center text-sm font-medium text-white transition hover:bg-gray-700"
+                            >
+                                Mulai Belajar
+                            </Link>
+
+                            <Link
+                                :href="
+                                    courseRoutes.leaderboard.url(course.slug)
+                                "
+                                class="flex w-full items-center justify-center gap-1.5 rounded-lg border px-4 py-2.5 text-center text-sm font-medium text-gray-700 transition hover:bg-gray-50"
+                            >
+                                <Trophy class="h-4 w-4" />
+                                Lihat Peringkat
+                            </Link>
+                        </div>
                     </div>
                 </article>
             </div>

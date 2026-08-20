@@ -1,6 +1,7 @@
 <script setup lang="ts">
-import { Link } from '@inertiajs/vue3';
+import { Link, usePage } from '@inertiajs/vue3';
 import { Trophy } from '@lucide/vue';
+import { computed } from 'vue';
 import courseRoutes from '@/routes/courses';
 
 interface LeaderboardEntry {
@@ -24,16 +25,27 @@ defineProps<{
     leaderboard: LeaderboardEntry[];
     currentUserRank: number | null;
 }>();
+
+const isAuthenticated = computed(() => Boolean(usePage().props.auth?.user));
 </script>
 
 <template>
     <div class="min-h-screen bg-gray-50">
         <div class="mx-auto max-w-5xl px-6 py-12">
             <Link
+                v-if="isAuthenticated"
                 :href="courseRoutes.show.url(course.slug)"
                 class="text-sm text-gray-500 hover:text-gray-900"
             >
                 ← Kembali ke {{ course.title }}
+            </Link>
+
+            <Link
+                v-else
+                :href="courseRoutes.index.url()"
+                class="text-sm text-gray-500 hover:text-gray-900"
+            >
+                ← Kembali ke Courses
             </Link>
 
             <header class="mt-8">

@@ -38,6 +38,17 @@ function completeLessons(User $user, Collection $lessons, int $count): void
     });
 }
 
+test('guests can view the courses index', function () {
+    Course::factory()->create(['is_published' => true]);
+    Course::factory()->create(['is_published' => false]);
+
+    $this->get(route('courses.index'))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->component('Courses/Index')
+            ->has('courses', 1));
+});
+
 test('guests can view the leaderboard', function () {
     [$course, $lessons] = leaderboardCourse(2);
 
