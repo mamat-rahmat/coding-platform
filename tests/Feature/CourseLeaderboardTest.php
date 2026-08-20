@@ -138,3 +138,30 @@ test('leaderboard is empty and currentUserRank is null when user has no progress
             ->where('currentUserRank', null)
             ->where('leaderboard', []));
 });
+
+test('leaderboard excludes admin users and keeps ranks contiguous', function () {
+    [$course, $lessons] = leaderboardCourse(3);
+
+    $regular = User::factory()->create(['name' => 'Regular User']);
+    $admin = User::factory()->admin()->create(['name' => 'Admin User']);
+
+    completeLessons($regular, $lessons, 3);
+    completeLessons($admin, $lessons, 3);
+
+    $this->actingAs($regular)
+        ->get(route('courses.leaderboard', $course->slug))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->where('leaderboard.0.name', 'Regular User')
+            ->where('leaderboard.0.rank', 1)
+            ->where('leaderboard.0.is_current_user', true)
+            ->where('leaderboard', fn ($list) => $list->toArray() === [[
+                'rank' => 1,
+                'name' => 'Regular User',
+                'completed_lessons' => 3,
+                'total_lessons' => 3,
+                'percentage' => 100,
+                'xp' => 100,
+                'is_current_user' => true,
+            ]]));
+});

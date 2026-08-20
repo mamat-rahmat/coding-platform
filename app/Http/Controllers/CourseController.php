@@ -129,6 +129,7 @@ class CourseController extends Controller
         $participants = LessonProgress::query()
             ->whereIn('lesson_id', $lessonIds)
             ->whereNotNull('completed_at')
+            ->whereHas('user', fn ($query) => $query->where('is_admin', false))
             ->selectRaw(
                 'user_id, count(*) as completed_count, max(completed_at) as last_completed_at',
             )
