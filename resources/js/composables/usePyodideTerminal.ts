@@ -35,7 +35,9 @@ function setupStdinWithSAB(buffer) {
             const length = Atomics.load(sabView, 1);
             if (length < 0) return null;
             const bytes = new Uint8Array(sab, 8, length);
-            return new TextDecoder().decode(bytes);
+            const copy = new Uint8Array(length);
+            copy.set(bytes);
+            return new TextDecoder().decode(copy);
         },
         isatty: true,
     });
