@@ -1,12 +1,15 @@
 <script setup lang="ts">
 import { router } from '@inertiajs/vue3';
-import { Play, CheckCircle2, XCircle, Loader2 } from '@lucide/vue';
-import { computed, ref } from 'vue';
+import { Play, CheckCircle2, XCircle, Loader2, Terminal } from '@lucide/vue';
+import { computed, onMounted, onUnmounted, ref } from 'vue';
 import CodeEditor from '@/components/CodeEditor.vue';
 import Markdown from '@/components/Markdown.vue';
 import { Button } from '@/components/ui/button';
-import { usePyodide } from '@/composables/usePyodide';
-import type { RunResult } from '@/composables/usePyodide';
+import {
+    usePyodideTerminal
+    
+} from '@/composables/usePyodideTerminal';
+import type {TestcaseResult} from '@/composables/usePyodideTerminal';
 import attemptRoutes from '@/routes/lesson-blocks/attempts';
 
 interface Testcase {
@@ -28,25 +31,33 @@ const props = defineProps<{
     content: CodeChallengeContent;
 }>();
 
-const { pyodideReady, pyodideLoading, pyodideError, loadPyodide, runCode } =
-    usePyodide();
+const {
+    pyodideReady,
+    pyodideLoading,
+    isRunning,
+    init,
+    runCode,
+    runTestcase,
+    clear,
+    write,
+    dispose,
+} = usePyodideTerminal();
 
 const userCode = ref(props.content.starter_code);
-const isRunning = ref(false);
-const runOutput = ref<RunResult | null>(null);
-const testcaseResults = ref<
-    Record<
-        string,
-        {
-            passed: boolean;
-            actual: string;
-            expected: string;
-            hidden: boolean;
-        }
-    >
->({});
+const terminalContainer = ref<HTMLElement | null>(null);
+const testcaseResults = ref<Record<string, TestcaseResult>>({});
 const hasRunTests = ref(false);
 const submitted = ref(false);
+
+onMounted(() => {
+    if (terminalContainer.value) {
+        init(terminalContainer.value);
+    }
+});
+
+onUnmounted(() => {
+    dispose();
+});
 
 const allTestcasesPassed = computed(
     () =>
@@ -60,64 +71,63 @@ const passedCount = computed(
 
 const totalCount = computed(() => props.content.testcases.length);
 
-const firstVisibleInput = computed(
-    () =>
-        props.content.testcases.find((tc) => !tc.hidden && tc.input)?.input ??
-        null,
-);
-
 async function runUserCode() {
-    isRunning.value = true;
-    runOutput.value = null;
+    if (!pyodideReady.value || isRunning.value) {
+return;
+}
 
-    try {
-        if (!pyodideReady.value) {
-            await loadPyodide();
-        }
-
-        runOutput.value = await runCode(
-            userCode.value,
-            firstVisibleInput.value ?? undefined,
-        );
-    } finally {
-        isRunning.value = false;
-    }
+    clear();
+    write('\x1b[33m--- Running ---\x1b[0m\r\n');
+    await runCode(userCode.value);
 }
 
 async function runAllTestcases() {
-    isRunning.value = true;
+    if (!pyodideReady.value || isRunning.value) {
+return;
+}
+
     testcaseResults.value = {};
     hasRunTests.value = false;
 
-    try {
-        if (!pyodideReady.value) {
-            await loadPyodide();
+    clear();
+    write('\x1b[33m--- Running Testcases ---\x1b[0m\r\n\r\n');
+
+    for (const testcase of props.content.testcases) {
+        write(`\x1b[36mTestcase ${testcase.id}...\x1b[0m\r\n`);
+
+        const result = await runTestcase(
+            userCode.value,
+            testcase.input,
+            testcase.expected_output,
+            testcase.id,
+        );
+
+        testcaseResults.value[testcase.id] = result;
+
+        if (result.passed) {
+            write('\x1b[32m  ✓ Lulus\x1b[0m\r\n');
+        } else {
+            write('\x1b[31m  ✗ Gagal\x1b[0m\r\n');
+
+            if (!testcase.hidden) {
+                write(`\x1b[90m  Expected: ${result.expected}\x1b[0m\r\n`);
+                write(`\x1b[90m  Got: ${result.actual}\x1b[0m\r\n`);
+            }
         }
 
-        for (const testcase of props.content.testcases) {
-            const result = await runCode(userCode.value, testcase.input);
-            const actual = result.stdout.trimEnd();
-            const expected = testcase.expected_output.trimEnd();
-            const passed = actual === expected && !result.error;
-
-            testcaseResults.value[testcase.id] = {
-                passed,
-                actual,
-                expected,
-                hidden: testcase.hidden,
-            };
-        }
-
-        hasRunTests.value = true;
-    } finally {
-        isRunning.value = false;
+        write('\r\n');
     }
+
+    write(
+        `\x1b[33m--- Hasil: ${passedCount.value}/${totalCount.value} lulus ---\x1b[0m\r\n`,
+    );
+    hasRunTests.value = true;
 }
 
 function submitResult() {
     if (!hasRunTests.value) {
-        return;
-    }
+return;
+}
 
     const isCorrect = allTestcasesPassed.value;
     const attemptData = Object.fromEntries(
@@ -151,8 +161,8 @@ function submitResult() {
                 )?.attempt_result;
 
                 if (!result || result.block_id !== props.blockId) {
-                    return;
-                }
+return;
+}
 
                 submitted.value = true;
             },
@@ -162,10 +172,10 @@ function submitResult() {
 
 function reset() {
     userCode.value = props.content.starter_code;
-    runOutput.value = null;
     testcaseResults.value = {};
     hasRunTests.value = false;
     submitted.value = false;
+    clear();
 }
 </script>
 
@@ -173,7 +183,6 @@ function reset() {
     <div class="space-y-4">
         <div>
             <h3 class="text-lg font-semibold text-gray-900">Tantangan Kode</h3>
-
             <p class="mt-2 text-sm text-gray-600">
                 <Markdown :content="content.prompt" />
             </p>
@@ -187,7 +196,7 @@ function reset() {
                     <Button
                         variant="outline"
                         size="sm"
-                        :disabled="isRunning"
+                        :disabled="!pyodideReady || isRunning"
                         @click="runUserCode"
                     >
                         <Play v-if="!isRunning" class="h-3.5 w-3.5" />
@@ -197,7 +206,7 @@ function reset() {
 
                     <Button
                         size="sm"
-                        :disabled="isRunning"
+                        :disabled="!pyodideReady || isRunning"
                         @click="runAllTestcases"
                     >
                         <Loader2
@@ -218,40 +227,30 @@ function reset() {
         </div>
 
         <div
-            v-if="pyodideError"
-            class="rounded-lg bg-red-50 p-3 text-sm text-red-700"
-        >
-            Gagal memuat Pyodide: {{ pyodideError }}
-        </div>
-
-        <div
             v-if="pyodideLoading && !pyodideReady"
             class="rounded-lg bg-blue-50 p-3 text-sm text-blue-700"
         >
-            Memuat Pyodide (~10MB)...
+            Memuat Pyodide di Web Worker (~10MB)...
         </div>
 
-        <div v-if="runOutput" class="overflow-hidden rounded-lg bg-gray-900">
+        <div class="space-y-2">
             <div
-                class="border-b border-gray-700 px-4 py-2 text-xs text-gray-400"
+                class="flex items-center gap-2 text-sm font-medium text-gray-700"
             >
-                Output
-                <span v-if="firstVisibleInput" class="ml-2 text-gray-500">
-                    (stdin dari testcase pertama)
+                <Terminal class="h-4 w-4" />
+                Terminal
+                <span
+                    v-if="pyodideReady"
+                    class="rounded-full bg-green-100 px-2 py-0.5 text-xs text-green-700"
+                >
+                    Siap
                 </span>
             </div>
 
-            <pre
-                class="overflow-x-auto p-4 text-sm text-gray-100"
-            ><code>{{ runOutput.stdout || '(kosong)' }}{{ runOutput.stderr }}{{ runOutput.error ? '\n--- Error ---\n' + runOutput.error : '' }}</code></pre>
-
             <div
-                v-if="runOutput.error && runOutput.error.includes('EOFError')"
-                class="border-t border-gray-700 px-4 py-2 text-xs text-amber-400"
-            >
-                Kode memanggil `input()` tapi tidak ada stdin. Gunakan tombol
-                "Run Testcases" untuk menjalankan dengan input testcase.
-            </div>
+                ref="terminalContainer"
+                class="h-64 overflow-hidden rounded-lg border border-gray-700 bg-gray-900 p-2"
+            />
         </div>
 
         <div v-if="hasRunTests">
@@ -351,7 +350,7 @@ function reset() {
                 Submit Hasil
             </Button>
 
-            <Button variant="outline" @click="reset"> Reset </Button>
+            <Button variant="outline" @click="reset">Reset</Button>
         </div>
 
         <div v-if="submitted" class="rounded-lg bg-green-50 p-4 text-green-700">
