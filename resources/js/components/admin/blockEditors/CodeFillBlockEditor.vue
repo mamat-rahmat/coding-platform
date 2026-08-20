@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { Plus, Trash2 } from '@lucide/vue';
+import Markdown from '@/components/Markdown.vue';
 import { Button } from '@/components/ui/button';
 
 interface Blank {
@@ -44,16 +45,35 @@ function placeholder(id: string): string {
 
 <template>
     <div class="space-y-4">
-        <div>
-            <label class="mb-1 block text-sm font-medium text-gray-700">
-                Judul / Penjelasan (Markdown)
-            </label>
-            <textarea
-                v-model="model.markdown"
-                class="w-full rounded-md border border-gray-300 p-3 font-mono text-sm focus:border-gray-900 focus:outline-none"
-                rows="3"
-                placeholder="Apa yang diminta untuk dilengkapi?"
-            />
+        <div class="grid grid-cols-1 gap-3 lg:grid-cols-2">
+            <div>
+                <label class="mb-1 block text-sm font-medium text-gray-700">
+                    Judul / Penjelasan (Markdown)
+                </label>
+                <textarea
+                    v-model="model.markdown"
+                    class="h-32 w-full rounded-md border border-gray-300 p-3 font-mono text-sm focus:border-gray-900 focus:outline-none"
+                    rows="3"
+                    placeholder="Apa yang diminta untuk dilengkapi?"
+                />
+            </div>
+
+            <div class="flex flex-col">
+                <span class="mb-1 block text-sm font-medium text-gray-700">
+                    Preview
+                </span>
+                <div
+                    class="h-32 flex-1 overflow-y-auto rounded-md border border-dashed border-gray-300 bg-gray-50 p-3"
+                >
+                    <p
+                        v-if="(model.markdown || '').trim() === ''"
+                        class="text-sm text-gray-400"
+                    >
+                        Preview akan tampil di sini.
+                    </p>
+                    <Markdown v-else :content="model.markdown ?? ''" />
+                </div>
+            </div>
         </div>
 
         <div>
