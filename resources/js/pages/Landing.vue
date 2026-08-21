@@ -13,6 +13,7 @@ import { computed } from 'vue';
 import AppLogoIcon from '@/components/AppLogoIcon.vue';
 import { login, register } from '@/routes';
 import courseRoutes from '@/routes/courses';
+import Login from './auth/Login.vue';
 
 const isAuthenticated = computed(() => Boolean(usePage().props.auth?.user));
 
@@ -131,22 +132,21 @@ const steps = [
                 <h1
                     class="mx-auto mt-6 max-w-3xl text-5xl font-bold tracking-tight text-balance"
                 >
-                    Belajar Coding dengan
-                    <span class="text-gray-400">Menulis & Menjalankan</span>
-                    Kode Nyata
+                    Belajar Coding Lewat 
+                    <span class="text-gray-400">Tantangan Interaktif</span>
                 </h1>
 
                 <p class="mx-auto mt-6 max-w-2xl text-lg text-gray-600">
-                    Pelajari dasar-dasar pemrograman lewat pelajaran singkat,
-                    contoh kode yang bisa langsung dijalankan, dan tantangan
-                    interaktif — semuanya di browser.
+                    Pelajari pemrograman dengan cara yang lebih menyenangkan.
+                    Ikuti pelajaran singkat, tulis kode sendiri,
+                    jalankan langsung di browser, dan selesaikan tantangan interaktif
                 </p>
 
                 <div
                     class="mt-8 flex flex-wrap items-center justify-center gap-3"
                 >
                     <Link
-                        :href="courseRoutes.index.url()"
+                        :href="login()"
                         class="inline-flex items-center gap-2 rounded-xl bg-gray-900 px-6 py-3 text-base font-medium text-white transition hover:bg-gray-700"
                     >
                         <Play class="h-5 w-5" />
@@ -158,7 +158,7 @@ const steps = [
                         class="inline-flex items-center gap-2 rounded-xl border border-gray-300 px-6 py-3 text-base font-medium text-gray-700 transition hover:bg-gray-50"
                     >
                         <Trophy class="h-5 w-5" />
-                        Lihat Peringkat
+                        Lihat Kelas
                     </Link>
                 </div>
 
