@@ -17,6 +17,11 @@ Route::get('/courses/{course:slug}/leaderboard', [
     'leaderboard',
 ])->name('courses.leaderboard');
 
+Route::get('/courses/{course:slug}/leaderboard/{user}/progress', [
+    CourseController::class,
+    'leaderboardUserProgress',
+])->name('courses.leaderboard.user-progress');
+
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::inertia('dashboard', 'Dashboard')->name('dashboard');
 
