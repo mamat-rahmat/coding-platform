@@ -107,11 +107,9 @@ async function runExample() {
                 Error: {{ pyodideError }}
             </div>
 
-            <div
-                v-if="pyodideReady"
-                class="border-t border-gray-700 bg-gray-900 px-4 py-2"
-            >
+            <div class="border-t border-gray-700 bg-gray-900 px-4 py-2">
                 <div
+                    v-if="pyodideReady"
                     class="mb-2 flex items-center gap-2 text-xs font-medium text-gray-400"
                 >
                     <Terminal class="h-3.5 w-3.5" />
