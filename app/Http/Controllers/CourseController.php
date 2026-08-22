@@ -56,10 +56,6 @@ class CourseController extends Controller
                 ]),
         ]);
 
-        $course->load([
-            'modules.lessons',
-        ]);
-
         $lessons = $course->modules
             ->flatMap(fn ($module) => $module->lessons)
             ->sortBy('sort_order')
