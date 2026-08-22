@@ -5,6 +5,7 @@ use App\Http\Controllers\AdminCourseController;
 use App\Http\Controllers\AdminLessonBlockController;
 use App\Http\Controllers\AdminLessonController;
 use App\Http\Controllers\AdminModuleController;
+use App\Http\Controllers\AdminUserController;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware(['auth', 'verified', 'admin'])->group(function () {
@@ -13,6 +14,10 @@ Route::middleware(['auth', 'verified', 'admin'])->group(function () {
 
     Route::resource('admin/courses', AdminCourseController::class)
         ->names('admin.courses');
+
+    Route::resource('admin/users', AdminUserController::class)
+        ->except(['create', 'store', 'show'])
+        ->names('admin.users');
 
     Route::resource(
         'admin/courses.modules',

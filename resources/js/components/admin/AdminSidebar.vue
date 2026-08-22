@@ -6,6 +6,7 @@ import {
     LayoutGrid,
     GraduationCap,
     ShieldCheck,
+    Users,
 } from '@lucide/vue';
 import AppLogo from '@/components/AppLogo.vue';
 import NavFooter from '@/components/NavFooter.vue';
@@ -37,6 +38,11 @@ const adminNavItems: NavItem[] = [
         title: 'Courses',
         href: '/admin/courses',
         icon: GraduationCap,
+    },
+    {
+        title: 'Users',
+        href: '/admin/users',
+        icon: Users,
     },
 ];
 
