@@ -93,7 +93,9 @@ const reset = () => {
                         selectedAnswer === option.id && !submitted,
 
                     'border-green-500 bg-green-50 text-green-900':
-                        submitted && option.id === content.correct_answer,
+                        submitted &&
+                        isCorrect &&
+                        option.id === content.correct_answer,
 
                     'border-red-500 bg-red-50 text-red-900':
                         submitted &&

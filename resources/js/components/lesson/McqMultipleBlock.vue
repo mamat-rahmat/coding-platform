@@ -121,7 +121,7 @@ const reset = () => {
                         isOptionSelected(option.id) && !submitted,
 
                     'border-green-500 bg-green-50 text-green-900':
-                        submitted && isOptionCorrect(option.id),
+                        submitted && isCorrect && isOptionCorrect(option.id),
 
                     'border-red-500 bg-red-50 text-red-900':
                         submitted &&
@@ -137,7 +137,9 @@ const reset = () => {
                         'border-gray-900 bg-gray-900 text-white':
                             isOptionSelected(option.id) && !submitted,
                         'border-green-500 bg-green-500 text-white':
-                            submitted && isOptionCorrect(option.id),
+                            submitted &&
+                            isCorrect &&
+                            isOptionCorrect(option.id),
                         'border-red-500 bg-red-500 text-white':
                             submitted &&
                             isOptionSelected(option.id) &&
@@ -186,7 +188,7 @@ const reset = () => {
             </p>
 
             <p v-if="!isCorrect" class="mt-1 text-sm">
-                Jawaban yang benar ditandai dengan warna hijau.
+                Coba perhatikan kembali soal dan pilih jawaban yang tepat.
             </p>
         </div>
     </div>
