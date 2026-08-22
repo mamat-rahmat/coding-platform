@@ -203,7 +203,7 @@ class CourseController extends Controller
             return [
                 'id' => $module->id,
                 'title' => $module->title,
-                'lessons' => $module->lessons->map(function ($lesson) use ($completedLessonIds, $correctBlockIds) {
+                'lessons' => $module->lessons->sortBy('sort_order')->values()->map(function ($lesson) use ($completedLessonIds, $correctBlockIds) {
                     $totalBlocks = $lesson->blocks->count();
                     $completedBlocks = $lesson->blocks
                         ->filter(fn ($block) => $correctBlockIds->contains($block->id))
