@@ -253,13 +253,11 @@ function toggleRow(entry: LeaderboardEntry) {
                                                 {{ mod.title }}
                                             </h4>
 
-                                            <div
-                                                class="grid grid-cols-1 gap-1 pl-4 sm:grid-cols-2 md:grid-cols-3"
-                                            >
+                                            <div class="pl-4">
                                                 <div
                                                     v-for="lesson in mod.lessons"
                                                     :key="lesson.id"
-                                                    class="flex items-center gap-2 rounded-md px-3 py-1.5 text-sm"
+                                                    class="flex min-w-0 items-center gap-2 rounded-md px-3 py-1.5 text-sm"
                                                     :class="
                                                         lesson.is_completed
                                                             ? 'bg-green-50 text-green-700'
