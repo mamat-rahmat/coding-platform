@@ -80,6 +80,7 @@ class ProfileController extends Controller
         return Inertia::render('Users/Show', [
             'profileUser' => [
                 'id' => $user->id,
+                'uuid' => $user->uuid,
                 'name' => $user->name,
                 'created_at' => $user->created_at->toISOString(),
             ],
