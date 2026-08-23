@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { Head, Link, router } from '@inertiajs/vue3';
-import { Plus, Pencil, Trash2, Eye } from '@lucide/vue';
+import { Plus, Pencil, Trash2, Eye, Download, Upload } from '@lucide/vue';
+import { ref } from 'vue';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import adminRoutes from '@/routes/admin';
@@ -31,12 +32,43 @@ defineOptions({
     },
 });
 
+const importFile = ref<File | null>(null);
+const isImporting = ref(false);
+const fileInput = ref<HTMLInputElement | null>(null);
+
 function destroy(course: Course) {
     if (!confirm(`Hapus course "${course.title}"?`)) {
         return;
     }
 
     router.delete(adminCourseRoutes.destroy.url(course.id));
+}
+
+function exportCourse(course: Course) {
+    window.location.href = `/admin/courses/${course.id}/export`;
+}
+
+function onFileChange(event: Event) {
+    const input = event.target as HTMLInputElement;
+    importFile.value = input.files?.[0] ?? null;
+}
+
+function importCourse() {
+    if (!importFile.value) {
+        return;
+    }
+
+    isImporting.value = true;
+
+    const formData = new FormData();
+    formData.append('file', importFile.value);
+
+    router.post('/admin/courses/import', formData, {
+        onFinish: () => {
+            isImporting.value = false;
+            importFile.value = null;
+        },
+    });
 }
 </script>
 
@@ -50,12 +82,42 @@ function destroy(course: Course) {
                 <p class="text-sm text-gray-500">Kelola semua course.</p>
             </div>
 
-            <Button as-child>
-                <Link :href="adminCourseRoutes.create.url()">
-                    <Plus class="h-4 w-4" />
-                    Course Baru
-                </Link>
-            </Button>
+            <div class="flex gap-2">
+                <div class="flex items-center gap-2">
+                    <input
+                        ref="fileInput"
+                        id="import-file"
+                        type="file"
+                        accept=".json"
+                        class="hidden"
+                        @change="onFileChange"
+                    />
+                    <Button
+                        variant="outline"
+                        :disabled="isImporting"
+                        @click="() => { importFile = null; fileInput?.click(); }"
+                    >
+                        <Upload class="h-4 w-4" />
+                        {{ isImporting ? 'Mengimport...' : 'Import' }}
+                    </Button>
+
+                    <Button
+                        v-if="importFile"
+                        variant="default"
+                        size="sm"
+                        @click="importCourse"
+                    >
+                        Upload {{ importFile.name }}
+                    </Button>
+                </div>
+
+                <Button as-child>
+                    <Link :href="adminCourseRoutes.create.url()">
+                        <Plus class="h-4 w-4" />
+                        Course Baru
+                    </Link>
+                </Button>
+            </div>
         </div>
 
         <Card>
@@ -125,6 +187,14 @@ function destroy(course: Course) {
                                 >
                                     <Pencil class="h-4 w-4" />
                                 </Link>
+                            </Button>
+
+                            <Button
+                                variant="ghost"
+                                size="icon-sm"
+                                @click="exportCourse(course)"
+                            >
+                                <Download class="h-4 w-4" />
                             </Button>
 
                             <Button

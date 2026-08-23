@@ -3,7 +3,6 @@ import { Head, Link } from '@inertiajs/vue3';
 import { ChevronDown, ChevronRight, Check, User, BookOpen, Trophy } from '@lucide/vue';
 import { ref } from 'vue';
 import courseRoutes from '@/routes/courses';
-import userRoutes from '@/routes/users';
 
 interface BlockProgress {
     id: number;
@@ -77,10 +76,7 @@ function toggleCourse(course: Course) {
 
     loadingCourseId.value = course.id;
 
-    const url = userRoutes.courseProgress.url({
-        user: props.profileUser.uuid,
-        course: course.slug,
-    });
+    const url = `/users/${props.profileUser.uuid}/progress/${course.slug}`;
 
     fetch(url)
         .then((res) => res.json())

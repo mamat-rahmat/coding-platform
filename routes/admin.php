@@ -6,6 +6,7 @@ use App\Http\Controllers\AdminLessonBlockController;
 use App\Http\Controllers\AdminLessonController;
 use App\Http\Controllers\AdminModuleController;
 use App\Http\Controllers\AdminUserController;
+use App\Http\Controllers\CourseExportImportController;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware(['auth', 'verified', 'admin'])->group(function () {
@@ -53,4 +54,14 @@ Route::middleware(['auth', 'verified', 'admin'])->group(function () {
         'admin/lessons/{lesson}/blocks/reorder',
         [AdminLessonBlockController::class, 'reorder'],
     )->name('admin.blocks.reorder');
+
+    Route::get(
+        'admin/courses/{course}/export',
+        [CourseExportImportController::class, 'export'],
+    )->name('admin.courses.export');
+
+    Route::post(
+        'admin/courses/import',
+        [CourseExportImportController::class, 'import'],
+    )->name('admin.courses.import');
 });
