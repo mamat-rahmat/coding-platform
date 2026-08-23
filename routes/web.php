@@ -26,7 +26,7 @@ Route::get('/courses/{course:slug}/leaderboard/{user}/progress', [
 Route::get('/users/{user}', [ProfileController::class, 'show'])
     ->name('users.show');
 
-Route::get('/users/{user}/courses/{course:slug}/progress', [
+Route::get('/users/{user}/progress/{course:slug}', [
     ProfileController::class,
     'userCourseProgress',
 ])->name('users.course-progress');

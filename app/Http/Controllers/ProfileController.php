@@ -88,9 +88,9 @@ class ProfileController extends Controller
         ]);
     }
 
-    public function userCourseProgress(User $user, Course $course): JsonResponse
+    public function userCourseProgress(User $user, string $course): JsonResponse
     {
-        abort_unless($course->is_published, 404);
+        $course = Course::where('slug', $course)->where('is_published', true)->firstOrFail();
 
         $publishedLessonIds = $course->lessons()->where('is_published', true)->pluck('lessons.id');
 
