@@ -321,7 +321,7 @@ const completeLesson = (lessonSlug: string) => {
                 <div v-else />
 
                 <Link
-                    v-if="nextLesson"
+                    v-if="nextLesson && !isCompleted"
                     :href="lessonRoutes.show.url(nextLesson.slug)"
                     class="text-sm text-gray-500 hover:text-gray-900"
                 >
