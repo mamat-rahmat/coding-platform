@@ -1,23 +1,39 @@
 <script setup lang="ts">
+import { router } from '@inertiajs/vue3';
 import { Lightbulb } from '@lucide/vue';
-import { ref } from 'vue';
+import { ref, watch } from 'vue';
 import Markdown from '@/components/Markdown.vue';
 import {
     Collapsible,
     CollapsibleContent,
     CollapsibleTrigger,
 } from '@/components/ui/collapsible';
+import attemptRoutes from '@/routes/lesson-blocks/attempts';
 
 interface HintContent {
     title: string;
     text: string | null;
 }
 
-defineProps<{
+const props = defineProps<{
+    blockId: number;
     content: HintContent;
 }>();
 
 const isOpen = ref(false);
+const tracked = ref(false);
+
+watch(isOpen, (open) => {
+    if (open && !tracked.value) {
+        tracked.value = true;
+
+        router.post(
+            attemptRoutes.store.url(props.blockId),
+            { answer: '' },
+            { preserveScroll: true, only: [] },
+        );
+    }
+});
 </script>
 
 <template>

@@ -1,10 +1,12 @@
 <script setup lang="ts">
+import { router } from '@inertiajs/vue3';
 import { Loader2, Play, Terminal } from '@lucide/vue';
 import { onMounted, onUnmounted, ref } from 'vue';
 import CodeEditor from '@/components/CodeEditor.vue';
 import Markdown from '@/components/Markdown.vue';
 import { Button } from '@/components/ui/button';
 import { usePyodideTerminal } from '@/composables/usePyodideTerminal';
+import attemptRoutes from '@/routes/lesson-blocks/attempts';
 
 interface CodeExampleContent {
     language: string;
@@ -13,6 +15,7 @@ interface CodeExampleContent {
 }
 
 const props = defineProps<{
+    blockId: number;
     content: CodeExampleContent;
 }>();
 
@@ -35,6 +38,12 @@ onMounted(() => {
     if (terminalContainer.value) {
         init(terminalContainer.value);
     }
+
+    router.post(
+        attemptRoutes.store.url(props.blockId),
+        { answer: '' },
+        { preserveScroll: true, only: [] },
+    );
 });
 
 onUnmounted(() => {

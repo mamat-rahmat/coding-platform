@@ -18,6 +18,12 @@ class BlockAttemptController extends Controller
     ): RedirectResponse {
         $type = $lessonBlock->type;
 
+        $accessTypes = [
+            LessonBlockType::TEXT,
+            LessonBlockType::HINT,
+            LessonBlockType::CODE_EXAMPLE,
+        ];
+
         $gradedTypes = [
             LessonBlockType::MCQ_SINGLE,
             LessonBlockType::MCQ_MULTIPLE,
@@ -26,13 +32,37 @@ class BlockAttemptController extends Controller
             LessonBlockType::CODE_CHALLENGE,
         ];
 
-        abort_unless(in_array($type, $gradedTypes, true), 404);
+        abort_unless(
+            in_array($type, [...$gradedTypes, ...$accessTypes], true),
+            404,
+        );
 
         $lesson = Lesson::query()->findOrFail($lessonBlock->lesson_id);
 
         abort_unless($lesson->is_published, 404);
 
         abort_unless($lesson->isUnlockedFor($request->user()), 403);
+
+        $existingAccess = $request->user()
+            ->blockAttempts()
+            ->where('lesson_block_id', $lessonBlock->id)
+            ->exists();
+
+        if ($existingAccess) {
+            return back();
+        }
+
+        if (in_array($type, $accessTypes, true)) {
+            BlockAttempt::create([
+                'user_id' => $request->user()->id,
+                'lesson_block_id' => $lessonBlock->id,
+                'selected_answer' => '',
+                'is_correct' => true,
+                'answered_at' => now(),
+            ]);
+
+            return back();
+        }
 
         $payload = match ($type) {
             LessonBlockType::MCQ_SINGLE => $this->verifyMcqSingle($request, $lessonBlock),
@@ -70,37 +100,26 @@ class BlockAttemptController extends Controller
      */
     private function maybeCompleteLesson(Request $request, LessonBlock $block): void
     {
-        $gradedTypes = [
-            LessonBlockType::MCQ_SINGLE,
-            LessonBlockType::MCQ_MULTIPLE,
-            LessonBlockType::CODE_FILL,
-            LessonBlockType::CODE_REORDER,
-            LessonBlockType::CODE_CHALLENGE,
-        ];
-
         $lesson = $block->lesson()->first();
 
         if (! $lesson) {
             return;
         }
 
-        $gradedBlockIds = $lesson
-            ->blocks()
-            ->whereIn('type', array_map(fn ($t) => $t->value, $gradedTypes))
-            ->pluck('id');
+        $allBlockIds = $lesson->blocks()->pluck('id');
 
-        if ($gradedBlockIds->isEmpty()) {
+        if ($allBlockIds->isEmpty()) {
             return;
         }
 
-        $correctBlockIds = $request->user()
+        $attemptedBlockIds = $request->user()
             ->blockAttempts()
-            ->whereIn('lesson_block_id', $gradedBlockIds)
+            ->whereIn('lesson_block_id', $allBlockIds)
             ->where('is_correct', true)
             ->pluck('lesson_block_id')
             ->unique();
 
-        if ($correctBlockIds->count() !== $gradedBlockIds->count()) {
+        if ($attemptedBlockIds->count() !== $allBlockIds->count()) {
             return;
         }
 

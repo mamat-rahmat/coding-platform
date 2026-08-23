@@ -159,23 +159,34 @@ test('code challenge stores attempt data and score', function () {
         ->and($attempt->score)->toBe(100);
 });
 
-test('non-graded block types return 404 on attempt submission', function () {
+test('access block types are tracked as correct on first submission', function () {
     $user = User::factory()->create();
-
     $hintBlock = LessonBlock::factory()->hint()->create();
     $textBlock = LessonBlock::factory()->create();
 
     $this->actingAs($user)
         ->post(route('lesson-blocks.attempts.store', $hintBlock), [
-            'answer' => 'x',
+            'answer' => '',
         ])
-        ->assertNotFound();
+        ->assertRedirect();
+
+    $this->assertDatabaseHas('block_attempts', [
+        'user_id' => $user->id,
+        'lesson_block_id' => $hintBlock->id,
+        'is_correct' => true,
+    ]);
 
     $this->actingAs($user)
         ->post(route('lesson-blocks.attempts.store', $textBlock), [
-            'answer' => 'x',
+            'answer' => '',
         ])
-        ->assertNotFound();
+        ->assertRedirect();
+
+    $this->assertDatabaseHas('block_attempts', [
+        'user_id' => $user->id,
+        'lesson_block_id' => $textBlock->id,
+        'is_correct' => true,
+    ]);
 });
 
 test('answer is required for mcq single', function () {

@@ -19,10 +19,15 @@ defineProps<{
 
     <CodeExampleBlock
         v-else-if="block.type === 'CODE_EXAMPLE'"
+        :block-id="block.id"
         :content="block.content"
     />
 
-    <HintBlock v-else-if="block.type === 'HINT'" :content="block.content" />
+    <HintBlock
+        v-else-if="block.type === 'HINT'"
+        :block-id="block.id"
+        :content="block.content"
+    />
 
     <McqSingleBlock
         v-else-if="block.type === 'MCQ_SINGLE'"

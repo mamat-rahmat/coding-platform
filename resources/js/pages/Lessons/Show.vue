@@ -132,10 +132,8 @@ const isCurrentAnswered = computed(
 
 const canGoNext = computed(() => isCurrentAnswered.value);
 
-const hasGradedBlocks = computed(() => props.blockStatus.totalGraded > 0);
-
 const showManualComplete = computed(
-    () => !props.isCompleted && !hasGradedBlocks.value,
+    () => !props.isCompleted && props.lesson.blocks.length === 0,
 );
 
 const progressPercentage = computed(() => {
