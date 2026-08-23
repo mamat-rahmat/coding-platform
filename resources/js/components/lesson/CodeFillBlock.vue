@@ -31,10 +31,13 @@ interface TemplatePart {
 const props = defineProps<{
     blockId: number;
     content: CodeFillContent;
+    isAnswered?: boolean;
+    isCorrect?: boolean | null;
+    selectedAnswer?: string | null;
 }>();
 
-const submitted = ref(false);
-const isCorrect = ref<boolean | null>(null);
+const submitted = ref(props.isAnswered ?? false);
+const isCorrect = ref<boolean | null>(props.isAnswered ? (props.isCorrect ?? null) : null);
 const blankResults = ref<boolean[]>([]);
 
 const shuffledOptions = ref<Option[]>(
@@ -53,9 +56,45 @@ const shuffledOptions = ref<Option[]>(
     })(),
 );
 
+function restoreFromAnswer(): (number | null)[] {
+    if (!props.selectedAnswer || !props.isAnswered) {
+        return props.content.blanks.map(() => null);
+    }
+
+    const answerMap = new Map<string, string>();
+
+    for (const part of props.selectedAnswer.split('|')) {
+        const [id, value] = part.split(':');
+
+        if (id && value !== undefined) {
+            answerMap.set(id, value);
+        }
+    }
+
+    const placements: (number | null)[] = props.content.blanks.map((blank, i) => {
+        const value = answerMap.get(blank.id);
+
+        if (!value) {
+            return null;
+        }
+
+        const optIdx = shuffledOptions.value.findIndex(
+            (o) => o.index === i && o.value === value,
+        );
+
+        return optIdx >= 0 ? optIdx : null;
+    });
+
+    return placements;
+}
+
 const optionPlacements = ref<(number | null)[]>(
-    props.content.blanks.map(() => null),
+    props.isAnswered ? restoreFromAnswer() : props.content.blanks.map(() => null),
 );
+
+if (props.isAnswered) {
+    blankResults.value = props.content.blanks.map((_, i) => checkBlank(i));
+}
 
 const activeBlankIndex = computed(() => {
     const idx = optionPlacements.value.indexOf(null);
@@ -222,6 +261,10 @@ function submitAnswer() {
 }
 
 function reset() {
+    if (props.isAnswered) {
+        return;
+    }
+
     optionPlacements.value = props.content.blanks.map(() => null);
     submitted.value = false;
     isCorrect.value = null;

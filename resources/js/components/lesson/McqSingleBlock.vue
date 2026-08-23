@@ -18,12 +18,15 @@ interface QuizContent {
 const props = defineProps<{
     blockId: number;
     content: QuizContent;
+    isAnswered?: boolean;
+    isCorrect?: boolean | null;
+    selectedAnswer?: string | null;
 }>();
 
-const selectedAnswer = ref<string | null>(null);
-const submitted = ref(false);
+const selectedAnswer = ref<string | null>(props.selectedAnswer ?? null);
+const submitted = ref(props.isAnswered ?? false);
 
-const isCorrect = ref<boolean | null>(null);
+const isCorrect = ref<boolean | null>(props.isAnswered ? (props.isCorrect ?? null) : null);
 
 const submitAnswer = () => {
     if (!selectedAnswer.value) {
@@ -62,6 +65,10 @@ const submitAnswer = () => {
 };
 
 const reset = () => {
+    if (props.isAnswered) {
+        return;
+    }
+
     selectedAnswer.value = null;
     submitted.value = false;
 };

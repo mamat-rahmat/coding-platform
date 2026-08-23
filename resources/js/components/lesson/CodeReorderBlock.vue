@@ -13,10 +13,17 @@ interface CodeReorderContent {
 const props = defineProps<{
     blockId: number;
     content: CodeReorderContent;
+    isAnswered?: boolean;
+    isCorrect?: boolean | null;
+    selectedAnswer?: string | null;
 }>();
 
 const shuffledIndices = ref<number[]>(
     (() => {
+        if (props.isAnswered && props.selectedAnswer) {
+            return props.selectedAnswer.split(',').map(Number);
+        }
+
         const indices = props.content.lines.map((_, i) => i);
 
         for (let i = indices.length - 1; i > 0; i--) {
@@ -36,8 +43,8 @@ const shuffledIndices = ref<number[]>(
     })(),
 );
 
-const submitted = ref(false);
-const isCorrect = ref<boolean | null>(null);
+const submitted = ref(props.isAnswered ?? false);
+const isCorrect = ref<boolean | null>(props.isAnswered ? (props.isCorrect ?? null) : null);
 
 const currentOrder = computed(() => [...shuffledIndices.value]);
 
@@ -86,6 +93,10 @@ const submitAnswer = () => {
 };
 
 const reset = () => {
+    if (props.isAnswered) {
+        return;
+    }
+
     const indices = props.content.lines.map((_, i) => i);
 
     for (let i = indices.length - 1; i > 0; i--) {

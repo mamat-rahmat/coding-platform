@@ -18,11 +18,16 @@ interface McqMultipleContent {
 const props = defineProps<{
     blockId: number;
     content: McqMultipleContent;
+    isAnswered?: boolean;
+    isCorrect?: boolean | null;
+    selectedAnswer?: string | null;
 }>();
 
-const selectedAnswers = ref<string[]>([]);
-const submitted = ref(false);
-const isCorrect = ref<boolean | null>(null);
+const selectedAnswers = ref<string[]>(
+    props.selectedAnswer ? props.selectedAnswer.split(',') : [],
+);
+const submitted = ref(props.isAnswered ?? false);
+const isCorrect = ref<boolean | null>(props.isAnswered ? (props.isCorrect ?? null) : null);
 
 const toggleAnswer = (optionId: string) => {
     if (submitted.value) {
@@ -85,6 +90,10 @@ const submitAnswer = () => {
 };
 
 const reset = () => {
+    if (props.isAnswered) {
+        return;
+    }
+
     selectedAnswers.value = [];
     submitted.value = false;
     isCorrect.value = null;

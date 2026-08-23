@@ -78,6 +78,7 @@ class LessonController extends Controller
 
             $block->is_answered = $attempt !== null;
             $block->is_correct = $attempt?->is_correct;
+            $block->selected_answer = $attempt?->selected_answer;
         });
 
         $totalGraded = count($gradedBlockIds);

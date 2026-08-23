@@ -26,6 +26,9 @@ interface CodeChallengeContent {
 const props = defineProps<{
     blockId: number;
     content: CodeChallengeContent;
+    isAnswered?: boolean;
+    isCorrect?: boolean | null;
+    selectedAnswer?: string | null;
 }>();
 
 const {
@@ -46,7 +49,7 @@ const userCode = ref(props.content.starter_code);
 const terminalContainer = ref<HTMLElement | null>(null);
 const testcaseResults = ref<Record<string, TestcaseResult>>({});
 const hasRunTests = ref(false);
-const submitted = ref(false);
+const submitted = ref(props.isAnswered ?? false);
 
 onMounted(() => {
     if (terminalContainer.value) {
@@ -64,11 +67,25 @@ const allTestcasesPassed = computed(
         Object.values(testcaseResults.value).every((r) => r.passed),
 );
 
-const passedCount = computed(
-    () => Object.values(testcaseResults.value).filter((r) => r.passed).length,
-);
+const passedCount = computed(() => {
+    if (props.isAnswered && props.selectedAnswer) {
+        const match = props.selectedAnswer.match(/^(\d+)\//);
 
-const totalCount = computed(() => props.content.testcases.length);
+        return match ? parseInt(match[1], 10) : 0;
+    }
+
+    return Object.values(testcaseResults.value).filter((r) => r.passed).length;
+});
+
+const totalCount = computed(() => {
+    if (props.isAnswered && props.selectedAnswer) {
+        const match = props.selectedAnswer.match(/\/(\d+)$/);
+
+        return match ? parseInt(match[1], 10) : props.content.testcases.length;
+    }
+
+    return props.content.testcases.length;
+});
 
 const firstVisibleInput = computed(
     () =>
@@ -181,6 +198,10 @@ function submitResult() {
 }
 
 function reset() {
+    if (props.isAnswered) {
+        return;
+    }
+
     userCode.value = props.content.starter_code;
     testcaseResults.value = {};
     hasRunTests.value = false;
