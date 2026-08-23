@@ -19,6 +19,7 @@ class StoreLessonBlockRequest extends FormRequest
                 'string',
                 Rule::in(array_map(fn ($t) => $t->value, LessonBlockType::cases())),
             ],
+            'title' => ['nullable', 'string', 'max:255'],
             'content' => ['required', 'array'],
             'sort_order' => ['required', 'integer', 'min:0'],
         ];
