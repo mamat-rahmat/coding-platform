@@ -199,7 +199,7 @@ defineProps<{
                                     />
 
                                     <span v-else>
-                                        {{ lessonIndex + 1 }}
+                                        {{ module.sort_order }}.{{ lesson.sort_order }}
                                     </span>
                                 </div>
 
