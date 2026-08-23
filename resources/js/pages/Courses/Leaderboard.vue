@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { Link, usePage } from '@inertiajs/vue3';
+import { Link, router, usePage } from '@inertiajs/vue3';
 import { ChevronDown, Check, Trophy } from '@lucide/vue';
-import { computed, ref } from 'vue';
+import { computed, onMounted, onUnmounted, ref } from 'vue';
 import courseRoutes from '@/routes/courses';
 import leaderboardRoutes from '@/routes/courses/leaderboard';
 
@@ -47,6 +47,24 @@ const isAuthenticated = computed(() => Boolean(usePage().props.auth?.user));
 const expandedUserId = ref<number | null>(null);
 const loadingUserId = ref<number | null>(null);
 const userProgressCache = ref<Record<number, ModuleProgress[]>>({});
+
+let pollInterval: ReturnType<typeof setInterval> | null = null;
+
+onMounted(() => {
+    pollInterval = setInterval(() => {
+        router.reload({
+            only: ['leaderboard', 'currentUserRank'],
+            preserveState: true,
+            preserveScroll: true,
+        });
+    }, 5000);
+});
+
+onUnmounted(() => {
+    if (pollInterval) {
+        clearInterval(pollInterval);
+    }
+});
 
 function toggleRow(entry: LeaderboardEntry) {
     if (expandedUserId.value === entry.user_id) {
