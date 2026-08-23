@@ -106,20 +106,40 @@ class BlockAttemptController extends Controller
             return;
         }
 
-        $allBlockIds = $lesson->blocks()->pluck('id');
+        $gradedTypes = [
+            LessonBlockType::MCQ_SINGLE,
+            LessonBlockType::MCQ_MULTIPLE,
+            LessonBlockType::CODE_FILL,
+            LessonBlockType::CODE_REORDER,
+            LessonBlockType::CODE_CHALLENGE,
+        ];
 
-        if ($allBlockIds->isEmpty()) {
+        $gradedBlockIds = $lesson->blocks()
+            ->whereIn('type', $gradedTypes)
+            ->pluck('id');
+
+        if ($gradedBlockIds->isEmpty()) {
+            LessonProgress::updateOrCreate(
+                [
+                    'user_id' => $request->user()->id,
+                    'lesson_id' => $lesson->id,
+                ],
+                [
+                    'completed_at' => now(),
+                ],
+            );
+
             return;
         }
 
         $attemptedBlockIds = $request->user()
             ->blockAttempts()
-            ->whereIn('lesson_block_id', $allBlockIds)
+            ->whereIn('lesson_block_id', $gradedBlockIds)
             ->where('is_correct', true)
             ->pluck('lesson_block_id')
             ->unique();
 
-        if ($attemptedBlockIds->count() !== $allBlockIds->count()) {
+        if ($attemptedBlockIds->count() !== $gradedBlockIds->count()) {
             return;
         }
 
