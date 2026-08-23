@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\LessonBlockType;
 use App\Models\Lesson;
+use App\Models\LessonProgress;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -90,6 +91,19 @@ class LessonController extends Controller
 
         $allGradedCorrect = $totalGraded > 0
             && $correctGraded === $totalGraded;
+
+        if (! $isCompleted && $totalGraded > 0 && $allGradedCorrect) {
+            LessonProgress::updateOrCreate(
+                [
+                    'user_id' => $request->user()->id,
+                    'lesson_id' => $lesson->id,
+                ],
+                [
+                    'completed_at' => now(),
+                ],
+            );
+            $isCompleted = true;
+        }
 
         return Inertia::render('Lessons/Show', [
             'lesson' => $lesson,
