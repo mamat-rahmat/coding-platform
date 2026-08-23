@@ -342,7 +342,7 @@ function toggleRow(entry: LeaderboardEntry) {
                                                                     : 'border-gray-300'
                                                             "
                                                         />
-                                                        <span class="truncate">{{ module.sort_order }}.{{ lesson.sort_order }} {{ lesson.title }}</span>
+                                                        <span class="truncate">{{ lesson.sort_order }} {{ lesson.title }}</span>
                                                         <span
                                                             v-if="lesson.blocks_total > 0"
                                                             class="ml-auto shrink-0 text-xs"
