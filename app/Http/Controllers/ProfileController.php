@@ -3,12 +3,90 @@
 namespace App\Http\Controllers;
 
 use App\Models\Course;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
 
 class ProfileController extends Controller
 {
+    public function show(User $user): Response
+    {
+        $courseIds = $user->lessonProgresses()
+            ->whereNotNull('completed_at')
+            ->pluck('lesson_id')
+            ->unique();
+
+        $courses = Course::query()
+            ->where('is_published', true)
+            ->whereHas('lessons', fn ($q) => $q->whereIn('lessons.id', $courseIds))
+            ->withCount(['lessons as total_lessons' => fn ($q) => $q->where('is_published', true)])
+            ->with(['modules' => fn ($q) => $q->orderBy('sort_order')
+                ->with(['lessons' => fn ($q) => $q->where('is_published', true)
+                    ->select(['id', 'course_module_id', 'sort_order']),
+                ])
+                ->select(['id', 'course_id', 'sort_order']),
+            ])
+            ->orderBy('title')
+            ->get(['id', 'title', 'slug', 'description', 'language', 'level', 'xp_reward']);
+
+        $courseIdsInProgress = $user->lessonProgresses()
+            ->pluck('lesson_id')
+            ->unique();
+
+        $coursesInProgress = Course::query()
+            ->where('is_published', true)
+            ->whereHas('lessons', fn ($q) => $q->whereIn('lessons.id', $courseIdsInProgress))
+            ->whereNotIn('id', $courses->pluck('id'))
+            ->withCount(['lessons as total_lessons' => fn ($q) => $q->where('is_published', true)])
+            ->with(['modules' => fn ($q) => $q->orderBy('sort_order')
+                ->with(['lessons' => fn ($q) => $q->where('is_published', true)
+                    ->select(['id', 'course_module_id', 'sort_order']),
+                ])
+                ->select(['id', 'course_id', 'sort_order']),
+            ])
+            ->orderBy('title')
+            ->get(['id', 'title', 'slug', 'description', 'language', 'level', 'xp_reward']);
+
+        $allCourses = $courses->concat($coursesInProgress)->unique('id')->values();
+
+        $data = $allCourses->map(function ($course) use ($user) {
+            $allLessonIds = $course->modules->flatMap->lessons->pluck('id');
+            $completedCount = $user->lessonProgresses()
+                ->whereIn('lesson_id', $allLessonIds)
+                ->whereNotNull('completed_at')
+                ->count();
+            $total = $allLessonIds->count();
+
+            return [
+                'id' => $course->id,
+                'title' => $course->title,
+                'slug' => $course->slug,
+                'description' => $course->description,
+                'language' => $course->language,
+                'level' => $course->level,
+                'xp_reward' => $course->xp_reward,
+                'total_lessons' => $total,
+                'completed_lessons' => $completedCount,
+                'percentage' => $total > 0 ? (int) round(($completedCount / $total) * 100) : 0,
+            ];
+        });
+
+        $totalXp = $user->blockAttempts()
+            ->where('is_correct', true)
+            ->sum('score');
+
+        return Inertia::render('Users/Show', [
+            'profileUser' => [
+                'id' => $user->id,
+                'name' => $user->name,
+                'created_at' => $user->created_at->toISOString(),
+            ],
+            'courses' => $data,
+            'totalXp' => (int) $totalXp,
+        ]);
+    }
+
     public function index(Request $request): Response
     {
         $user = $request->user();
