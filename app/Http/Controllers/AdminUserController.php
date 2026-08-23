@@ -19,6 +19,7 @@ class AdminUserController extends Controller
             ->withCount(['lessonProgresses', 'blockAttempts'])
             ->get([
                 'id',
+                'uuid',
                 'name',
                 'email',
                 'is_admin',
