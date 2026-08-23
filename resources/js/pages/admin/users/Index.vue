@@ -126,6 +126,9 @@ function formatDate(dateString: string): string {
                     >
                         <div class="flex-1">
                             <div class="flex items-center gap-2">
+                                <span class="text-xs text-gray-400">
+                                    #{{ user.id }}
+                                </span>
                                 <span class="font-medium text-gray-900">
                                     {{ user.name }}
                                 </span>

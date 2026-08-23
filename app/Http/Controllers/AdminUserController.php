@@ -15,7 +15,7 @@ class AdminUserController extends Controller
         $this->authorize('viewAny', User::class);
 
         $users = User::query()
-            ->orderBy('name')
+            ->orderBy('created_at')
             ->withCount(['lessonProgresses', 'blockAttempts'])
             ->get([
                 'id',
