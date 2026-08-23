@@ -93,7 +93,7 @@ function restoreFromAnswer(): (number | null)[] {
         if (optIdx >= 0) {
             usedOptIndices.add(optIdx);
 
-            return optIdx;
+            return shuffledOptions.value[optIdx].index;
         }
 
         return null;
