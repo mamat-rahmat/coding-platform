@@ -19,7 +19,7 @@ const blockTypeLabels: Record<string, string> = {
     HINT: 'Hint',
     MCQ_SINGLE: 'Pilihan Ganda',
     MCQ_MULTIPLE: 'Pilihan Ganda (Multi)',
-    CODE_FILL: 'Isi Kode',
+    CODE_FILL: 'Lengkapi Kode',
     CODE_REORDER: 'Susun Kode',
     CODE_CHALLENGE: 'Tantangan Kode',
 };
