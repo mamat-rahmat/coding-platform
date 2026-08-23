@@ -1,7 +1,32 @@
 <script setup lang="ts">
 import { Head, Link } from '@inertiajs/vue3';
-import { User, BookOpen, Trophy } from '@lucide/vue';
+import { ChevronDown, ChevronRight, Check, User, BookOpen, Trophy } from '@lucide/vue';
+import { ref } from 'vue';
 import courseRoutes from '@/routes/courses';
+import userRoutes from '@/routes/users';
+
+interface BlockProgress {
+    id: number;
+    type: string;
+    sort_order: number;
+    is_completed: boolean;
+}
+
+interface LessonProgress {
+    id: number;
+    title: string;
+    sort_order: number;
+    is_completed: boolean;
+    blocks_completed: number;
+    blocks_total: number;
+    blocks: BlockProgress[];
+}
+
+interface ModuleProgress {
+    id: number;
+    title: string;
+    lessons: LessonProgress[];
+}
 
 interface Course {
     id: number;
@@ -22,11 +47,68 @@ interface ProfileUser {
     created_at: string;
 }
 
-defineProps<{
+const props = defineProps<{
     profileUser: ProfileUser;
     courses: Course[];
     totalXp: number;
 }>();
+
+const expandedCourseId = ref<number | null>(null);
+const expandedLessonId = ref<number | null>(null);
+const loadingCourseId = ref<number | null>(null);
+const courseProgressCache = ref<Record<number, ModuleProgress[]>>({});
+
+function toggleCourse(course: Course) {
+    if (expandedCourseId.value === course.id) {
+        expandedCourseId.value = null;
+        expandedLessonId.value = null;
+
+        return;
+    }
+
+    expandedCourseId.value = course.id;
+    expandedLessonId.value = null;
+
+    if (courseProgressCache.value[course.id]) {
+        return;
+    }
+
+    loadingCourseId.value = course.id;
+
+    const url = userRoutes.courseProgress.url({
+        user: props.profileUser.id,
+        course: course.slug,
+    });
+
+    fetch(url)
+        .then((res) => res.json())
+        .then((data) => {
+            courseProgressCache.value[course.id] = data.modules;
+        })
+        .finally(() => {
+            loadingCourseId.value = null;
+        });
+}
+
+function toggleLesson(lessonId: number) {
+    expandedLessonId.value =
+        expandedLessonId.value === lessonId ? null : lessonId;
+}
+
+function blockTypeLabel(type: string): string {
+    const labels: Record<string, string> = {
+        TEXT: 'Materi',
+        CODE_EXAMPLE: 'Contoh Kode',
+        HINT: 'Hint',
+        MCQ_SINGLE: 'Pilihan Ganda',
+        MCQ_MULTIPLE: 'Pilihan Ganda (Multi)',
+        CODE_FILL: 'Isi Kode',
+        CODE_REORDER: 'Susun Kode',
+        CODE_CHALLENGE: 'Tantangan Kode',
+    };
+
+    return labels[type] ?? type;
+}
 
 function formatDate(dateString: string): string {
     const date = new Date(dateString);
@@ -98,56 +180,181 @@ function formatDate(dateString: string): string {
                 </div>
 
                 <div v-else class="space-y-3">
-                    <div
+                    <template
                         v-for="course in courses"
                         :key="course.id"
-                        class="rounded-xl border bg-white p-5"
                     >
-                        <div class="flex items-start justify-between gap-4">
-                            <div class="flex-1">
-                                <div class="flex items-center gap-2">
-                                    <h3 class="text-lg font-semibold text-gray-900">
-                                        {{ course.title }}
-                                    </h3>
-                                    <span
-                                        class="rounded-full px-2 py-0.5 text-xs font-medium"
-                                        :class="
-                                            course.percentage === 100
-                                                ? 'bg-green-100 text-green-700'
-                                                : 'bg-gray-100 text-gray-600'
-                                        "
-                                    >
-                                        {{ course.percentage === 100 ? 'Selesai' : 'Dalam progress' }}
-                                    </span>
+                        <div class="overflow-hidden rounded-xl border bg-white">
+                            <div
+                                class="cursor-pointer p-5 transition-colors hover:bg-gray-50"
+                                @click="toggleCourse(course)"
+                            >
+                                <div class="flex items-start justify-between gap-4">
+                                    <div class="flex items-center gap-2">
+                                        <ChevronDown
+                                            class="h-4 w-4 shrink-0 text-gray-400 transition-transform"
+                                            :class="
+                                                expandedCourseId === course.id
+                                                    ? 'rotate-180'
+                                                    : ''
+                                            "
+                                        />
+                                        <h3 class="text-lg font-semibold text-gray-900">
+                                            {{ course.title }}
+                                        </h3>
+                                        <span
+                                            class="rounded-full px-2 py-0.5 text-xs font-medium"
+                                            :class="
+                                                course.percentage === 100
+                                                    ? 'bg-green-100 text-green-700'
+                                                    : 'bg-gray-100 text-gray-600'
+                                            "
+                                        >
+                                            {{ course.percentage === 100 ? 'Selesai' : 'Dalam progress' }}
+                                        </span>
+                                    </div>
+
+                                    <div class="flex items-center gap-3">
+                                        <span class="text-xs text-gray-500">
+                                            {{ course.completed_lessons }}/{{ course.total_lessons }} lessons
+                                        </span>
+
+                                        <Link
+                                            :href="`/courses/${course.slug}`"
+                                            class="rounded-lg border border-gray-200 px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-50"
+                                            @click.stop
+                                        >
+                                            Buka Course
+                                        </Link>
+                                    </div>
                                 </div>
 
-                                <p class="mt-1 text-sm text-gray-500">
-                                    {{ course.language }} · {{ course.level }} ·
-                                    {{ course.completed_lessons }}/{{ course.total_lessons }} lessons ·
-                                    {{ course.xp_reward }} XP
+                                <p class="mt-1 ml-6 text-sm text-gray-500">
+                                    {{ course.language }} · {{ course.level }} · {{ course.xp_reward }} XP
                                 </p>
+
+                                <div class="mt-3 ml-6">
+                                    <div class="h-2 overflow-hidden rounded-full bg-gray-200">
+                                        <div
+                                            class="h-full rounded-full bg-gray-900 transition-all"
+                                            :style="{ width: `${course.percentage}%` }"
+                                        />
+                                    </div>
+                                    <p class="mt-1 text-xs text-gray-500">
+                                        {{ course.percentage }}% selesai
+                                    </p>
+                                </div>
                             </div>
 
-                            <Link
-                                :href="`/courses/${course.slug}`"
-                                class="rounded-lg border border-gray-200 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+                            <div
+                                v-if="expandedCourseId === course.id"
+                                class="border-t bg-gray-50 px-6 py-4"
                             >
-                                Buka Course
-                            </Link>
-                        </div>
-
-                        <div class="mt-4">
-                            <div class="h-2 overflow-hidden rounded-full bg-gray-200">
                                 <div
-                                    class="h-full rounded-full bg-gray-900 transition-all"
-                                    :style="{ width: `${course.percentage}%` }"
-                                />
+                                    v-if="loadingCourseId === course.id"
+                                    class="py-4 text-center text-sm text-gray-500"
+                                >
+                                    Memuat detail pelajaran...
+                                </div>
+
+                                <div
+                                    v-else-if="courseProgressCache[course.id]"
+                                    class="space-y-4"
+                                >
+                                    <div
+                                        v-for="mod in courseProgressCache[course.id]"
+                                        :key="mod.id"
+                                    >
+                                        <h4
+                                            class="mb-2 text-xs font-semibold tracking-wide text-gray-500 uppercase"
+                                        >
+                                            {{ mod.title }}
+                                        </h4>
+
+                                        <div class="pl-4">
+                                            <div
+                                                v-for="lesson in mod.lessons"
+                                                :key="lesson.id"
+                                            >
+                                                <div
+                                                    class="flex min-w-0 cursor-pointer items-center gap-2 rounded-md px-3 py-1.5 text-sm transition-colors hover:bg-gray-100"
+                                                    :class="
+                                                        lesson.is_completed
+                                                            ? 'bg-green-50 text-green-700'
+                                                            : lesson.blocks_completed > 0
+                                                              ? 'bg-amber-50 text-amber-700'
+                                                              : 'text-gray-500'
+                                                    "
+                                                    @click="toggleLesson(lesson.id)"
+                                                >
+                                                    <ChevronRight
+                                                        class="h-3.5 w-3.5 shrink-0 text-gray-400 transition-transform"
+                                                        :class="
+                                                            expandedLessonId === lesson.id
+                                                                ? 'rotate-90'
+                                                                : ''
+                                                        "
+                                                    />
+                                                    <Check
+                                                        v-if="lesson.is_completed"
+                                                        class="h-3.5 w-3.5 shrink-0 text-green-600"
+                                                    />
+                                                    <span
+                                                        v-else
+                                                        class="inline-block h-3.5 w-3.5 shrink-0 rounded-full border-2"
+                                                        :class="
+                                                            lesson.blocks_completed > 0
+                                                                ? 'border-amber-400'
+                                                                : 'border-gray-300'
+                                                        "
+                                                    />
+                                                    <span class="truncate">{{ lesson.sort_order }} {{ lesson.title }}</span>
+                                                    <span
+                                                        v-if="lesson.blocks_total > 0"
+                                                        class="ml-auto shrink-0 text-xs"
+                                                        :class="
+                                                            lesson.is_completed
+                                                                ? 'text-green-600'
+                                                                : 'text-gray-400'
+                                                        "
+                                                    >
+                                                        {{ lesson.blocks_completed }}/{{ lesson.blocks_total }}
+                                                    </span>
+                                                </div>
+
+                                                <div
+                                                    v-if="expandedLessonId === lesson.id && lesson.blocks.length > 0"
+                                                    class="ml-8 mt-1 space-y-0.5"
+                                                >
+                                                    <div
+                                                        v-for="block in lesson.blocks"
+                                                        :key="block.id"
+                                                        class="flex items-center gap-2 rounded px-3 py-1 text-xs"
+                                                        :class="
+                                                            block.is_completed
+                                                                ? 'text-green-600'
+                                                                : 'text-gray-400'
+                                                        "
+                                                    >
+                                                        <span
+                                                            class="inline-block h-2 w-2 shrink-0 rounded-full"
+                                                            :class="
+                                                                block.is_completed
+                                                                    ? 'bg-green-500'
+                                                                    : 'bg-gray-300'
+                                                            "
+                                                        />
+                                                        <span class="text-gray-500">{{ block.sort_order }}</span>
+                                                        <span>{{ blockTypeLabel(block.type) }}</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
-                            <p class="mt-1 text-xs text-gray-500">
-                                {{ course.percentage }}% selesai
-                            </p>
                         </div>
-                    </div>
+                    </template>
                 </div>
             </div>
         </div>

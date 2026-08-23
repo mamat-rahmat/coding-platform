@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Course;
 use App\Models\User;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -85,6 +86,69 @@ class ProfileController extends Controller
             'courses' => $data,
             'totalXp' => (int) $totalXp,
         ]);
+    }
+
+    public function userCourseProgress(User $user, Course $course): JsonResponse
+    {
+        abort_unless($course->is_published, 404);
+
+        $publishedLessonIds = $course->lessons()->where('is_published', true)->pluck('lessons.id');
+
+        $completedLessonIds = $user->lessonProgresses()
+            ->whereIn('lesson_id', $publishedLessonIds)
+            ->whereNotNull('completed_at')
+            ->pluck('lesson_id');
+
+        $correctBlockIds = $user->blockAttempts()
+            ->where('is_correct', true)
+            ->whereIn('lesson_block_id', fn ($query) => $query
+                ->select('id')
+                ->from('lesson_blocks')
+                ->whereIn('lesson_id', $publishedLessonIds))
+            ->pluck('lesson_block_id');
+
+        $modules = $course->modules()
+            ->orderBy('sort_order')
+            ->with([
+                'lessons' => fn ($query) => $query
+                    ->where('is_published', true)
+                    ->orderBy('sort_order')
+                    ->with('blocks:id,lesson_id,type,sort_order')
+                    ->select(['id', 'course_module_id', 'title', 'sort_order']),
+            ])
+            ->get(['id', 'course_id', 'title', 'sort_order']);
+
+        $data = $modules->map(function ($module) use ($completedLessonIds, $correctBlockIds) {
+            return [
+                'id' => $module->id,
+                'title' => $module->title,
+                'lessons' => $module->lessons->sortBy('sort_order')->values()->map(function ($lesson) use ($completedLessonIds, $correctBlockIds) {
+                    $blocks = $lesson->blocks->sortBy('sort_order')->values()->map(function ($block) use ($correctBlockIds) {
+                        return [
+                            'id' => $block->id,
+                            'type' => $block->type->value,
+                            'sort_order' => $block->sort_order,
+                            'is_completed' => $correctBlockIds->contains($block->id),
+                        ];
+                    });
+
+                    $totalBlocks = $blocks->count();
+                    $completedBlocks = $blocks->filter->is_completed->count();
+
+                    return [
+                        'id' => $lesson->id,
+                        'title' => $lesson->title,
+                        'sort_order' => $lesson->sort_order,
+                        'is_completed' => $completedLessonIds->contains($lesson->id),
+                        'blocks_completed' => $completedBlocks,
+                        'blocks_total' => $totalBlocks,
+                        'blocks' => $blocks,
+                    ];
+                }),
+            ];
+        });
+
+        return response()->json(['modules' => $data]);
     }
 
     public function index(Request $request): Response
