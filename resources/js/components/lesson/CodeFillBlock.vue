@@ -64,25 +64,39 @@ function restoreFromAnswer(): (number | null)[] {
     const answerMap = new Map<string, string>();
 
     for (const part of props.selectedAnswer.split('|')) {
-        const [id, value] = part.split(':');
+        const sep = part.indexOf(':');
 
-        if (id && value !== undefined) {
+        if (sep === -1) {
+            continue;
+        }
+
+        const id = part.slice(0, sep);
+        const value = part.slice(sep + 1);
+
+        if (id) {
             answerMap.set(id, value);
         }
     }
 
-    const placements: (number | null)[] = props.content.blanks.map((blank, i) => {
+    const usedOptIndices = new Set<number>();
+    const placements: (number | null)[] = props.content.blanks.map((blank) => {
         const value = answerMap.get(blank.id);
 
-        if (!value) {
+        if (value === undefined) {
             return null;
         }
 
         const optIdx = shuffledOptions.value.findIndex(
-            (o) => o.index === i && o.value === value,
+            (o, idx) => o.value === value && !usedOptIndices.has(idx),
         );
 
-        return optIdx >= 0 ? optIdx : null;
+        if (optIdx >= 0) {
+            usedOptIndices.add(optIdx);
+
+            return optIdx;
+        }
+
+        return null;
     });
 
     return placements;
