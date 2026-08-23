@@ -1,16 +1,25 @@
 <script setup lang="ts">
 import { Link, router, usePage } from '@inertiajs/vue3';
-import { ChevronDown, Check, Trophy } from '@lucide/vue';
+import { ChevronDown, ChevronRight, Check, Trophy } from '@lucide/vue';
 import { computed, onMounted, onUnmounted, ref } from 'vue';
 import courseRoutes from '@/routes/courses';
 import leaderboardRoutes from '@/routes/courses/leaderboard';
 
+interface BlockProgress {
+    id: number;
+    type: string;
+    sort_order: number;
+    is_completed: boolean;
+}
+
 interface LessonProgress {
     id: number;
     title: string;
+    sort_order: number;
     is_completed: boolean;
     blocks_completed: number;
     blocks_total: number;
+    blocks: BlockProgress[];
 }
 
 interface ModuleProgress {
@@ -45,8 +54,29 @@ const props = defineProps<{
 const isAuthenticated = computed(() => Boolean(usePage().props.auth?.user));
 
 const expandedUserId = ref<number | null>(null);
+const expandedLessonId = ref<number | null>(null);
 const loadingUserId = ref<number | null>(null);
 const userProgressCache = ref<Record<number, ModuleProgress[]>>({});
+
+function toggleLesson(lessonId: number) {
+    expandedLessonId.value =
+        expandedLessonId.value === lessonId ? null : lessonId;
+}
+
+function blockTypeLabel(type: string): string {
+    const labels: Record<string, string> = {
+        TEXT: 'Materi',
+        CODE_EXAMPLE: 'Contoh Kode',
+        HINT: 'Hint',
+        MCQ_SINGLE: 'Pilihan Ganda',
+        MCQ_MULTIPLE: 'Pilihan Ganda (Multi)',
+        CODE_FILL: 'Isi Kode',
+        CODE_REORDER: 'Susun Kode',
+        CODE_CHALLENGE: 'Tantangan Kode',
+    };
+
+    return labels[type] ?? type;
+}
 
 let pollInterval: ReturnType<typeof setInterval> | null = null;
 
@@ -69,11 +99,13 @@ onUnmounted(() => {
 function toggleRow(entry: LeaderboardEntry) {
     if (expandedUserId.value === entry.user_id) {
         expandedUserId.value = null;
+        expandedLessonId.value = null;
 
         return;
     }
 
     expandedUserId.value = entry.user_id;
+    expandedLessonId.value = null;
 
     if (userProgressCache.value[entry.user_id]) {
         return;
@@ -275,42 +307,81 @@ function toggleRow(entry: LeaderboardEntry) {
                                                 <div
                                                     v-for="lesson in mod.lessons"
                                                     :key="lesson.id"
-                                                    class="flex min-w-0 items-center gap-2 rounded-md px-3 py-1.5 text-sm"
-                                                    :class="
-                                                        lesson.is_completed
-                                                            ? 'bg-green-50 text-green-700'
-                                                            : lesson.blocks_completed > 0
-                                                              ? 'bg-amber-50 text-amber-700'
-                                                              : 'text-gray-500'
-                                                    "
                                                 >
-                                                    <Check
-                                                        v-if="
-                                                            lesson.is_completed
-                                                        "
-                                                        class="h-3.5 w-3.5 shrink-0 text-green-600"
-                                                    />
-                                                    <span
-                                                        v-else
-                                                        class="inline-block h-3.5 w-3.5 shrink-0 rounded-full border-2"
-                                                        :class="
-                                                            lesson.blocks_completed > 0
-                                                                ? 'border-amber-400'
-                                                                : 'border-gray-300'
-                                                        "
-                                                    />
-                                                    <span class="truncate">{{ lesson.title }}</span>
-                                                    <span
-                                                        v-if="lesson.blocks_total > 0"
-                                                        class="ml-auto shrink-0 text-xs"
+                                                    <div
+                                                        class="flex min-w-0 cursor-pointer items-center gap-2 rounded-md px-3 py-1.5 text-sm transition-colors hover:bg-gray-100"
                                                         :class="
                                                             lesson.is_completed
-                                                                ? 'text-green-600'
-                                                                : 'text-gray-400'
+                                                                ? 'bg-green-50 text-green-700'
+                                                                : lesson.blocks_completed > 0
+                                                                  ? 'bg-amber-50 text-amber-700'
+                                                                  : 'text-gray-500'
                                                         "
+                                                        @click="toggleLesson(lesson.id)"
                                                     >
-                                                        {{ lesson.blocks_completed }}/{{ lesson.blocks_total }}
-                                                    </span>
+                                                        <ChevronRight
+                                                            class="h-3.5 w-3.5 shrink-0 text-gray-400 transition-transform"
+                                                            :class="
+                                                                expandedLessonId === lesson.id
+                                                                    ? 'rotate-90'
+                                                                    : ''
+                                                            "
+                                                        />
+                                                        <Check
+                                                            v-if="
+                                                                lesson.is_completed
+                                                            "
+                                                            class="h-3.5 w-3.5 shrink-0 text-green-600"
+                                                        />
+                                                        <span
+                                                            v-else
+                                                            class="inline-block h-3.5 w-3.5 shrink-0 rounded-full border-2"
+                                                            :class="
+                                                                lesson.blocks_completed > 0
+                                                                    ? 'border-amber-400'
+                                                                    : 'border-gray-300'
+                                                            "
+                                                        />
+                                                        <span class="truncate">{{ module.sort_order }}.{{ lesson.sort_order }} {{ lesson.title }}</span>
+                                                        <span
+                                                            v-if="lesson.blocks_total > 0"
+                                                            class="ml-auto shrink-0 text-xs"
+                                                            :class="
+                                                                lesson.is_completed
+                                                                    ? 'text-green-600'
+                                                                    : 'text-gray-400'
+                                                            "
+                                                        >
+                                                            {{ lesson.blocks_completed }}/{{ lesson.blocks_total }}
+                                                        </span>
+                                                    </div>
+
+                                                    <div
+                                                        v-if="expandedLessonId === lesson.id && lesson.blocks.length > 0"
+                                                        class="ml-8 mt-1 space-y-0.5"
+                                                    >
+                                                        <div
+                                                            v-for="block in lesson.blocks"
+                                                            :key="block.id"
+                                                            class="flex items-center gap-2 rounded px-3 py-1 text-xs"
+                                                            :class="
+                                                                block.is_completed
+                                                                    ? 'text-green-600'
+                                                                    : 'text-gray-400'
+                                                            "
+                                                        >
+                                                            <span
+                                                                class="inline-block h-2 w-2 shrink-0 rounded-full"
+                                                                :class="
+                                                                    block.is_completed
+                                                                        ? 'bg-green-500'
+                                                                        : 'bg-gray-300'
+                                                                "
+                                                            />
+                                                            <span class="text-gray-500">{{ block.sort_order }}</span>
+                                                            <span>{{ blockTypeLabel(block.type) }}</span>
+                                                        </div>
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>

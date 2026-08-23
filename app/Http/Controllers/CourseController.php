@@ -190,7 +190,7 @@ class CourseController extends Controller
                 'lessons' => fn ($query) => $query
                     ->where('is_published', true)
                     ->orderBy('sort_order')
-                    ->with('blocks:id,lesson_id,sort_order')
+                    ->with('blocks:id,lesson_id,type,sort_order')
                     ->select(['id', 'course_module_id', 'title', 'sort_order']),
             ])
             ->get(['id', 'course_id', 'title', 'sort_order']);
@@ -205,12 +205,23 @@ class CourseController extends Controller
                         ->filter(fn ($block) => $correctBlockIds->contains($block->id))
                         ->count();
 
+                    $blocks = $lesson->blocks->sortBy('sort_order')->values()->map(function ($block) use ($correctBlockIds) {
+                        return [
+                            'id' => $block->id,
+                            'type' => $block->type->value,
+                            'sort_order' => $block->sort_order,
+                            'is_completed' => $correctBlockIds->contains($block->id),
+                        ];
+                    });
+
                     return [
                         'id' => $lesson->id,
                         'title' => $lesson->title,
+                        'sort_order' => $lesson->sort_order,
                         'is_completed' => $completedLessonIds->contains($lesson->id),
                         'blocks_completed' => $completedBlocks,
                         'blocks_total' => $totalBlocks,
+                        'blocks' => $blocks,
                     ];
                 }),
             ];
