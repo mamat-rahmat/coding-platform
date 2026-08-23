@@ -16,6 +16,7 @@ const props = defineProps<{
 const blockAnswered = (props.block as LessonBlock & { is_answered?: boolean }).is_answered ?? false;
 const blockCorrect = (props.block as LessonBlock & { is_correct?: boolean }).is_correct ?? null;
 const blockSelectedAnswer = (props.block as LessonBlock & { selected_answer?: string }).selected_answer ?? null;
+const blockAttemptData = (props.block as LessonBlock & { attempt_data?: Record<string, unknown> | null }).attempt_data ?? null;
 </script>
 
 <template>
@@ -76,6 +77,7 @@ const blockSelectedAnswer = (props.block as LessonBlock & { selected_answer?: st
         :is-answered="blockAnswered"
         :is-correct="blockCorrect"
         :selected-answer="blockSelectedAnswer"
+        :attempt-data="blockAttemptData"
     />
 
     <p v-else class="text-sm text-gray-500">Block type belum didukung.</p>

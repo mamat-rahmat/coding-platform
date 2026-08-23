@@ -29,6 +29,7 @@ const props = defineProps<{
     isAnswered?: boolean;
     isCorrect?: boolean | null;
     selectedAnswer?: string | null;
+    attemptData?: Record<string, unknown> | null;
 }>();
 
 const {
@@ -45,7 +46,9 @@ const {
     dispose,
 } = usePyodideTerminal();
 
-const userCode = ref(props.content.starter_code);
+const userCode = ref(
+    (props.isAnswered && props.attemptData?.code) as string || props.content.starter_code,
+);
 const terminalContainer = ref<HTMLElement | null>(null);
 const testcaseResults = ref<Record<string, TestcaseResult>>({});
 const hasRunTests = ref(false);
@@ -157,12 +160,15 @@ function submitResult() {
     }
 
     const isCorrect = allTestcasesPassed.value;
-    const attemptData = Object.fromEntries(
-        Object.entries(testcaseResults.value).map(([id, r]) => [
-            id,
-            { passed: r.passed },
-        ]),
-    );
+    const attemptData = {
+        ...Object.fromEntries(
+            Object.entries(testcaseResults.value).map(([id, r]) => [
+                id,
+                { passed: r.passed },
+            ]),
+        ),
+        code: userCode.value,
+    };
 
     router.post(
         attemptRoutes.store.url(props.blockId),
