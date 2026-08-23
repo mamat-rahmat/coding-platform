@@ -24,6 +24,16 @@ Route::middleware(['auth', 'verified', 'admin'])->group(function () {
         [AdminUserController::class, 'resetProgress'],
     )->name('admin.users.resetProgress');
 
+    Route::patch(
+        'admin/users/{user}/approve',
+        [AdminUserController::class, 'approve'],
+    )->name('admin.users.approve');
+
+    Route::patch(
+        'admin/users/{user}/reject',
+        [AdminUserController::class, 'reject'],
+    )->name('admin.users.reject');
+
     Route::resource(
         'admin/courses.modules',
         AdminModuleController::class,

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Head, Link, router } from '@inertiajs/vue3';
-import { Pencil, Trash2, ShieldCheck, RotateCcw } from '@lucide/vue';
+import { Pencil, Trash2, ShieldCheck, RotateCcw, Check, X } from '@lucide/vue';
 import { computed, ref } from 'vue';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -23,6 +23,7 @@ interface User {
     name: string;
     email: string;
     is_admin: boolean;
+    is_approved: boolean;
     email_verified_at: string | null;
     created_at: string;
     lesson_progresses_count: number;
@@ -68,6 +69,14 @@ function destroy(user: User) {
 
 function resetProgress(user: User) {
     router.delete(adminUserRoutes.resetProgress.url(user.id));
+}
+
+function approve(user: User) {
+    router.patch(adminUserRoutes.approve.url(user.id));
+}
+
+function reject(user: User) {
+    router.patch(adminUserRoutes.reject.url(user.id));
 }
 
 const resetTarget = ref<User | null>(null);
@@ -147,6 +156,13 @@ function formatDate(dateString: string): string {
                                 >
                                     Unverified
                                 </span>
+
+                                <span
+                                    v-if="!user.is_admin && !user.is_approved"
+                                    class="rounded-full bg-orange-100 px-2 py-0.5 text-xs font-medium text-orange-700"
+                                >
+                                    Belum Disetujui
+                                </span>
                             </div>
 
                             <p class="text-xs text-gray-500">
@@ -160,6 +176,24 @@ function formatDate(dateString: string): string {
                         </div>
 
                         <div class="flex gap-1">
+                            <Button
+                                v-if="!user.is_admin && !user.is_approved"
+                                variant="ghost"
+                                size="icon-sm"
+                                @click="approve(user)"
+                            >
+                                <Check class="h-4 w-4 text-green-600" />
+                            </Button>
+
+                            <Button
+                                v-if="!user.is_admin && user.is_approved"
+                                variant="ghost"
+                                size="icon-sm"
+                                @click="reject(user)"
+                            >
+                                <X class="h-4 w-4 text-orange-600" />
+                            </Button>
+
                             <Button as-child variant="ghost" size="icon-sm">
                                 <Link
                                     :href="

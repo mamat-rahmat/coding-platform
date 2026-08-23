@@ -31,6 +31,11 @@ Route::get('/users/{user}/progress/{course:slug}', [
     'userCourseProgress',
 ])->name('users.course-progress');
 
+Route::middleware(['auth'])->group(function () {
+    Route::inertia('pending-approval', 'auth/PendingApproval')
+        ->name('pending-approval');
+});
+
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::inertia('dashboard', 'Dashboard')->name('dashboard');
 

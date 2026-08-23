@@ -22,6 +22,7 @@ class AdminUserController extends Controller
                 'name',
                 'email',
                 'is_admin',
+                'is_approved',
                 'email_verified_at',
                 'created_at',
             ]);
@@ -83,5 +84,27 @@ class AdminUserController extends Controller
         return redirect()
             ->route('admin.users.index')
             ->with('success', 'Progress user berhasil direset.');
+    }
+
+    public function approve(User $user): RedirectResponse
+    {
+        $this->authorize('update', $user);
+
+        $user->update(['is_approved' => true]);
+
+        return redirect()
+            ->route('admin.users.index')
+            ->with('success', 'User berhasil disetujui.');
+    }
+
+    public function reject(User $user): RedirectResponse
+    {
+        $this->authorize('update', $user);
+
+        $user->update(['is_approved' => false]);
+
+        return redirect()
+            ->route('admin.users.index')
+            ->with('success', 'User berhasil ditolak.');
     }
 }
