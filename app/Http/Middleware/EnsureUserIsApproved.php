@@ -17,7 +17,20 @@ class EnsureUserIsApproved
     public function handle(Request $request, Closure $next): Response
     {
         if (Auth::check() && ! Auth::user()->is_approved && ! Auth::user()->is_admin) {
-            if ($request->routeIs('pending-approval')) {
+            $allowed = [
+                'pending-approval',
+                'login',
+                'logout',
+                'register',
+                'register.store',
+                'home',
+                'password.request',
+                'password.email',
+                'password.reset',
+                'password.update',
+            ];
+
+            if ($request->routeIs(...$allowed)) {
                 return $next($request);
             }
 
