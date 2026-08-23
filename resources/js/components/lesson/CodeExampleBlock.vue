@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { router } from '@inertiajs/vue3';
 import { Loader2, Play, Terminal } from '@lucide/vue';
 import { onMounted, onUnmounted, ref } from 'vue';
 import CodeEditor from '@/components/CodeEditor.vue';
@@ -39,11 +38,17 @@ onMounted(() => {
         init(terminalContainer.value);
     }
 
-    router.post(
-        attemptRoutes.store.url(props.blockId),
-        { answer: '' },
-        { preserveScroll: true, only: [] },
-    );
+    fetch(attemptRoutes.store.url(props.blockId), {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest',
+            'X-XSRF-TOKEN': decodeURIComponent(
+                document.cookie.match(/XSRF-TOKEN=([^;]+)/)?.[1] ?? '',
+            ),
+        },
+        body: JSON.stringify({ answer: '' }),
+    });
 });
 
 onUnmounted(() => {

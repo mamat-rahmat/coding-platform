@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { router } from '@inertiajs/vue3';
 import { Lightbulb } from '@lucide/vue';
 import { ref, watch } from 'vue';
 import Markdown from '@/components/Markdown.vue';
@@ -27,11 +26,17 @@ watch(isOpen, (open) => {
     if (open && !tracked.value) {
         tracked.value = true;
 
-        router.post(
-            attemptRoutes.store.url(props.blockId),
-            { answer: '' },
-            { preserveScroll: true, only: [] },
-        );
+        fetch(attemptRoutes.store.url(props.blockId), {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-XSRF-TOKEN': decodeURIComponent(
+                    document.cookie.match(/XSRF-TOKEN=([^;]+)/)?.[1] ?? '',
+                ),
+            },
+            body: JSON.stringify({ answer: '' }),
+        });
     }
 });
 </script>
