@@ -71,4 +71,17 @@ class AdminUserController extends Controller
             ->route('admin.users.index')
             ->with('success', 'User berhasil dihapus.');
     }
+
+    public function resetProgress(User $user): RedirectResponse
+    {
+        $this->authorize('resetProgress', $user);
+
+        $user->lessonProgresses()->delete();
+        $user->blockAttempts()->delete();
+        $user->courses()->detach();
+
+        return redirect()
+            ->route('admin.users.index')
+            ->with('success', 'Progress user berhasil direset.');
+    }
 }

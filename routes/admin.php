@@ -19,6 +19,11 @@ Route::middleware(['auth', 'verified', 'admin'])->group(function () {
         ->except(['create', 'store', 'show'])
         ->names('admin.users');
 
+    Route::delete(
+        'admin/users/{user}/progress',
+        [AdminUserController::class, 'resetProgress'],
+    )->name('admin.users.resetProgress');
+
     Route::resource(
         'admin/courses.modules',
         AdminModuleController::class,
