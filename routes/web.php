@@ -23,10 +23,10 @@ Route::get('/courses/{course:slug}/leaderboard/{user}/progress', [
     'leaderboardUserProgress',
 ])->name('courses.leaderboard.user-progress');
 
-Route::get('/users/{user}', [ProfileController::class, 'show'])
+Route::get('/users/{user:uuid}', [ProfileController::class, 'show'])
     ->name('users.show');
 
-Route::get('/users/{user}/progress/{course:slug}', [
+Route::get('/users/{user:uuid}/progress/{course:slug}', [
     ProfileController::class,
     'userCourseProgress',
 ])->name('users.course-progress');

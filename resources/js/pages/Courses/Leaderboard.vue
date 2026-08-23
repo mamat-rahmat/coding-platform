@@ -31,6 +31,7 @@ interface ModuleProgress {
 interface LeaderboardEntry {
     rank: number;
     user_id: number;
+    uuid: string;
     name: string;
     completed_lessons: number;
     total_lessons: number;
@@ -84,8 +85,6 @@ onMounted(() => {
     pollInterval = setInterval(() => {
         router.reload({
             only: ['leaderboard', 'currentUserRank'],
-            preserveState: true,
-            preserveScroll: true,
         });
     }, 5000);
 });
@@ -231,7 +230,12 @@ function toggleRow(entry: LeaderboardEntry) {
                                 </td>
 
                                 <td class="px-6 py-4 font-medium text-gray-900">
-                                    {{ entry.name }}
+                                    <Link
+                                        :href="`/users/${entry.uuid}`"
+                                        class="hover:underline"
+                                    >
+                                        {{ entry.name }}
+                                    </Link>
                                     <span
                                         v-if="entry.is_current_user"
                                         class="ml-2 text-xs font-medium text-amber-700"

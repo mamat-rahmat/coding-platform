@@ -190,6 +190,7 @@ test('leaderboard excludes admin users and keeps ranks contiguous', function () 
             ->where('leaderboard', fn ($list) => $list->toArray() === [[
                 'rank' => 1,
                 'user_id' => $regular->id,
+                'uuid' => $regular->uuid,
                 'name' => 'Regular User',
                 'completed_lessons' => 3,
                 'total_lessons' => 3,

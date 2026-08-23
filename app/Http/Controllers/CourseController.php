@@ -136,7 +136,7 @@ class CourseController extends Controller
                 ->selectRaw('user_id, max(completed_at) as last_completed_at')
                 ->groupBy('user_id'))
             ->orderByDesc('lesson_progresses_count')
-            ->get(['users.id', 'users.name']);
+            ->get(['users.id', 'users.uuid', 'users.name']);
 
         $currentUserId = $request->user()?->id ?? null;
 
@@ -152,6 +152,7 @@ class CourseController extends Controller
             return [
                 'rank' => $index + 1,
                 'user_id' => $participant->id,
+                'uuid' => $participant->uuid,
                 'name' => $participant->name,
                 'completed_lessons' => $completedCount,
                 'total_lessons' => $totalLessons,
