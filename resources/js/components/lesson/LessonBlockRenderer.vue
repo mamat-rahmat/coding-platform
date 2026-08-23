@@ -15,7 +15,7 @@ defineProps<{
 </script>
 
 <template>
-    <TextBlock v-if="block.type === 'TEXT'" :content="block.content" />
+    <TextBlock v-if="block.type === 'TEXT'" :block-id="block.id" :content="block.content" />
 
     <CodeExampleBlock
         v-else-if="block.type === 'CODE_EXAMPLE'"
