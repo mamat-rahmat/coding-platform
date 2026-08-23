@@ -4,6 +4,16 @@ import { ArrowLeft } from '@lucide/vue';
 import { reactive } from 'vue';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+    Dialog,
+    DialogClose,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+    DialogTrigger,
+} from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import adminRoutes from '@/routes/admin';
@@ -38,6 +48,10 @@ function submit() {
             Object.assign(errors, serverErrors);
         },
     });
+}
+
+function resetProgress() {
+    router.delete(adminUserRoutes.resetProgress.url(props.user.id));
 }
 
 defineOptions({
@@ -158,6 +172,62 @@ defineOptions({
                         </Button>
                     </div>
                 </form>
+            </CardContent>
+        </Card>
+
+        <Card v-if="!user.is_admin" class="mt-6">
+            <CardHeader>
+                <CardTitle class="text-destructive">
+                    Danger Zone
+                </CardTitle>
+            </CardHeader>
+
+            <CardContent>
+                <div
+                    class="flex items-center justify-between rounded-lg border border-red-200 p-4"
+                >
+                    <div>
+                        <p class="font-medium">Reset Progress</p>
+                        <p class="text-sm text-gray-500">
+                            Hapus semua lesson selesai, jawaban block,
+                            dan enrollment course untuk user ini.
+                        </p>
+                    </div>
+
+                    <Dialog>
+                        <DialogTrigger as-child>
+                            <Button variant="destructive">
+                                Reset Progress
+                            </Button>
+                        </DialogTrigger>
+                        <DialogContent>
+                            <DialogHeader>
+                                <DialogTitle>Reset Progress</DialogTitle>
+                                <DialogDescription>
+                                    Semua progress belajar
+                                    <strong>{{ user.name }}</strong> akan
+                                    dihapus: lesson selesai, jawaban
+                                    block, dan enrollment course.
+                                    Tindakan ini tidak dapat
+                                    dibatalkan.
+                                </DialogDescription>
+                            </DialogHeader>
+                            <DialogFooter>
+                                <DialogClose as-child>
+                                    <Button variant="outline">
+                                        Batal
+                                    </Button>
+                                </DialogClose>
+                                <Button
+                                    variant="destructive"
+                                    @click="resetProgress"
+                                >
+                                    Reset
+                                </Button>
+                            </DialogFooter>
+                        </DialogContent>
+                    </Dialog>
+                </div>
             </CardContent>
         </Card>
     </div>

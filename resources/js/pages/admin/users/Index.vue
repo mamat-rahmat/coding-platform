@@ -1,9 +1,19 @@
 <script setup lang="ts">
 import { Head, Link, router } from '@inertiajs/vue3';
-import { Pencil, Trash2, ShieldCheck } from '@lucide/vue';
+import { Pencil, Trash2, ShieldCheck, RotateCcw } from '@lucide/vue';
 import { computed, ref } from 'vue';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+    Dialog,
+    DialogClose,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+    DialogTrigger,
+} from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import adminRoutes from '@/routes/admin';
 import adminUserRoutes from '@/routes/admin/users';
@@ -55,6 +65,12 @@ function destroy(user: User) {
 
     router.delete(adminUserRoutes.destroy.url(user.id));
 }
+
+function resetProgress(user: User) {
+    router.delete(adminUserRoutes.resetProgress.url(user.id));
+}
+
+const resetTarget = ref<User | null>(null);
 
 function formatDate(dateString: string): string {
     return new Date(dateString).toLocaleDateString('id-ID', {
@@ -150,6 +166,56 @@ function formatDate(dateString: string): string {
                                     <Pencil class="h-4 w-4" />
                                 </Link>
                             </Button>
+
+                            <Dialog>
+                                <DialogTrigger as-child>
+                                    <Button
+                                        variant="ghost"
+                                        size="icon-sm"
+                                        :disabled="user.is_admin"
+                                        @click="resetTarget = user"
+                                    >
+                                        <RotateCcw
+                                            class="h-4 w-4"
+                                            :class="
+                                                user.is_admin
+                                                    ? 'text-gray-300'
+                                                    : 'text-orange-600'
+                                            "
+                                        />
+                                    </Button>
+                                </DialogTrigger>
+                                <DialogContent>
+                                    <DialogHeader>
+                                        <DialogTitle
+                                            >Reset Progress</DialogTitle
+                                        >
+                                        <DialogDescription>
+                                            Semua progress belajar
+                                            <strong>{{
+                                                user.name
+                                            }}</strong
+                                            > akan dihapus: lesson
+                                            selesai, jawaban block, dan
+                                            enrollment course. Tindakan
+                                            ini tidak dapat dibatalkan.
+                                        </DialogDescription>
+                                    </DialogHeader>
+                                    <DialogFooter>
+                                        <DialogClose as-child>
+                                            <Button variant="outline">
+                                                Batal
+                                            </Button>
+                                        </DialogClose>
+                                        <Button
+                                            variant="destructive"
+                                            @click="resetProgress(user)"
+                                        >
+                                            Reset
+                                        </Button>
+                                    </DialogFooter>
+                                </DialogContent>
+                            </Dialog>
 
                             <Button
                                 variant="ghost"
