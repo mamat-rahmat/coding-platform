@@ -87,6 +87,7 @@ const defaultContent: Record<string, Record<string, unknown>> = {
 
 const form = reactive({
     type: 'TEXT',
+    title: '',
     content: defaultContent.TEXT,
     sort_order: props.nextSortOrder,
 });
@@ -159,6 +160,15 @@ defineOptions({
                                     ?.description
                             }}
                         </p>
+                    </div>
+
+                    <div>
+                        <Label for="title">Judul Block</Label>
+                        <Input
+                            id="title"
+                            v-model="form.title"
+                            placeholder="Judul singkat untuk block ini"
+                        />
                     </div>
 
                     <div>

@@ -15,6 +15,7 @@ class LessonBlock extends Model
     protected $fillable = [
         'lesson_id',
         'type',
+        'title',
         'content',
         'sort_order',
     ];

@@ -1,5 +1,6 @@
 export interface BaseLessonBlock {
     id: number;
+    title: string | null;
     sort_order: number;
 }
 

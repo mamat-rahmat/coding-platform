@@ -20,6 +20,7 @@ interface Lesson {
 interface Block {
     id: number;
     type: string;
+    title: string | null;
     content: Record<string, unknown>;
     sort_order: number;
 }
@@ -31,6 +32,7 @@ const props = defineProps<{
 
 const form = reactive({
     type: props.block.type,
+    title: props.block.title ?? '',
     content: { ...props.block.content },
     sort_order: props.block.sort_order,
 });
@@ -94,6 +96,15 @@ defineOptions({
 
             <CardContent>
                 <form class="space-y-4" @submit.prevent="submit">
+                    <div>
+                        <Label for="title">Judul Block</Label>
+                        <Input
+                            id="title"
+                            v-model="form.title"
+                            placeholder="Judul singkat untuk block ini"
+                        />
+                    </div>
+
                     <div>
                         <Label for="sort_order">Sort Order</Label>
                         <Input

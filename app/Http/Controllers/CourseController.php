@@ -196,7 +196,7 @@ class CourseController extends Controller
                 'lessons' => fn ($query) => $query
                     ->where('is_published', true)
                     ->orderBy('sort_order')
-                    ->with('blocks:id,lesson_id,type,sort_order')
+                    ->with('blocks:id,lesson_id,type,title,sort_order')
                     ->select(['id', 'course_module_id', 'title', 'sort_order']),
             ])
             ->get(['id', 'course_id', 'title', 'sort_order']);
@@ -215,6 +215,7 @@ class CourseController extends Controller
                         return [
                             'id' => $block->id,
                             'type' => $block->type->value,
+                            'title' => $block->title,
                             'sort_order' => $block->sort_order,
                             'is_completed' => $correctBlockIds->contains($block->id),
                         ];

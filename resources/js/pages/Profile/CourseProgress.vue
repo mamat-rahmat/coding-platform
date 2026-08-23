@@ -6,6 +6,7 @@ import profileRoutes from '@/routes/profile';
 interface BlockProgress {
     id: number;
     type: string;
+    title: string | null;
     sort_order: number;
     is_completed: boolean;
 }
@@ -193,7 +194,7 @@ function blockTypeLabel(type: string): string {
                                     "
                                 />
                                 <span class="text-gray-500">{{ block.sort_order }}.</span>
-                                <span>{{ blockTypeLabel(block.type) }}</span>
+                                <span>{{ blockTypeLabel(block.type) }}{{ block.title ? ': ' + block.title : '' }}</span>
                             </div>
                         </div>
                     </div>
