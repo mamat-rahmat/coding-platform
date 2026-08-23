@@ -44,6 +44,7 @@ interface Course {
 
 interface ProfileUser {
     id: number;
+    uuid: string;
     name: string;
     created_at: string;
 }
@@ -77,7 +78,7 @@ function toggleCourse(course: Course) {
     loadingCourseId.value = course.id;
 
     const url = userRoutes.courseProgress.url({
-        user: props.profileUser.id,
+        user: props.profileUser.uuid,
         course: course.slug,
     });
 
