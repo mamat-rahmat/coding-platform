@@ -283,20 +283,13 @@ const completeLesson = (lessonSlug: string) => {
                         </button>
 
                         <Link
-                            v-else-if="isCompleted && nextLesson"
-                            :href="lessonRoutes.show.url(nextLesson.slug)"
+                            v-else-if="isCompleted"
+                            :href="courseRoutes.show.url(lesson.module.course.slug)"
                             class="flex items-center gap-1.5 rounded-lg bg-green-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-green-700"
                         >
                             <CheckCircle2 class="h-4 w-4" />
-                            Lesson selesai — Lanjut
+                            Lesson selesai — Kembali ke Course
                         </Link>
-
-                        <span
-                            v-else-if="isCompleted"
-                            class="rounded-lg bg-green-100 px-5 py-2.5 text-sm font-medium text-green-700"
-                        >
-                            ✓ Lesson selesai
-                        </span>
 
                         <span
                             v-else-if="isCurrentAnswered"
