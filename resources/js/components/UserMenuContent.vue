@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Link, router } from '@inertiajs/vue3';
-import { LogOut, Settings } from '@lucide/vue';
+import { LogOut, Settings, UserIcon } from '@lucide/vue';
 import {
     DropdownMenuGroup,
     DropdownMenuItem,
@@ -10,6 +10,7 @@ import {
 import UserInfo from '@/components/UserInfo.vue';
 import { logout } from '@/routes';
 import { edit } from '@/routes/profile';
+import profileRoutes from '@/routes/profile';
 import type { User } from '@/types';
 
 type Props = {
@@ -31,6 +32,12 @@ defineProps<Props>();
     </DropdownMenuLabel>
     <DropdownMenuSeparator />
     <DropdownMenuGroup>
+        <DropdownMenuItem :as-child="true">
+            <Link class="block w-full cursor-pointer" :href="profileRoutes.index.url()" prefetch>
+                <UserIcon class="mr-2 h-4 w-4" />
+                Profil Saya
+            </Link>
+        </DropdownMenuItem>
         <DropdownMenuItem :as-child="true">
             <Link class="block w-full cursor-pointer" :href="edit()" prefetch>
                 <Settings class="mr-2 h-4 w-4" />

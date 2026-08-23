@@ -5,6 +5,7 @@ use App\Http\Controllers\CourseController;
 use App\Http\Controllers\LessonController;
 use App\Http\Controllers\LessonProgressController;
 use App\Http\Controllers\PlaygroundController;
+use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 
 Route::inertia('/', 'Landing')->name('home');
@@ -24,6 +25,14 @@ Route::get('/courses/{course:slug}/leaderboard/{user}/progress', [
 
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::inertia('dashboard', 'Dashboard')->name('dashboard');
+
+    Route::get('/profile', [ProfileController::class, 'index'])
+        ->name('profile.index');
+
+    Route::get('/profile/courses/{course:slug}', [
+        ProfileController::class,
+        'courseProgress',
+    ])->name('profile.course-progress');
 
     Route::get('/courses/{course:slug}', [CourseController::class, 'show'])
         ->name('courses.show');
