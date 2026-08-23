@@ -33,6 +33,8 @@ class LessonController extends Controller
             'blocks' => fn ($query) => $query->orderBy('sort_order'),
         ]);
 
+        $lesson->module->course->users()->syncWithoutDetaching($request->user()->id);
+
         $orderedLessons = $lesson->orderedInCourse();
 
         $position = $orderedLessons->search(

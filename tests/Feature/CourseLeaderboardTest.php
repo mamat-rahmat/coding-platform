@@ -38,6 +38,11 @@ function completeLessons(User $user, Collection $lessons, int $count): void
     });
 }
 
+function enrollUser(Course $course, User $user): void
+{
+    $course->users()->attach($user->id);
+}
+
 test('guests can view the courses index', function () {
     Course::factory()->create(['is_published' => true]);
     Course::factory()->create(['is_published' => false]);
@@ -74,6 +79,10 @@ test('leaderboard lists participants sorted by completed lessons', function () {
     $behind = User::factory()->create(['name' => 'Behind User']);
     $current = User::factory()->create(['name' => 'Current User']);
 
+    enrollUser($course, $ahead);
+    enrollUser($course, $current);
+    enrollUser($course, $behind);
+
     completeLessons($ahead, $lessons, 3);
     completeLessons($current, $lessons, 2);
     completeLessons($behind, $lessons, 1);
@@ -104,6 +113,9 @@ test('ties are broken by earliest completion', function () {
 
     $early = User::factory()->create(['name' => 'Early User']);
     $late = User::factory()->create(['name' => 'Late User']);
+
+    enrollUser($course, $early);
+    enrollUser($course, $late);
 
     LessonProgress::factory()->create([
         'user_id' => $early->id,
@@ -139,11 +151,31 @@ test('leaderboard is empty and currentUserRank is null when user has no progress
             ->where('leaderboard', []));
 });
 
+test('enrolled user with 0 completed lessons appears on leaderboard', function () {
+    [$course, $lessons] = leaderboardCourse(3);
+
+    $user = User::factory()->create(['name' => 'New User']);
+    enrollUser($course, $user);
+
+    $this->actingAs($user)
+        ->get(route('courses.leaderboard', $course->slug))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->where('currentUserRank', 1)
+            ->where('leaderboard.0.name', 'New User')
+            ->where('leaderboard.0.completed_lessons', 0)
+            ->where('leaderboard.0.percentage', 0)
+            ->where('leaderboard.0.xp', 0));
+});
+
 test('leaderboard excludes admin users and keeps ranks contiguous', function () {
     [$course, $lessons] = leaderboardCourse(3);
 
     $regular = User::factory()->create(['name' => 'Regular User']);
     $admin = User::factory()->admin()->create(['name' => 'Admin User']);
+
+    enrollUser($course, $regular);
+    enrollUser($course, $admin);
 
     completeLessons($regular, $lessons, 3);
     completeLessons($admin, $lessons, 3);

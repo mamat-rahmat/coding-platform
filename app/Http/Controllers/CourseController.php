@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Models\Course;
-use App\Models\LessonProgress;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -124,35 +123,41 @@ class CourseController extends Controller
 
         $totalLessons = $lessonIds->count();
 
-        $participants = LessonProgress::query()
-            ->whereIn('lesson_id', $lessonIds)
-            ->whereNotNull('completed_at')
-            ->whereHas('user', fn ($query) => $query->where('is_admin', false))
-            ->selectRaw(
-                'user_id, count(*) as completed_count, max(completed_at) as last_completed_at',
-            )
-            ->groupBy('user_id')
-            ->with('user:id,name')
-            ->orderByDesc('completed_count')
-            ->orderBy('last_completed_at')
-            ->get();
+        $participants = $course->users()
+            ->where('is_admin', false)
+            ->withCount([
+                'lessonProgresses' => fn ($query) => $query
+                    ->whereIn('lesson_id', $lessonIds)
+                    ->whereNotNull('completed_at'),
+            ])
+            ->with('lessonProgresses', fn ($query) => $query
+                ->whereIn('lesson_id', $lessonIds)
+                ->whereNotNull('completed_at')
+                ->selectRaw('user_id, max(completed_at) as last_completed_at')
+                ->groupBy('user_id'))
+            ->orderByDesc('lesson_progresses_count')
+            ->get(['users.id', 'users.name']);
 
         $currentUserId = $request->user()?->id ?? null;
 
         $leaderboard = $participants->map(function ($participant, int $index) use ($totalLessons, $course, $currentUserId) {
+            $completedCount = $participant->lesson_progresses_count;
+            $lastCompleted = $participant->relationLoaded('lessonProgresses')
+                ? $participant->lessonProgresses->first()?->last_completed_at
+                : null;
             $percentage = $totalLessons > 0
-                ? (int) round(($participant->completed_count / $totalLessons) * 100)
+                ? (int) round(($completedCount / $totalLessons) * 100)
                 : 0;
 
             return [
                 'rank' => $index + 1,
-                'user_id' => $participant->user_id,
-                'name' => $participant->user->name,
-                'completed_lessons' => $participant->completed_count,
+                'user_id' => $participant->id,
+                'name' => $participant->name,
+                'completed_lessons' => $completedCount,
                 'total_lessons' => $totalLessons,
                 'percentage' => $percentage,
                 'xp' => round($course->xp_reward * ($percentage / 100)),
-                'is_current_user' => $participant->user_id === $currentUserId,
+                'is_current_user' => $participant->id === $currentUserId,
             ];
         });
 
