@@ -174,7 +174,7 @@ const reset = () => {
             </button>
 
             <button
-                v-else
+                v-else-if="!isAnswered"
                 type="button"
                 class="rounded-lg border px-5 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50"
                 @click="reset"
