@@ -20,6 +20,7 @@ import adminUserRoutes from '@/routes/admin/users';
 
 interface User {
     id: number;
+    uuid: string;
     name: string;
     email: string;
     is_admin: boolean;
@@ -138,9 +139,12 @@ function formatDate(dateString: string): string {
                                 <span class="text-xs text-gray-400">
                                     #{{ user.id }}
                                 </span>
-                                <span class="font-medium text-gray-900">
+                                <Link
+                                    :href="`/users/${user.uuid}`"
+                                    class="font-medium text-gray-900 hover:underline"
+                                >
                                     {{ user.name }}
-                                </span>
+                                </Link>
 
                                 <span
                                     v-if="user.is_admin"
