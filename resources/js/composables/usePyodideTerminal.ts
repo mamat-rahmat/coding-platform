@@ -1,6 +1,6 @@
 import { FitAddon } from '@xterm/addon-fit';
 import { WebLinksAddon } from '@xterm/addon-web-links';
-import { Terminal } from '@xterm/xterm';
+import type { Terminal as TerminalType } from '@xterm/xterm';
 import { ref, onUnmounted } from 'vue';
 import '@xterm/xterm/css/xterm.css';
 
@@ -174,7 +174,7 @@ export function usePyodideTerminal(): UsePyodideTerminalReturn {
     const isInteractive = ref(false);
     const isRunning = ref(false);
 
-    let term: Terminal | null = null;
+    let term: TerminalType | null = null;
     let fitAddon: FitAddon | null = null;
     let worker: Worker | null = null;
     let sab: SharedArrayBuffer | null = null;
@@ -186,7 +186,8 @@ export function usePyodideTerminal(): UsePyodideTerminalReturn {
     let testcaseResolve: ((result: TestcaseResult) => void) | null = null;
     let pendingStdin: string | null = null;
 
-    function init(container: HTMLElement): void {
+    async function init(container: HTMLElement): Promise<void> {
+        const { Terminal } = await import('@xterm/xterm');
         term = new Terminal({
             fontSize: 13,
             fontFamily:
