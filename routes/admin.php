@@ -64,4 +64,9 @@ Route::middleware(['auth', 'verified', 'admin'])->group(function () {
         'admin/courses/import',
         [CourseExportImportController::class, 'import'],
     )->name('admin.courses.import');
+
+    Route::post(
+        'admin/courses/{course}/import-content',
+        [CourseExportImportController::class, 'importContent'],
+    )->name('admin.courses.importContent');
 });

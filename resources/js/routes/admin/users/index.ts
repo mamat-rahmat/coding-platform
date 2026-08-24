@@ -1,4 +1,4 @@
-import { queryParams, type RouteQueryOptions, type RouteDefinition, type RouteFormDefinition, applyUrlDefaults } from './../../../wayfinder'
+import { queryParams, type RouteQueryOptions, type RouteDefinition, applyUrlDefaults } from './../../../wayfinder'
 /**
 * @see \App\Http\Controllers\AdminUserController::index
 * @see app/Http/Controllers/AdminUserController.php:13
@@ -42,43 +42,6 @@ index.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
     url: index.url(options),
     method: 'head',
 })
-
-/**
-* @see \App\Http\Controllers\AdminUserController::index
-* @see app/Http/Controllers/AdminUserController.php:13
-* @route '/admin/users'
-*/
-const indexForm = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
-    action: index.url(options),
-    method: 'get',
-})
-
-/**
-* @see \App\Http\Controllers\AdminUserController::index
-* @see app/Http/Controllers/AdminUserController.php:13
-* @route '/admin/users'
-*/
-indexForm.get = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
-    action: index.url(options),
-    method: 'get',
-})
-
-/**
-* @see \App\Http\Controllers\AdminUserController::index
-* @see app/Http/Controllers/AdminUserController.php:13
-* @route '/admin/users'
-*/
-indexForm.head = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
-    action: index.url({
-        [options?.mergeQuery ? 'mergeQuery' : 'query']: {
-            _method: 'HEAD',
-            ...(options?.query ?? options?.mergeQuery ?? {}),
-        }
-    }),
-    method: 'get',
-})
-
-index.form = indexForm
 
 /**
 * @see \App\Http\Controllers\AdminUserController::edit
@@ -149,43 +112,6 @@ edit.head = (args: { user: number | { id: number } } | [user: number | { id: num
 })
 
 /**
-* @see \App\Http\Controllers\AdminUserController::edit
-* @see app/Http/Controllers/AdminUserController.php:36
-* @route '/admin/users/{user}/edit'
-*/
-const editForm = (args: { user: number | { id: number } } | [user: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
-    action: edit.url(args, options),
-    method: 'get',
-})
-
-/**
-* @see \App\Http\Controllers\AdminUserController::edit
-* @see app/Http/Controllers/AdminUserController.php:36
-* @route '/admin/users/{user}/edit'
-*/
-editForm.get = (args: { user: number | { id: number } } | [user: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
-    action: edit.url(args, options),
-    method: 'get',
-})
-
-/**
-* @see \App\Http\Controllers\AdminUserController::edit
-* @see app/Http/Controllers/AdminUserController.php:36
-* @route '/admin/users/{user}/edit'
-*/
-editForm.head = (args: { user: number | { id: number } } | [user: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
-    action: edit.url(args, {
-        [options?.mergeQuery ? 'mergeQuery' : 'query']: {
-            _method: 'HEAD',
-            ...(options?.query ?? options?.mergeQuery ?? {}),
-        }
-    }),
-    method: 'get',
-})
-
-edit.form = editForm
-
-/**
 * @see \App\Http\Controllers\AdminUserController::update
 * @see app/Http/Controllers/AdminUserController.php:47
 * @route '/admin/users/{user}'
@@ -254,53 +180,6 @@ update.patch = (args: { user: number | { id: number } } | [user: number | { id: 
 })
 
 /**
-* @see \App\Http\Controllers\AdminUserController::update
-* @see app/Http/Controllers/AdminUserController.php:47
-* @route '/admin/users/{user}'
-*/
-const updateForm = (args: { user: number | { id: number } } | [user: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
-    action: update.url(args, {
-        [options?.mergeQuery ? 'mergeQuery' : 'query']: {
-            _method: 'PUT',
-            ...(options?.query ?? options?.mergeQuery ?? {}),
-        }
-    }),
-    method: 'post',
-})
-
-/**
-* @see \App\Http\Controllers\AdminUserController::update
-* @see app/Http/Controllers/AdminUserController.php:47
-* @route '/admin/users/{user}'
-*/
-updateForm.put = (args: { user: number | { id: number } } | [user: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
-    action: update.url(args, {
-        [options?.mergeQuery ? 'mergeQuery' : 'query']: {
-            _method: 'PUT',
-            ...(options?.query ?? options?.mergeQuery ?? {}),
-        }
-    }),
-    method: 'post',
-})
-
-/**
-* @see \App\Http\Controllers\AdminUserController::update
-* @see app/Http/Controllers/AdminUserController.php:47
-* @route '/admin/users/{user}'
-*/
-updateForm.patch = (args: { user: number | { id: number } } | [user: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
-    action: update.url(args, {
-        [options?.mergeQuery ? 'mergeQuery' : 'query']: {
-            _method: 'PATCH',
-            ...(options?.query ?? options?.mergeQuery ?? {}),
-        }
-    }),
-    method: 'post',
-})
-
-update.form = updateForm
-
-/**
 * @see \App\Http\Controllers\AdminUserController::destroy
 * @see app/Http/Controllers/AdminUserController.php:66
 * @route '/admin/users/{user}'
@@ -357,38 +236,6 @@ destroy.delete = (args: { user: number | { id: number } } | [user: number | { id
     url: destroy.url(args, options),
     method: 'delete',
 })
-
-/**
-* @see \App\Http\Controllers\AdminUserController::destroy
-* @see app/Http/Controllers/AdminUserController.php:66
-* @route '/admin/users/{user}'
-*/
-const destroyForm = (args: { user: number | { id: number } } | [user: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
-    action: destroy.url(args, {
-        [options?.mergeQuery ? 'mergeQuery' : 'query']: {
-            _method: 'DELETE',
-            ...(options?.query ?? options?.mergeQuery ?? {}),
-        }
-    }),
-    method: 'post',
-})
-
-/**
-* @see \App\Http\Controllers\AdminUserController::destroy
-* @see app/Http/Controllers/AdminUserController.php:66
-* @route '/admin/users/{user}'
-*/
-destroyForm.delete = (args: { user: number | { id: number } } | [user: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
-    action: destroy.url(args, {
-        [options?.mergeQuery ? 'mergeQuery' : 'query']: {
-            _method: 'DELETE',
-            ...(options?.query ?? options?.mergeQuery ?? {}),
-        }
-    }),
-    method: 'post',
-})
-
-destroy.form = destroyForm
 
 /**
 * @see \App\Http\Controllers\AdminUserController::resetProgress
@@ -449,38 +296,6 @@ resetProgress.delete = (args: { user: number | { id: number } } | [user: number 
 })
 
 /**
-* @see \App\Http\Controllers\AdminUserController::resetProgress
-* @see app/Http/Controllers/AdminUserController.php:77
-* @route '/admin/users/{user}/progress'
-*/
-const resetProgressForm = (args: { user: number | { id: number } } | [user: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
-    action: resetProgress.url(args, {
-        [options?.mergeQuery ? 'mergeQuery' : 'query']: {
-            _method: 'DELETE',
-            ...(options?.query ?? options?.mergeQuery ?? {}),
-        }
-    }),
-    method: 'post',
-})
-
-/**
-* @see \App\Http\Controllers\AdminUserController::resetProgress
-* @see app/Http/Controllers/AdminUserController.php:77
-* @route '/admin/users/{user}/progress'
-*/
-resetProgressForm.delete = (args: { user: number | { id: number } } | [user: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
-    action: resetProgress.url(args, {
-        [options?.mergeQuery ? 'mergeQuery' : 'query']: {
-            _method: 'DELETE',
-            ...(options?.query ?? options?.mergeQuery ?? {}),
-        }
-    }),
-    method: 'post',
-})
-
-resetProgress.form = resetProgressForm
-
-/**
 * @see \App\Http\Controllers\AdminUserController::approve
 * @see app/Http/Controllers/AdminUserController.php:90
 * @route '/admin/users/{user}/approve'
@@ -539,38 +354,6 @@ approve.patch = (args: { user: number | { id: number } } | [user: number | { id:
 })
 
 /**
-* @see \App\Http\Controllers\AdminUserController::approve
-* @see app/Http/Controllers/AdminUserController.php:90
-* @route '/admin/users/{user}/approve'
-*/
-const approveForm = (args: { user: number | { id: number } } | [user: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
-    action: approve.url(args, {
-        [options?.mergeQuery ? 'mergeQuery' : 'query']: {
-            _method: 'PATCH',
-            ...(options?.query ?? options?.mergeQuery ?? {}),
-        }
-    }),
-    method: 'post',
-})
-
-/**
-* @see \App\Http\Controllers\AdminUserController::approve
-* @see app/Http/Controllers/AdminUserController.php:90
-* @route '/admin/users/{user}/approve'
-*/
-approveForm.patch = (args: { user: number | { id: number } } | [user: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
-    action: approve.url(args, {
-        [options?.mergeQuery ? 'mergeQuery' : 'query']: {
-            _method: 'PATCH',
-            ...(options?.query ?? options?.mergeQuery ?? {}),
-        }
-    }),
-    method: 'post',
-})
-
-approve.form = approveForm
-
-/**
 * @see \App\Http\Controllers\AdminUserController::reject
 * @see app/Http/Controllers/AdminUserController.php:101
 * @route '/admin/users/{user}/reject'
@@ -627,38 +410,6 @@ reject.patch = (args: { user: number | { id: number } } | [user: number | { id: 
     url: reject.url(args, options),
     method: 'patch',
 })
-
-/**
-* @see \App\Http\Controllers\AdminUserController::reject
-* @see app/Http/Controllers/AdminUserController.php:101
-* @route '/admin/users/{user}/reject'
-*/
-const rejectForm = (args: { user: number | { id: number } } | [user: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
-    action: reject.url(args, {
-        [options?.mergeQuery ? 'mergeQuery' : 'query']: {
-            _method: 'PATCH',
-            ...(options?.query ?? options?.mergeQuery ?? {}),
-        }
-    }),
-    method: 'post',
-})
-
-/**
-* @see \App\Http\Controllers\AdminUserController::reject
-* @see app/Http/Controllers/AdminUserController.php:101
-* @route '/admin/users/{user}/reject'
-*/
-rejectForm.patch = (args: { user: number | { id: number } } | [user: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
-    action: reject.url(args, {
-        [options?.mergeQuery ? 'mergeQuery' : 'query']: {
-            _method: 'PATCH',
-            ...(options?.query ?? options?.mergeQuery ?? {}),
-        }
-    }),
-    method: 'post',
-})
-
-reject.form = rejectForm
 
 const users = {
     index: Object.assign(index, index),

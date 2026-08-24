@@ -1,4 +1,4 @@
-import { queryParams, type RouteQueryOptions, type RouteDefinition, type RouteFormDefinition, applyUrlDefaults } from './../../wayfinder'
+import { queryParams, type RouteQueryOptions, type RouteDefinition, applyUrlDefaults } from './../../wayfinder'
 /**
 * @see \App\Http\Controllers\ProfileController::show
 * @see app/Http/Controllers/ProfileController.php:14
@@ -68,43 +68,6 @@ show.head = (args: { user: string | { uuid: string } } | [user: string | { uuid:
 })
 
 /**
-* @see \App\Http\Controllers\ProfileController::show
-* @see app/Http/Controllers/ProfileController.php:14
-* @route '/users/{user}'
-*/
-const showForm = (args: { user: string | { uuid: string } } | [user: string | { uuid: string } ] | string | { uuid: string }, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
-    action: show.url(args, options),
-    method: 'get',
-})
-
-/**
-* @see \App\Http\Controllers\ProfileController::show
-* @see app/Http/Controllers/ProfileController.php:14
-* @route '/users/{user}'
-*/
-showForm.get = (args: { user: string | { uuid: string } } | [user: string | { uuid: string } ] | string | { uuid: string }, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
-    action: show.url(args, options),
-    method: 'get',
-})
-
-/**
-* @see \App\Http\Controllers\ProfileController::show
-* @see app/Http/Controllers/ProfileController.php:14
-* @route '/users/{user}'
-*/
-showForm.head = (args: { user: string | { uuid: string } } | [user: string | { uuid: string } ] | string | { uuid: string }, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
-    action: show.url(args, {
-        [options?.mergeQuery ? 'mergeQuery' : 'query']: {
-            _method: 'HEAD',
-            ...(options?.query ?? options?.mergeQuery ?? {}),
-        }
-    }),
-    method: 'get',
-})
-
-show.form = showForm
-
-/**
 * @see \App\Http\Controllers\ProfileController::courseProgress
 * @see app/Http/Controllers/ProfileController.php:92
 * @route '/users/{user}/progress/{course}'
@@ -168,43 +131,6 @@ courseProgress.head = (args: { user: string | { uuid: string }, course: string |
     url: courseProgress.url(args, options),
     method: 'head',
 })
-
-/**
-* @see \App\Http\Controllers\ProfileController::courseProgress
-* @see app/Http/Controllers/ProfileController.php:92
-* @route '/users/{user}/progress/{course}'
-*/
-const courseProgressForm = (args: { user: string | { uuid: string }, course: string | number | { slug: string | number } } | [user: string | { uuid: string }, course: string | number | { slug: string | number } ], options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
-    action: courseProgress.url(args, options),
-    method: 'get',
-})
-
-/**
-* @see \App\Http\Controllers\ProfileController::courseProgress
-* @see app/Http/Controllers/ProfileController.php:92
-* @route '/users/{user}/progress/{course}'
-*/
-courseProgressForm.get = (args: { user: string | { uuid: string }, course: string | number | { slug: string | number } } | [user: string | { uuid: string }, course: string | number | { slug: string | number } ], options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
-    action: courseProgress.url(args, options),
-    method: 'get',
-})
-
-/**
-* @see \App\Http\Controllers\ProfileController::courseProgress
-* @see app/Http/Controllers/ProfileController.php:92
-* @route '/users/{user}/progress/{course}'
-*/
-courseProgressForm.head = (args: { user: string | { uuid: string }, course: string | number | { slug: string | number } } | [user: string | { uuid: string }, course: string | number | { slug: string | number } ], options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
-    action: courseProgress.url(args, {
-        [options?.mergeQuery ? 'mergeQuery' : 'query']: {
-            _method: 'HEAD',
-            ...(options?.query ?? options?.mergeQuery ?? {}),
-        }
-    }),
-    method: 'get',
-})
-
-courseProgress.form = courseProgressForm
 
 const users = {
     show: Object.assign(show, show),

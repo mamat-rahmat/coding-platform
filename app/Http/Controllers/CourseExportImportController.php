@@ -43,6 +43,7 @@ class CourseExportImportController extends Controller
                         'description' => $lesson->description,
                         'sort_order' => $lesson->sort_order,
                         'is_published' => $lesson->is_published,
+                        'is_optional' => $lesson->is_optional,
                         'blocks' => $lesson->blocks->map(fn ($block) => [
                             'type' => $block->type->value,
                             'title' => $block->title,
@@ -108,6 +109,7 @@ class CourseExportImportController extends Controller
                         'description' => $lessonData['description'] ?? null,
                         'sort_order' => $lessonData['sort_order'] ?? 0,
                         'is_published' => $lessonData['is_published'] ?? false,
+                        'is_optional' => $lessonData['is_optional'] ?? false,
                     ]);
 
                     foreach ($lessonData['blocks'] ?? [] as $blockData) {
@@ -128,6 +130,114 @@ class CourseExportImportController extends Controller
             'message' => 'Course berhasil diimport.',
             'course_id' => $course->id,
             'course_slug' => $course->slug,
+        ]);
+    }
+
+    public function importContent(Request $request, Course $course): JsonResponse
+    {
+        $this->authorize('update', $course);
+
+        $request->validate([
+            'file' => ['required', 'file', 'mimes:json', 'max:10240'],
+        ]);
+
+        $content = file_get_contents($request->file('file')->getRealPath());
+        $data = json_decode($content, true);
+
+        if (json_last_error() !== JSON_ERROR_NONE) {
+            abort(422, 'File JSON tidak valid.');
+        }
+
+        if (! isset($data['course'], $data['version'])) {
+            abort(422, 'Format export tidak valid. File harus berisi data course dengan version.');
+        }
+
+        $modulesData = $data['course']['modules'] ?? [];
+
+        $summary = \DB::transaction(function () use ($course, $modulesData) {
+            $stats = [
+                'modules_added' => 0,
+                'modules_merged' => 0,
+                'lessons_added' => 0,
+                'lessons_merged' => 0,
+                'blocks_added' => 0,
+                'blocks_skipped' => 0,
+            ];
+
+            $moduleOffset = ($course->modules()->max('sort_order') ?? -1) + 1;
+
+            foreach ($modulesData as $moduleData) {
+                $moduleSlug = $moduleData['slug'] ?? 'module';
+                $existingModule = $course->modules()->where('slug', $moduleSlug)->first();
+
+                if ($existingModule) {
+                    $module = $existingModule;
+                    $stats['modules_merged']++;
+                } else {
+                    $module = $course->modules()->create([
+                        'title' => $moduleData['title'] ?? 'Module',
+                        'slug' => $this->uniqueSlug($moduleSlug, CourseModule::class, 'course_id', $course->id),
+                        'description' => $moduleData['description'] ?? null,
+                        'sort_order' => $moduleOffset++,
+                    ]);
+                    $stats['modules_added']++;
+                }
+
+                $lessonOffset = ($module->lessons()->max('sort_order') ?? -1) + 1;
+
+                foreach ($moduleData['lessons'] ?? [] as $lessonData) {
+                    $lessonSlug = $lessonData['slug'] ?? 'lesson';
+                    $existingLesson = $module->lessons()->where('slug', $lessonSlug)->first();
+
+                    if ($existingLesson) {
+                        $lesson = $existingLesson;
+                        $stats['lessons_merged']++;
+                    } else {
+                        $lesson = $module->lessons()->create([
+                            'title' => $lessonData['title'] ?? 'Lesson',
+                            'slug' => $this->uniqueSlug($lessonSlug, Lesson::class, 'course_module_id', $module->id),
+                            'description' => $lessonData['description'] ?? null,
+                            'sort_order' => $lessonOffset++,
+                            'is_published' => $lessonData['is_published'] ?? false,
+                            'is_optional' => $lessonData['is_optional'] ?? false,
+                        ]);
+                        $stats['lessons_added']++;
+                    }
+
+                    $blockOffset = ($lesson->blocks()->max('sort_order') ?? -1) + 1;
+
+                    foreach ($lessonData['blocks'] ?? [] as $blockData) {
+                        $blockTitle = $blockData['title'] ?? null;
+
+                        if ($blockTitle !== null) {
+                            $existingBlock = $lesson->blocks()
+                                ->where('title', $blockTitle)
+                                ->exists();
+
+                            if ($existingBlock) {
+                                $stats['blocks_skipped']++;
+
+                                continue;
+                            }
+                        }
+
+                        $lesson->blocks()->create([
+                            'type' => $blockData['type'] ?? 'TEXT',
+                            'title' => $blockTitle,
+                            'content' => $blockData['content'] ?? [],
+                            'sort_order' => $blockOffset++,
+                        ]);
+                        $stats['blocks_added']++;
+                    }
+                }
+            }
+
+            return $stats;
+        });
+
+        return response()->json([
+            'message' => 'Content berhasil diimport.',
+            ...$summary,
         ]);
     }
 

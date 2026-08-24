@@ -7,7 +7,10 @@ import {
     Trash2,
     FolderPlus,
     Eye,
+    Upload,
+    Loader2,
 } from '@lucide/vue';
+import { ref } from 'vue';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import adminRoutes from '@/routes/admin';
@@ -38,9 +41,65 @@ interface Course {
     lessons_count: number;
 }
 
-defineProps<{
+const props = defineProps<{
     course: Course;
 }>();
+
+const importFile = ref<File | null>(null);
+const isImporting = ref(false);
+const importMessage = ref<string | null>(null);
+const fileInput = ref<HTMLInputElement | null>(null);
+
+function onFileChange(e: Event) {
+    const target = e.target as HTMLInputElement;
+    importFile.value = target.files?.[0] ?? null;
+    importMessage.value = null;
+}
+
+function importContent() {
+    if (!importFile.value || isImporting.value) {
+        return;
+    }
+
+    isImporting.value = true;
+    importMessage.value = null;
+
+    const formData = new FormData();
+    formData.append('file', importFile.value);
+
+    fetch(adminCourseRoutes.importContent.url(props.course.id), {
+        method: 'POST',
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest',
+            'X-XSRF-TOKEN': decodeURIComponent(
+                document.cookie.match(/XSRF-TOKEN=([^;]+)/)?.[1] ?? '',
+            ),
+        },
+        body: formData,
+    })
+        .then(async (res) => {
+            const data = await res.json();
+
+            if (!res.ok) {
+                throw new Error(data.message ?? 'Gagal import content.');
+            }
+
+            importMessage.value = `Berhasil: ${data.modules_added} module baru, ${data.modules_merged} module digabung, ${data.lessons_added} lesson baru, ${data.lessons_merged} lesson digabung, ${data.blocks_added} block baru, ${data.blocks_skipped} block dilewati.`;
+            importFile.value = null;
+
+            if (fileInput.value) {
+                fileInput.value.value = '';
+            }
+
+            router.reload({ only: ['course'] });
+        })
+        .catch((err) => {
+            importMessage.value = err.message ?? 'Gagal import content.';
+        })
+        .finally(() => {
+            isImporting.value = false;
+        });
+}
 
 function destroy(module: Module) {
     if (!confirm(`Hapus module "${module.title}"?`)) {
@@ -95,6 +154,41 @@ defineOptions({
             </div>
 
             <div class="flex gap-2">
+                <input
+                    ref="fileInput"
+                    type="file"
+                    accept=".json"
+                    class="hidden"
+                    @change="onFileChange"
+                />
+
+                <Button
+                    variant="outline"
+                    size="sm"
+                    :disabled="isImporting"
+                    @click="fileInput?.click()"
+                >
+                    <Upload class="h-3.5 w-3.5" />
+                    Import Content
+                </Button>
+
+                <Button
+                    v-if="importFile"
+                    size="sm"
+                    :disabled="isImporting"
+                    @click="importContent"
+                >
+                    <Loader2
+                        v-if="isImporting"
+                        class="h-3.5 w-3.5 animate-spin"
+                    />
+                    {{
+                        isImporting
+                            ? 'Mengimport...'
+                            : `Upload ${importFile.name}`
+                    }}
+                </Button>
+
                 <Button as-child variant="outline" size="sm">
                     <Link :href="courseRoutes.show.url(course.slug)">
                         Preview as Student
@@ -108,6 +202,13 @@ defineOptions({
                     </Link>
                 </Button>
             </div>
+        </div>
+
+        <div
+            v-if="importMessage"
+            class="mb-4 rounded-lg border border-blue-200 bg-blue-50 p-3 text-sm text-blue-700"
+        >
+            {{ importMessage }}
         </div>
 
         <Card>
