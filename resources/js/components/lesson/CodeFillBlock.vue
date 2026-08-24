@@ -14,6 +14,7 @@ interface Blank {
 interface CodeFillContent {
     code_template: string;
     blanks: Blank[];
+    options?: string[];
     markdown?: string;
 }
 
@@ -42,9 +43,14 @@ const blankResults = ref<boolean[]>([]);
 
 const shuffledOptions = ref<Option[]>(
     (() => {
-        const opts: Option[] = props.content.blanks.map((b, i) => ({
+        const correctAnswers = props.content.blanks.map((b) => b.answer);
+        const extras = (props.content.options ?? []).filter(
+            (v) => v.trim() !== '',
+        );
+        const allValues = [...correctAnswers, ...extras];
+        const opts: Option[] = allValues.map((value, i) => ({
             index: i,
-            value: b.answer,
+            value,
         }));
 
         for (let i = opts.length - 1; i > 0; i--) {

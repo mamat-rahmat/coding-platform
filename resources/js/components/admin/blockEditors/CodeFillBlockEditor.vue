@@ -12,6 +12,7 @@ interface Blank {
 interface CodeFillContent {
     code_template: string;
     blanks: Blank[];
+    options?: string[];
     markdown?: string;
 }
 
@@ -29,6 +30,10 @@ if (typeof model.value.markdown !== 'string') {
     model.value.markdown = '';
 }
 
+if (!Array.isArray(model.value.options)) {
+    model.value.options = [];
+}
+
 function addBlank() {
     const nextId = String.fromCharCode(65 + model.value.blanks.length);
     model.value.blanks.push({ id: nextId, answer: '' });
@@ -40,6 +45,14 @@ function removeBlank(index: number) {
 
 function placeholder(id: string): string {
     return `{{ ${id} }}`;
+}
+
+function addExtraOption() {
+    model.value.options!.push('');
+}
+
+function removeExtraOption(index: number) {
+    model.value.options!.splice(index, 1);
 }
 </script>
 
@@ -127,6 +140,57 @@ function placeholder(id: string): string {
                         variant="ghost"
                         size="icon-sm"
                         @click="removeBlank(index)"
+                    >
+                        <Trash2 class="h-4 w-4 text-red-600" />
+                    </Button>
+                </div>
+            </div>
+        </div>
+
+        <div>
+            <div class="mb-2 flex items-center justify-between">
+                <label class="text-sm font-medium text-gray-700">
+                    Opsi Tambahan (Distractor)
+                </label>
+                <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    @click="addExtraOption"
+                >
+                    <Plus class="h-3.5 w-3.5" />
+                    Tambah Opsi
+                </Button>
+            </div>
+
+            <p class="mb-2 text-xs text-gray-500">
+                Opsi tambahan ditampilkan sebagai pilihan yang salah. Jawaban
+                benar dari blanks selalu ditampilkan.
+            </p>
+
+            <div
+                v-if="(model.options ?? []).length === 0"
+                class="rounded-md border border-dashed border-gray-300 p-3 text-center text-xs text-gray-400"
+            >
+                Tidak ada opsi tambahan.
+            </div>
+
+            <div class="space-y-2">
+                <div
+                    v-for="(opt, index) in model.options"
+                    :key="index"
+                    class="flex items-center gap-2"
+                >
+                    <input
+                        v-model="model.options![index]"
+                        class="flex-1 rounded-md border border-gray-300 p-2 font-mono text-sm focus:border-gray-900 focus:outline-none"
+                        placeholder="Teks opsi salah"
+                    />
+                    <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon-sm"
+                        @click="removeExtraOption(index)"
                     >
                         <Trash2 class="h-4 w-4 text-red-600" />
                     </Button>
