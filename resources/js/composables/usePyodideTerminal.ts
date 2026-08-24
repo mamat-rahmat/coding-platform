@@ -447,8 +447,6 @@ export function usePyodideTerminal(): UsePyodideTerminalReturn {
     }
 
     function stop(): void {
-        stopped = true;
-
         if (worker) {
             worker.terminate();
             worker = null;
