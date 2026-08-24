@@ -288,11 +288,13 @@ export function usePyodideTerminal(): UsePyodideTerminalReturn {
                 break;
 
             case 'done':
+                term?.write('\r\n\x1b[33m--- Selesai ---\x1b[0m\r\n');
                 isRunning.value = false;
                 break;
 
             case 'error':
                 term?.write(`\r\n\x1b[31m${msg.data}\x1b[0m\r\n`);
+                term?.write('\r\n\x1b[33m--- Selesai ---\x1b[0m\r\n');
                 isRunning.value = false;
                 break;
 
