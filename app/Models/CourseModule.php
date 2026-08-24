@@ -41,10 +41,10 @@ class CourseModule extends Model
 
     public function isCompletedBy(User $user): bool
     {
-        $lessons = $this->lessonsOrdered();
+        $lessons = $this->lessonsOrdered()->where('is_optional', false);
 
         if ($lessons->isEmpty()) {
-            return false;
+            return true;
         }
 
         return $user->lessonProgresses()

@@ -51,6 +51,7 @@ class CourseController extends Controller
                             'slug',
                             'description',
                             'sort_order',
+                            'is_optional',
                         ]),
                 ]),
         ]);
@@ -71,8 +72,9 @@ class CourseController extends Controller
                 $lesson->is_completed = $completedLessonIds->contains($lesson->id);
             });
 
-            $module->is_completed = $module->lessons->isNotEmpty()
-                && $module->lessons->every(fn ($lesson) => $lesson->is_completed);
+            $requiredLessons = $module->lessons->where('is_optional', false);
+            $module->is_completed = $requiredLessons->isNotEmpty()
+                && $requiredLessons->every(fn ($lesson) => $lesson->is_completed);
         });
 
         $moduleBlocked = false;
@@ -80,11 +82,14 @@ class CourseController extends Controller
         $course->modules->each(function ($module) use (&$moduleBlocked, $completedLessonIds) {
             $module->is_locked = $moduleBlocked;
 
-            $previousInModule = true;
+            $previousRequired = true;
 
-            $module->lessons->each(function ($lesson) use (&$previousInModule, $completedLessonIds, $module) {
-                $lesson->is_locked = $module->is_locked || ! $previousInModule;
-                $previousInModule = $completedLessonIds->contains($lesson->id);
+            $module->lessons->each(function ($lesson) use (&$previousRequired, $completedLessonIds, $module) {
+                $lesson->is_locked = $module->is_locked || ! $previousRequired;
+
+                if (! $lesson->is_optional) {
+                    $previousRequired = $completedLessonIds->contains($lesson->id);
+                }
             });
 
             if (! $module->is_completed) {
@@ -92,9 +97,10 @@ class CourseController extends Controller
             }
         });
 
-        $totalLessons = $lessons->count();
+        $requiredLessons = $lessons->where('is_optional', false);
+        $totalLessons = $requiredLessons->count();
 
-        $completedLessons = $lessons
+        $completedLessons = $requiredLessons
             ->whereIn('id', $completedLessonIds)
             ->count();
 

@@ -13,6 +13,7 @@ interface Lesson {
     is_published: boolean;
     is_completed: boolean;
     is_locked: boolean;
+    is_optional: boolean;
 }
 
 interface CourseModule {
@@ -204,9 +205,18 @@ defineProps<{
                                 </div>
 
                                 <div>
-                                    <h3 class="font-medium text-gray-900">
-                                        {{ module.sort_order }}.{{ lesson.sort_order }} {{ lesson.title }}
-                                    </h3>
+                                    <div class="flex items-center gap-2">
+                                        <h3 class="font-medium text-gray-900">
+                                            {{ module.sort_order }}.{{ lesson.sort_order }} {{ lesson.title }}
+                                        </h3>
+
+                                        <span
+                                            v-if="lesson.is_optional"
+                                            class="rounded-full bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-700"
+                                        >
+                                            Opsional
+                                        </span>
+                                    </div>
 
                                     <p
                                         v-if="lesson.description"

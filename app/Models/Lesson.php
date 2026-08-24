@@ -19,12 +19,14 @@ class Lesson extends Model
         'description',
         'sort_order',
         'is_published',
+        'is_optional',
     ];
 
     protected function casts(): array
     {
         return [
             'is_published' => 'boolean',
+            'is_optional' => 'boolean',
         ];
     }
 
@@ -57,6 +59,7 @@ class Lesson extends Model
                 'lessons.slug',
                 'lessons.description',
                 'lessons.sort_order',
+                'lessons.is_optional',
             ])
             ->sortBy(fn (Lesson $lesson) => [
                 $lesson->module->sort_order,
@@ -85,11 +88,15 @@ class Lesson extends Model
             return true;
         }
 
-        $previous = $siblings[$position - 1];
+        for ($i = $position - 1; $i >= 0; $i--) {
+            if (! $siblings[$i]->is_optional) {
+                return $user->lessonProgresses()
+                    ->where('lesson_id', $siblings[$i]->id)
+                    ->whereNotNull('completed_at')
+                    ->exists();
+            }
+        }
 
-        return $user->lessonProgresses()
-            ->where('lesson_id', $previous->id)
-            ->whereNotNull('completed_at')
-            ->exists();
+        return true;
     }
 }

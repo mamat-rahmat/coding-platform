@@ -13,6 +13,7 @@ interface Lesson {
     title: string;
     slug: string;
     description: string | null;
+    is_optional: boolean;
     blocks: LessonBlock[];
     module: {
         id: number;
@@ -364,7 +365,7 @@ const completeLesson = (lessonSlug: string) => {
                 <div v-else />
 
                 <Link
-                    v-if="nextLesson && !isCompleted"
+                    v-if="nextLesson && (!isCompleted || lesson.is_optional)"
                     :href="lessonRoutes.show.url(nextLesson.slug)"
                     class="text-sm text-gray-500 hover:text-gray-900"
                 >
