@@ -38,7 +38,7 @@ const blockAttemptData = (props.block as LessonBlock & { attempt_data?: Record<s
     <div>
         <h2
             v-if="block.title"
-            class="mb-2 text-base font-semibold text-gray-900"
+            class="mb-2 text-lg font-bold text-gray-900"
         >
             [{{ blockTypeLabels[block.type] ?? block.type }}] {{ block.title }}
         </h2>
