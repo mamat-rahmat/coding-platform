@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Loader2, Play, Terminal } from '@lucide/vue';
+import { Loader2, Play, Square, Terminal } from '@lucide/vue';
 import { onMounted, onUnmounted, ref } from 'vue';
 import CodeEditor from '@/components/CodeEditor.vue';
 import Markdown from '@/components/Markdown.vue';
@@ -30,6 +30,7 @@ const {
     isRunning,
     init,
     runCode,
+    stop,
     clear,
     write,
     dispose,
@@ -103,6 +104,17 @@ async function runExample() {
                         <Play v-if="!isRunning" class="h-3.5 w-3.5" />
                         <Loader2 v-else class="h-3.5 w-3.5 animate-spin" />
                         Run
+                    </Button>
+
+                    <Button
+                        v-if="isRunning"
+                        variant="outline"
+                        size="sm"
+                        class="border-red-600 bg-gray-800 text-red-400 hover:bg-red-900/30 hover:text-red-300"
+                        @click="stop"
+                    >
+                        <Square class="h-3.5 w-3.5" />
+                        Stop
                     </Button>
                 </div>
             </div>

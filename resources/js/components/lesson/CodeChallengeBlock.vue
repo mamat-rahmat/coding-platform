@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { router } from '@inertiajs/vue3';
-import { Play, CheckCircle2, XCircle, Loader2, Terminal } from '@lucide/vue';
+import { Play, CheckCircle2, XCircle, Loader2, Square, Terminal } from '@lucide/vue';
 import { computed, onMounted, onUnmounted, ref } from 'vue';
 import CodeEditor from '@/components/CodeEditor.vue';
 import Markdown from '@/components/Markdown.vue';
@@ -41,6 +41,7 @@ const {
     init,
     runCode,
     runTestcase,
+    stop,
     clear,
     write,
     dispose,
@@ -251,6 +252,17 @@ function reset() {
                             class="h-3.5 w-3.5 animate-spin"
                         />
                         Run Testcases
+                    </Button>
+
+                    <Button
+                        v-if="isRunning"
+                        variant="outline"
+                        size="sm"
+                        class="border-red-300 text-red-700 hover:bg-red-50"
+                        @click="stop"
+                    >
+                        <Square class="h-3.5 w-3.5" />
+                        Stop
                     </Button>
                 </div>
             </div>

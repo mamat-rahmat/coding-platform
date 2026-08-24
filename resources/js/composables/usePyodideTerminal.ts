@@ -154,6 +154,7 @@ export interface UsePyodideTerminalReturn {
         expectedOutput: string,
         testcaseId: string,
     ) => Promise<TestcaseResult>;
+    stop: () => void;
     clear: () => void;
     write: (text: string) => void;
     dispose: () => void;
@@ -437,6 +438,18 @@ export function usePyodideTerminal(): UsePyodideTerminalReturn {
         term?.write(text);
     }
 
+    function stop(): void {
+        if (worker) {
+            worker.terminate();
+            worker = null;
+        }
+
+        isRunning.value = false;
+        pyodideReady.value = false;
+        pyodideLoading.value = false;
+        initWorker();
+    }
+
     function dispose(): void {
         worker?.terminate();
         worker = null;
@@ -461,6 +474,7 @@ export function usePyodideTerminal(): UsePyodideTerminalReturn {
         init,
         runCode,
         runTestcase,
+        stop,
         clear,
         write,
         dispose,
