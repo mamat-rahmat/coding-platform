@@ -451,6 +451,8 @@ export function usePyodideTerminal(): UsePyodideTerminalReturn {
     }
 
     function stop(): void {
+        messageEpoch++;
+
         if (worker) {
             worker.terminate();
             worker = null;
