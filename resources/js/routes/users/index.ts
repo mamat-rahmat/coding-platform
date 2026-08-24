@@ -4,7 +4,7 @@ import { queryParams, type RouteQueryOptions, type RouteDefinition, type RouteFo
 * @see app/Http/Controllers/ProfileController.php:14
 * @route '/users/{user}'
 */
-export const show = (args: { user: number | { id: number } } | [user: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'get'> => ({
+export const show = (args: { user: string | { uuid: string } } | [user: string | { uuid: string } ] | string | { uuid: string }, options?: RouteQueryOptions): RouteDefinition<'get'> => ({
     url: show.url(args, options),
     method: 'get',
 })
@@ -19,13 +19,13 @@ show.definition = {
 * @see app/Http/Controllers/ProfileController.php:14
 * @route '/users/{user}'
 */
-show.url = (args: { user: number | { id: number } } | [user: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions) => {
+show.url = (args: { user: string | { uuid: string } } | [user: string | { uuid: string } ] | string | { uuid: string }, options?: RouteQueryOptions) => {
     if (typeof args === 'string' || typeof args === 'number') {
         args = { user: args }
     }
 
-    if (typeof args === 'object' && !Array.isArray(args) && 'id' in args) {
-        args = { user: args.id }
+    if (typeof args === 'object' && !Array.isArray(args) && 'uuid' in args) {
+        args = { user: args.uuid }
     }
 
     if (Array.isArray(args)) {
@@ -38,7 +38,7 @@ show.url = (args: { user: number | { id: number } } | [user: number | { id: numb
 
     const parsedArgs = {
         user: typeof args.user === 'object'
-        ? args.user.id
+        ? args.user.uuid
         : args.user,
     }
 
@@ -52,7 +52,7 @@ show.url = (args: { user: number | { id: number } } | [user: number | { id: numb
 * @see app/Http/Controllers/ProfileController.php:14
 * @route '/users/{user}'
 */
-show.get = (args: { user: number | { id: number } } | [user: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'get'> => ({
+show.get = (args: { user: string | { uuid: string } } | [user: string | { uuid: string } ] | string | { uuid: string }, options?: RouteQueryOptions): RouteDefinition<'get'> => ({
     url: show.url(args, options),
     method: 'get',
 })
@@ -62,7 +62,7 @@ show.get = (args: { user: number | { id: number } } | [user: number | { id: numb
 * @see app/Http/Controllers/ProfileController.php:14
 * @route '/users/{user}'
 */
-show.head = (args: { user: number | { id: number } } | [user: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'head'> => ({
+show.head = (args: { user: string | { uuid: string } } | [user: string | { uuid: string } ] | string | { uuid: string }, options?: RouteQueryOptions): RouteDefinition<'head'> => ({
     url: show.url(args, options),
     method: 'head',
 })
@@ -72,7 +72,7 @@ show.head = (args: { user: number | { id: number } } | [user: number | { id: num
 * @see app/Http/Controllers/ProfileController.php:14
 * @route '/users/{user}'
 */
-const showForm = (args: { user: number | { id: number } } | [user: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
+const showForm = (args: { user: string | { uuid: string } } | [user: string | { uuid: string } ] | string | { uuid: string }, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
     action: show.url(args, options),
     method: 'get',
 })
@@ -82,7 +82,7 @@ const showForm = (args: { user: number | { id: number } } | [user: number | { id
 * @see app/Http/Controllers/ProfileController.php:14
 * @route '/users/{user}'
 */
-showForm.get = (args: { user: number | { id: number } } | [user: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
+showForm.get = (args: { user: string | { uuid: string } } | [user: string | { uuid: string } ] | string | { uuid: string }, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
     action: show.url(args, options),
     method: 'get',
 })
@@ -92,7 +92,7 @@ showForm.get = (args: { user: number | { id: number } } | [user: number | { id: 
 * @see app/Http/Controllers/ProfileController.php:14
 * @route '/users/{user}'
 */
-showForm.head = (args: { user: number | { id: number } } | [user: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
+showForm.head = (args: { user: string | { uuid: string } } | [user: string | { uuid: string } ] | string | { uuid: string }, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
     action: show.url(args, {
         [options?.mergeQuery ? 'mergeQuery' : 'query']: {
             _method: 'HEAD',
@@ -106,10 +106,10 @@ show.form = showForm
 
 /**
 * @see \App\Http\Controllers\ProfileController::courseProgress
-* @see app/Http/Controllers/ProfileController.php:91
+* @see app/Http/Controllers/ProfileController.php:92
 * @route '/users/{user}/progress/{course}'
 */
-export const courseProgress = (args: { user: number | { id: number }, course: string | number | { slug: string | number } } | [user: number | { id: number }, course: string | number | { slug: string | number } ], options?: RouteQueryOptions): RouteDefinition<'get'> => ({
+export const courseProgress = (args: { user: string | { uuid: string }, course: string | number | { slug: string | number } } | [user: string | { uuid: string }, course: string | number | { slug: string | number } ], options?: RouteQueryOptions): RouteDefinition<'get'> => ({
     url: courseProgress.url(args, options),
     method: 'get',
 })
@@ -121,10 +121,10 @@ courseProgress.definition = {
 
 /**
 * @see \App\Http\Controllers\ProfileController::courseProgress
-* @see app/Http/Controllers/ProfileController.php:91
+* @see app/Http/Controllers/ProfileController.php:92
 * @route '/users/{user}/progress/{course}'
 */
-courseProgress.url = (args: { user: number | { id: number }, course: string | number | { slug: string | number } } | [user: number | { id: number }, course: string | number | { slug: string | number } ], options?: RouteQueryOptions) => {
+courseProgress.url = (args: { user: string | { uuid: string }, course: string | number | { slug: string | number } } | [user: string | { uuid: string }, course: string | number | { slug: string | number } ], options?: RouteQueryOptions) => {
     if (Array.isArray(args)) {
         args = {
             user: args[0],
@@ -136,7 +136,7 @@ courseProgress.url = (args: { user: number | { id: number }, course: string | nu
 
     const parsedArgs = {
         user: typeof args.user === 'object'
-        ? args.user.id
+        ? args.user.uuid
         : args.user,
         course: typeof args.course === 'object'
         ? args.course.slug
@@ -151,50 +151,50 @@ courseProgress.url = (args: { user: number | { id: number }, course: string | nu
 
 /**
 * @see \App\Http\Controllers\ProfileController::courseProgress
-* @see app/Http/Controllers/ProfileController.php:91
+* @see app/Http/Controllers/ProfileController.php:92
 * @route '/users/{user}/progress/{course}'
 */
-courseProgress.get = (args: { user: number | { id: number }, course: string | number | { slug: string | number } } | [user: number | { id: number }, course: string | number | { slug: string | number } ], options?: RouteQueryOptions): RouteDefinition<'get'> => ({
+courseProgress.get = (args: { user: string | { uuid: string }, course: string | number | { slug: string | number } } | [user: string | { uuid: string }, course: string | number | { slug: string | number } ], options?: RouteQueryOptions): RouteDefinition<'get'> => ({
     url: courseProgress.url(args, options),
     method: 'get',
 })
 
 /**
 * @see \App\Http\Controllers\ProfileController::courseProgress
-* @see app/Http/Controllers/ProfileController.php:91
+* @see app/Http/Controllers/ProfileController.php:92
 * @route '/users/{user}/progress/{course}'
 */
-courseProgress.head = (args: { user: number | { id: number }, course: string | number | { slug: string | number } } | [user: number | { id: number }, course: string | number | { slug: string | number } ], options?: RouteQueryOptions): RouteDefinition<'head'> => ({
+courseProgress.head = (args: { user: string | { uuid: string }, course: string | number | { slug: string | number } } | [user: string | { uuid: string }, course: string | number | { slug: string | number } ], options?: RouteQueryOptions): RouteDefinition<'head'> => ({
     url: courseProgress.url(args, options),
     method: 'head',
 })
 
 /**
 * @see \App\Http\Controllers\ProfileController::courseProgress
-* @see app/Http/Controllers/ProfileController.php:91
+* @see app/Http/Controllers/ProfileController.php:92
 * @route '/users/{user}/progress/{course}'
 */
-const courseProgressForm = (args: { user: number | { id: number }, course: string | number | { slug: string | number } } | [user: number | { id: number }, course: string | number | { slug: string | number } ], options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
+const courseProgressForm = (args: { user: string | { uuid: string }, course: string | number | { slug: string | number } } | [user: string | { uuid: string }, course: string | number | { slug: string | number } ], options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
     action: courseProgress.url(args, options),
     method: 'get',
 })
 
 /**
 * @see \App\Http\Controllers\ProfileController::courseProgress
-* @see app/Http/Controllers/ProfileController.php:91
+* @see app/Http/Controllers/ProfileController.php:92
 * @route '/users/{user}/progress/{course}'
 */
-courseProgressForm.get = (args: { user: number | { id: number }, course: string | number | { slug: string | number } } | [user: number | { id: number }, course: string | number | { slug: string | number } ], options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
+courseProgressForm.get = (args: { user: string | { uuid: string }, course: string | number | { slug: string | number } } | [user: string | { uuid: string }, course: string | number | { slug: string | number } ], options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
     action: courseProgress.url(args, options),
     method: 'get',
 })
 
 /**
 * @see \App\Http\Controllers\ProfileController::courseProgress
-* @see app/Http/Controllers/ProfileController.php:91
+* @see app/Http/Controllers/ProfileController.php:92
 * @route '/users/{user}/progress/{course}'
 */
-courseProgressForm.head = (args: { user: number | { id: number }, course: string | number | { slug: string | number } } | [user: number | { id: number }, course: string | number | { slug: string | number } ], options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
+courseProgressForm.head = (args: { user: string | { uuid: string }, course: string | number | { slug: string | number } } | [user: string | { uuid: string }, course: string | number | { slug: string | number } ], options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
     action: courseProgress.url(args, {
         [options?.mergeQuery ? 'mergeQuery' : 'query']: {
             _method: 'HEAD',
