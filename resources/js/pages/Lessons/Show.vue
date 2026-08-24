@@ -48,8 +48,8 @@ const props = defineProps<{
 
 const page = usePage();
 
-const isAdmin = computed(
-    () => Boolean((page.props.auth?.user as { is_admin?: boolean })?.is_admin),
+const isAdmin = computed(() =>
+    Boolean((page.props.auth?.user as { is_admin?: boolean })?.is_admin),
 );
 
 const gradedTypes = [
@@ -69,6 +69,10 @@ const runBlockIds = ref<Set<number>>(new Set());
 
 function readBlockFromUrl(): number {
     if (props.lesson.blocks.length === 0) {
+        return 0;
+    }
+
+    if (typeof window === 'undefined') {
         return 0;
     }
 
@@ -96,7 +100,10 @@ function navigateToBlock(index: number) {
 
 function onBlockRun() {
     if (currentBlock.value) {
-        runBlockIds.value = new Set([...runBlockIds.value, currentBlock.value.id]);
+        runBlockIds.value = new Set([
+            ...runBlockIds.value,
+            currentBlock.value.id,
+        ]);
     }
 }
 
@@ -118,7 +125,10 @@ watch(
         )?.attempt_result;
 
         if (result) {
-            answeredBlockIds.value = new Set([...answeredBlockIds.value, result.block_id]);
+            answeredBlockIds.value = new Set([
+                ...answeredBlockIds.value,
+                result.block_id,
+            ]);
         }
     },
     { deep: true },
@@ -273,12 +283,12 @@ const completeLesson = (lessonSlug: string) => {
                     :key="currentBlock.id"
                     class="rounded-xl border bg-white p-6 shadow-sm"
                 >
-                    <LessonBlockRenderer :block="currentBlock" @run="onBlockRun" />
+                    <LessonBlockRenderer
+                        :block="currentBlock"
+                        @run="onBlockRun"
+                    />
 
-                    <div
-                        v-if="isAdmin"
-                        class="mt-4 border-t pt-4"
-                    >
+                    <div v-if="isAdmin" class="mt-4 border-t pt-4">
                         <Link
                             :href="adminBlockRoutes.edit.url(currentBlock.id)"
                             class="inline-flex items-center gap-1.5 rounded-lg border border-gray-300 px-3 py-1.5 text-xs font-medium text-gray-700 transition hover:bg-gray-50"
@@ -329,7 +339,9 @@ const completeLesson = (lessonSlug: string) => {
 
                         <Link
                             v-else-if="isCompleted"
-                            :href="courseRoutes.show.url(lesson.module.course.slug)"
+                            :href="
+                                courseRoutes.show.url(lesson.module.course.slug)
+                            "
                             class="flex items-center gap-1.5 rounded-lg bg-green-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-green-700"
                         >
                             <CheckCircle2 class="h-4 w-4" />

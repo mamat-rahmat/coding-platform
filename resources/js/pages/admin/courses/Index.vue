@@ -45,7 +45,7 @@ function destroy(course: Course) {
 }
 
 function exportCourse(course: Course) {
-    window.location.href = `/admin/courses/${course.id}/export`;
+    window.location.href = adminCourseRoutes.exportMethod.url(course.id);
 }
 
 function onFileChange(event: Event) {
@@ -63,7 +63,7 @@ function importCourse() {
     const formData = new FormData();
     formData.append('file', importFile.value);
 
-    router.post('/admin/courses/import', formData, {
+    router.post(adminCourseRoutes.importMethod.url(), formData, {
         onFinish: () => {
             isImporting.value = false;
             importFile.value = null;
@@ -95,7 +95,12 @@ function importCourse() {
                     <Button
                         variant="outline"
                         :disabled="isImporting"
-                        @click="() => { importFile = null; fileInput?.click(); }"
+                        @click="
+                            () => {
+                                importFile = null;
+                                fileInput?.click();
+                            }
+                        "
                     >
                         <Upload class="h-4 w-4" />
                         {{ isImporting ? 'Mengimport...' : 'Import' }}
