@@ -1,6 +1,8 @@
 <script setup lang="ts">
-import { Link } from '@inertiajs/vue3';
-import { Lock, LockKeyhole, Trophy } from '@lucide/vue';
+import { Link, usePage } from '@inertiajs/vue3';
+import { Lock, LockKeyhole, Pencil, Trophy } from '@lucide/vue';
+import { computed } from 'vue';
+import adminCourseRoutes from '@/routes/admin/courses';
 import courseRoutes from '@/routes/courses';
 import lessonRoutes from '@/routes/lessons';
 
@@ -49,6 +51,12 @@ defineProps<{
     course: Course;
     progress: CourseProgress;
 }>();
+
+const page = usePage();
+
+const isAdmin = computed(
+    () => Boolean((page.props.auth?.user as { is_admin?: boolean })?.is_admin),
+);
 </script>
 
 <template>
@@ -116,13 +124,22 @@ defineProps<{
                     </p>
                 </div>
 
-                <div class="mt-6">
+                <div class="mt-6 flex items-center gap-3">
                     <Link
                         :href="courseRoutes.leaderboard.url(course.slug)"
                         class="inline-flex items-center gap-2 rounded-lg border border-gray-200 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
                     >
                         <Trophy class="h-4 w-4" />
                         Lihat Peringkat
+                    </Link>
+
+                    <Link
+                        v-if="isAdmin"
+                        :href="adminCourseRoutes.edit.url(course.id)"
+                        class="inline-flex items-center gap-2 rounded-lg border border-gray-200 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+                    >
+                        <Pencil class="h-4 w-4" />
+                        Edit Course
                     </Link>
                 </div>
             </header>
