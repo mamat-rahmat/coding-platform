@@ -164,7 +164,7 @@ const reset = () => {
             </button>
 
             <button
-                v-else-if="!isAnswered"
+                v-else-if="!isAnswered && !isCorrect"
                 type="button"
                 class="rounded-lg border px-5 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50"
                 @click="reset"

@@ -43,16 +43,16 @@ class BlockAttemptController extends Controller
 
         abort_unless($lesson->isUnlockedFor($request->user()), 403);
 
-        $existingAccess = $request->user()
+        $existingAttempt = $request->user()
             ->blockAttempts()
             ->where('lesson_block_id', $lessonBlock->id)
-            ->exists();
-
-        if ($existingAccess) {
-            return back();
-        }
+            ->first();
 
         if (in_array($type, $accessTypes, true)) {
+            if ($existingAttempt) {
+                return back();
+            }
+
             BlockAttempt::create([
                 'user_id' => $request->user()->id,
                 'lesson_block_id' => $lessonBlock->id,
@@ -61,6 +61,10 @@ class BlockAttemptController extends Controller
                 'answered_at' => now(),
             ]);
 
+            return back();
+        }
+
+        if ($existingAttempt && $existingAttempt->is_correct) {
             return back();
         }
 
@@ -73,15 +77,25 @@ class BlockAttemptController extends Controller
             default => ['answer' => '', 'is_correct' => false],
         };
 
-        BlockAttempt::create([
-            'user_id' => $request->user()->id,
-            'lesson_block_id' => $lessonBlock->id,
-            'selected_answer' => $payload['answer'],
-            'is_correct' => $payload['is_correct'],
-            'attempt_data' => $payload['attempt_data'] ?? null,
-            'score' => $payload['score'] ?? null,
-            'answered_at' => now(),
-        ]);
+        if ($existingAttempt) {
+            $existingAttempt->update([
+                'selected_answer' => $payload['answer'],
+                'is_correct' => $payload['is_correct'],
+                'attempt_data' => $payload['attempt_data'] ?? null,
+                'score' => $payload['score'] ?? null,
+                'answered_at' => now(),
+            ]);
+        } else {
+            BlockAttempt::create([
+                'user_id' => $request->user()->id,
+                'lesson_block_id' => $lessonBlock->id,
+                'selected_answer' => $payload['answer'],
+                'is_correct' => $payload['is_correct'],
+                'attempt_data' => $payload['attempt_data'] ?? null,
+                'score' => $payload['score'] ?? null,
+                'answered_at' => now(),
+            ]);
+        }
 
         if ($payload['is_correct']) {
             $this->maybeCompleteLesson($request, $lessonBlock);
