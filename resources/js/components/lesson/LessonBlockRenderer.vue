@@ -13,6 +13,10 @@ const props = defineProps<{
     block: LessonBlock;
 }>();
 
+const emit = defineEmits<{
+    run: [];
+}>();
+
 const blockTypeLabels: Record<string, string> = {
     TEXT: 'Materi',
     CODE_EXAMPLE: 'Contoh Kode',
@@ -45,6 +49,7 @@ const blockAttemptData = (props.block as LessonBlock & { attempt_data?: Record<s
             v-else-if="block.type === 'CODE_EXAMPLE'"
             :block-id="block.id"
             :content="block.content"
+            @run="emit('run')"
         />
 
         <HintBlock

@@ -18,6 +18,10 @@ const props = defineProps<{
     content: CodeExampleContent;
 }>();
 
+const emit = defineEmits<{
+    run: [];
+}>();
+
 const {
     pyodideReady,
     pyodideLoading,
@@ -37,18 +41,6 @@ onMounted(() => {
     if (terminalContainer.value) {
         init(terminalContainer.value);
     }
-
-    fetch(attemptRoutes.store.url(props.blockId), {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'X-Requested-With': 'XMLHttpRequest',
-            'X-XSRF-TOKEN': decodeURIComponent(
-                document.cookie.match(/XSRF-TOKEN=([^;]+)/)?.[1] ?? '',
-            ),
-        },
-        body: JSON.stringify({ answer: '' }),
-    });
 });
 
 onUnmounted(() => {
@@ -63,6 +55,20 @@ async function runExample() {
     clear();
     write('\x1b[33m--- Running ---\x1b[0m\r\n');
     await runCode(props.content.code);
+
+    fetch(attemptRoutes.store.url(props.blockId), {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest',
+            'X-XSRF-TOKEN': decodeURIComponent(
+                document.cookie.match(/XSRF-TOKEN=([^;]+)/)?.[1] ?? '',
+            ),
+        },
+        body: JSON.stringify({ answer: '' }),
+    });
+
+    emit('run');
 }
 </script>
 

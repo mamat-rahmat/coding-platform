@@ -61,7 +61,10 @@ const gradedTypes = [
 
 const isGraded = (block: LessonBlock) => gradedTypes.includes(block.type);
 
+const isCodeExample = (block: LessonBlock) => block.type === 'CODE_EXAMPLE';
+
 const answeredBlockIds = ref<Set<number>>(new Set());
+const runBlockIds = ref<Set<number>>(new Set());
 
 function readBlockFromUrl(): number {
     if (props.lesson.blocks.length === 0) {
@@ -88,6 +91,12 @@ function navigateToBlock(index: number) {
     });
 
     router.get(url, {}, { preserveState: true, preserveScroll: true });
+}
+
+function onBlockRun() {
+    if (currentBlock.value) {
+        runBlockIds.value.add(currentBlock.value.id);
+    }
 }
 
 for (const block of props.lesson.blocks) {
@@ -129,10 +138,16 @@ const isCurrentGraded = computed(
     () => currentBlock.value && isGraded(currentBlock.value),
 );
 
+const isCurrentCodeExample = computed(
+    () => currentBlock.value && isCodeExample(currentBlock.value),
+);
+
 const isCurrentAnswered = computed(
     () =>
-        !isCurrentGraded.value ||
-        answeredBlockIds.value.has(currentBlock.value.id),
+        (!isCurrentGraded.value ||
+            answeredBlockIds.value.has(currentBlock.value.id)) &&
+        (!isCurrentCodeExample.value ||
+            runBlockIds.value.has(currentBlock.value.id)),
 );
 
 const canGoNext = computed(() => isCurrentAnswered.value);
@@ -247,7 +262,7 @@ const completeLesson = (lessonSlug: string) => {
                     :key="currentBlock.id"
                     class="rounded-xl border bg-white p-6 shadow-sm"
                 >
-                    <LessonBlockRenderer :block="currentBlock" />
+                    <LessonBlockRenderer :block="currentBlock" @run="onBlockRun" />
 
                     <div
                         v-if="isAdmin"
