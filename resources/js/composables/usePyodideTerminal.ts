@@ -448,7 +448,7 @@ export function usePyodideTerminal(): UsePyodideTerminalReturn {
     }
 
     function clear(): void {
-        term?.clear();
+        term?.write('\x1b[3J\x1b[2J\x1b[H');
     }
 
     function write(text: string): void {
@@ -477,7 +477,7 @@ export function usePyodideTerminal(): UsePyodideTerminalReturn {
             });
         }
 
-        term?.clear();
+        clear();
         isRunning.value = false;
         pyodideReady.value = false;
         pyodideLoading.value = false;

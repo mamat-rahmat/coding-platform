@@ -1,6 +1,13 @@
 <script setup lang="ts">
 import { router } from '@inertiajs/vue3';
-import { Play, CheckCircle2, XCircle, Loader2, Square, Terminal } from '@lucide/vue';
+import {
+    Play,
+    CheckCircle2,
+    XCircle,
+    Loader2,
+    Square,
+    Terminal,
+} from '@lucide/vue';
 import { computed, onMounted, onUnmounted, ref } from 'vue';
 import CodeEditor from '@/components/CodeEditor.vue';
 import Markdown from '@/components/Markdown.vue';
@@ -48,7 +55,8 @@ const {
 } = usePyodideTerminal();
 
 const userCode = ref(
-    (props.isAnswered && props.attemptData?.code) as string || props.content.starter_code,
+    ((props.isAnswered && props.attemptData?.code) as string) ||
+        props.content.starter_code,
 );
 const terminalContainer = ref<HTMLElement | null>(null);
 const testcaseResults = ref<Record<string, TestcaseResult>>({});
@@ -132,6 +140,10 @@ async function runAllTestcases() {
             testcase.expected_output,
             testcase.id,
         );
+
+        if (!pyodideReady.value) {
+            break;
+        }
 
         testcaseResults.value[testcase.id] = result;
 
