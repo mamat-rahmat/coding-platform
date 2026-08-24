@@ -243,7 +243,12 @@ export function usePyodideTerminal(): UsePyodideTerminalReturn {
 
         worker.onmessage = createMessageHandler(messageEpoch);
 
+        const errorEpoch = messageEpoch;
         worker.onerror = (err: ErrorEvent) => {
+            if (errorEpoch !== messageEpoch) {
+                return;
+            }
+
             const msg = err.message || 'Unknown worker error';
             pyodideError.value = msg;
             pyodideLoading.value = false;
@@ -454,8 +459,22 @@ export function usePyodideTerminal(): UsePyodideTerminalReturn {
         messageEpoch++;
 
         if (worker) {
+            worker.onmessage = null;
+            worker.onerror = null;
             worker.terminate();
             worker = null;
+        }
+
+        if (testcaseResolve) {
+            const resolve = testcaseResolve;
+            testcaseResolve = null;
+            resolve({
+                testcaseId: '',
+                passed: false,
+                actual: '',
+                expected: '',
+                error: 'Dihentikan',
+            });
         }
 
         term?.clear();
