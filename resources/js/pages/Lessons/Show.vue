@@ -96,13 +96,13 @@ function navigateToBlock(index: number) {
 
 function onBlockRun() {
     if (currentBlock.value) {
-        runBlockIds.value.add(currentBlock.value.id);
+        runBlockIds.value = new Set([...runBlockIds.value, currentBlock.value.id]);
     }
 }
 
 for (const block of props.lesson.blocks) {
     if ((block as LessonBlock & { is_answered?: boolean }).is_answered) {
-        answeredBlockIds.value.add(block.id);
+        answeredBlockIds.value = new Set([...answeredBlockIds.value, block.id]);
     }
 }
 
@@ -118,7 +118,7 @@ watch(
         )?.attempt_result;
 
         if (result) {
-            answeredBlockIds.value.add(result.block_id);
+            answeredBlockIds.value = new Set([...answeredBlockIds.value, result.block_id]);
         }
     },
     { deep: true },
