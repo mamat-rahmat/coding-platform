@@ -1,10 +1,11 @@
 <script setup lang="ts">
 import { Link, router, usePage } from '@inertiajs/vue3';
-import { ArrowLeft, ArrowRight, CheckCircle2 } from '@lucide/vue';
+import { ArrowLeft, ArrowRight, CheckCircle2, Pencil } from '@lucide/vue';
 import { computed, ref, watch } from 'vue';
 import LessonBlockRenderer from '@/components/lesson/LessonBlockRenderer.vue';
 import courseRoutes from '@/routes/courses';
 import lessonRoutes from '@/routes/lessons';
+import adminBlockRoutes from '@/routes/admin/blocks';
 import type { LessonBlock } from '@/types/lesson';
 
 interface Lesson {
@@ -45,6 +46,10 @@ const props = defineProps<{
 }>();
 
 const page = usePage();
+
+const isAdmin = computed(
+    () => Boolean((page.props.auth?.user as { is_admin?: boolean })?.is_admin),
+);
 
 const gradedTypes = [
     'MCQ_SINGLE',
@@ -243,6 +248,19 @@ const completeLesson = (lessonSlug: string) => {
                     class="rounded-xl border bg-white p-6 shadow-sm"
                 >
                     <LessonBlockRenderer :block="currentBlock" />
+
+                    <div
+                        v-if="isAdmin"
+                        class="mt-4 border-t pt-4"
+                    >
+                        <Link
+                            :href="adminBlockRoutes.edit.url(currentBlock.id)"
+                            class="inline-flex items-center gap-1.5 rounded-lg border border-gray-300 px-3 py-1.5 text-xs font-medium text-gray-700 transition hover:bg-gray-50"
+                        >
+                            <Pencil class="h-3 w-3" />
+                            Edit Block
+                        </Link>
+                    </div>
                 </section>
             </main>
 
