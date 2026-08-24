@@ -3,9 +3,9 @@ import { Link, router, usePage } from '@inertiajs/vue3';
 import { ArrowLeft, ArrowRight, CheckCircle2, Pencil } from '@lucide/vue';
 import { computed, ref, watch } from 'vue';
 import LessonBlockRenderer from '@/components/lesson/LessonBlockRenderer.vue';
+import adminBlockRoutes from '@/routes/admin/blocks';
 import courseRoutes from '@/routes/courses';
 import lessonRoutes from '@/routes/lessons';
-import adminBlockRoutes from '@/routes/admin/blocks';
 import type { LessonBlock } from '@/types/lesson';
 
 interface Lesson {

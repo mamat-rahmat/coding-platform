@@ -13,7 +13,6 @@ import { computed } from 'vue';
 import AppLogoIcon from '@/components/AppLogoIcon.vue';
 import { login, register } from '@/routes';
 import courseRoutes from '@/routes/courses';
-import Login from './auth/Login.vue';
 
 const isAuthenticated = computed(() => Boolean(usePage().props.auth?.user));
 
