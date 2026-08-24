@@ -188,7 +188,6 @@ export function usePyodideTerminal(): UsePyodideTerminalReturn {
     let stdinResolve: ((value: string) => void) | null = null;
     let testcaseResolve: ((result: TestcaseResult) => void) | null = null;
     let pendingStdin: string | null = null;
-    let stopped = false;
 
     async function init(container: HTMLElement): Promise<void> {
         const { Terminal } = await import('@xterm/xterm');
@@ -271,15 +270,14 @@ export function usePyodideTerminal(): UsePyodideTerminalReturn {
     }
 
     function handleWorkerMessage(e: MessageEvent): void {
-        if (stopped) {
+        const msg = e.data;
+
+        if (msg.type !== 'ready' && e.target !== worker) {
             return;
         }
 
-        const msg = e.data;
-
         switch (msg.type) {
             case 'ready':
-                stopped = false;
                 pyodideReady.value = true;
                 pyodideLoading.value = false;
                 break;
