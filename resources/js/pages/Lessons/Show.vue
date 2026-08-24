@@ -142,13 +142,23 @@ const isCurrentCodeExample = computed(
     () => currentBlock.value && isCodeExample(currentBlock.value),
 );
 
-const isCurrentAnswered = computed(
-    () =>
-        (!isCurrentGraded.value ||
-            answeredBlockIds.value.has(currentBlock.value.id)) &&
-        (!isCurrentCodeExample.value ||
-            runBlockIds.value.has(currentBlock.value.id)),
-);
+const isCurrentAnswered = computed(() => {
+    if (isCurrentGraded.value) {
+        const block = currentBlock.value;
+
+        return (
+            answeredBlockIds.value.has(block.id) &&
+            (block as LessonBlock & { is_correct?: boolean }).is_correct ===
+                true
+        );
+    }
+
+    if (isCurrentCodeExample.value) {
+        return runBlockIds.value.has(currentBlock.value.id);
+    }
+
+    return true;
+});
 
 const canGoNext = computed(() => isCurrentAnswered.value);
 
