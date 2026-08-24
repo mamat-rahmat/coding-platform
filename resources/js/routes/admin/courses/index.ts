@@ -1,4 +1,4 @@
-import { queryParams, type RouteQueryOptions, type RouteDefinition, applyUrlDefaults } from './../../../wayfinder'
+import { queryParams, type RouteQueryOptions, type RouteDefinition, type RouteFormDefinition, applyUrlDefaults } from './../../../wayfinder'
 /**
 * @see \App\Http\Controllers\AdminCourseController::index
 * @see app/Http/Controllers/AdminCourseController.php:14
@@ -42,6 +42,43 @@ index.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
     url: index.url(options),
     method: 'head',
 })
+
+/**
+* @see \App\Http\Controllers\AdminCourseController::index
+* @see app/Http/Controllers/AdminCourseController.php:14
+* @route '/admin/courses'
+*/
+const indexForm = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
+    action: index.url(options),
+    method: 'get',
+})
+
+/**
+* @see \App\Http\Controllers\AdminCourseController::index
+* @see app/Http/Controllers/AdminCourseController.php:14
+* @route '/admin/courses'
+*/
+indexForm.get = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
+    action: index.url(options),
+    method: 'get',
+})
+
+/**
+* @see \App\Http\Controllers\AdminCourseController::index
+* @see app/Http/Controllers/AdminCourseController.php:14
+* @route '/admin/courses'
+*/
+indexForm.head = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
+    action: index.url({
+        [options?.mergeQuery ? 'mergeQuery' : 'query']: {
+            _method: 'HEAD',
+            ...(options?.query ?? options?.mergeQuery ?? {}),
+        }
+    }),
+    method: 'get',
+})
+
+index.form = indexForm
 
 /**
 * @see \App\Http\Controllers\AdminCourseController::create
@@ -88,6 +125,43 @@ create.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
 })
 
 /**
+* @see \App\Http\Controllers\AdminCourseController::create
+* @see app/Http/Controllers/AdminCourseController.php:28
+* @route '/admin/courses/create'
+*/
+const createForm = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
+    action: create.url(options),
+    method: 'get',
+})
+
+/**
+* @see \App\Http\Controllers\AdminCourseController::create
+* @see app/Http/Controllers/AdminCourseController.php:28
+* @route '/admin/courses/create'
+*/
+createForm.get = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
+    action: create.url(options),
+    method: 'get',
+})
+
+/**
+* @see \App\Http\Controllers\AdminCourseController::create
+* @see app/Http/Controllers/AdminCourseController.php:28
+* @route '/admin/courses/create'
+*/
+createForm.head = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
+    action: create.url({
+        [options?.mergeQuery ? 'mergeQuery' : 'query']: {
+            _method: 'HEAD',
+            ...(options?.query ?? options?.mergeQuery ?? {}),
+        }
+    }),
+    method: 'get',
+})
+
+create.form = createForm
+
+/**
 * @see \App\Http\Controllers\AdminCourseController::store
 * @see app/Http/Controllers/AdminCourseController.php:35
 * @route '/admin/courses'
@@ -120,6 +194,28 @@ store.post = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
     url: store.url(options),
     method: 'post',
 })
+
+/**
+* @see \App\Http\Controllers\AdminCourseController::store
+* @see app/Http/Controllers/AdminCourseController.php:35
+* @route '/admin/courses'
+*/
+const storeForm = (options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
+    action: store.url(options),
+    method: 'post',
+})
+
+/**
+* @see \App\Http\Controllers\AdminCourseController::store
+* @see app/Http/Controllers/AdminCourseController.php:35
+* @route '/admin/courses'
+*/
+storeForm.post = (options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
+    action: store.url(options),
+    method: 'post',
+})
+
+store.form = storeForm
 
 /**
 * @see \App\Http\Controllers\AdminCourseController::show
@@ -190,6 +286,43 @@ show.head = (args: { course: number | { id: number } } | [course: number | { id:
 })
 
 /**
+* @see \App\Http\Controllers\AdminCourseController::show
+* @see app/Http/Controllers/AdminCourseController.php:46
+* @route '/admin/courses/{course}'
+*/
+const showForm = (args: { course: number | { id: number } } | [course: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
+    action: show.url(args, options),
+    method: 'get',
+})
+
+/**
+* @see \App\Http\Controllers\AdminCourseController::show
+* @see app/Http/Controllers/AdminCourseController.php:46
+* @route '/admin/courses/{course}'
+*/
+showForm.get = (args: { course: number | { id: number } } | [course: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
+    action: show.url(args, options),
+    method: 'get',
+})
+
+/**
+* @see \App\Http\Controllers\AdminCourseController::show
+* @see app/Http/Controllers/AdminCourseController.php:46
+* @route '/admin/courses/{course}'
+*/
+showForm.head = (args: { course: number | { id: number } } | [course: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
+    action: show.url(args, {
+        [options?.mergeQuery ? 'mergeQuery' : 'query']: {
+            _method: 'HEAD',
+            ...(options?.query ?? options?.mergeQuery ?? {}),
+        }
+    }),
+    method: 'get',
+})
+
+show.form = showForm
+
+/**
 * @see \App\Http\Controllers\AdminCourseController::edit
 * @see app/Http/Controllers/AdminCourseController.php:61
 * @route '/admin/courses/{course}/edit'
@@ -256,6 +389,43 @@ edit.head = (args: { course: number | { id: number } } | [course: number | { id:
     url: edit.url(args, options),
     method: 'head',
 })
+
+/**
+* @see \App\Http\Controllers\AdminCourseController::edit
+* @see app/Http/Controllers/AdminCourseController.php:61
+* @route '/admin/courses/{course}/edit'
+*/
+const editForm = (args: { course: number | { id: number } } | [course: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
+    action: edit.url(args, options),
+    method: 'get',
+})
+
+/**
+* @see \App\Http\Controllers\AdminCourseController::edit
+* @see app/Http/Controllers/AdminCourseController.php:61
+* @route '/admin/courses/{course}/edit'
+*/
+editForm.get = (args: { course: number | { id: number } } | [course: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
+    action: edit.url(args, options),
+    method: 'get',
+})
+
+/**
+* @see \App\Http\Controllers\AdminCourseController::edit
+* @see app/Http/Controllers/AdminCourseController.php:61
+* @route '/admin/courses/{course}/edit'
+*/
+editForm.head = (args: { course: number | { id: number } } | [course: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
+    action: edit.url(args, {
+        [options?.mergeQuery ? 'mergeQuery' : 'query']: {
+            _method: 'HEAD',
+            ...(options?.query ?? options?.mergeQuery ?? {}),
+        }
+    }),
+    method: 'get',
+})
+
+edit.form = editForm
 
 /**
 * @see \App\Http\Controllers\AdminCourseController::update
@@ -326,6 +496,53 @@ update.patch = (args: { course: number | { id: number } } | [course: number | { 
 })
 
 /**
+* @see \App\Http\Controllers\AdminCourseController::update
+* @see app/Http/Controllers/AdminCourseController.php:70
+* @route '/admin/courses/{course}'
+*/
+const updateForm = (args: { course: number | { id: number } } | [course: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
+    action: update.url(args, {
+        [options?.mergeQuery ? 'mergeQuery' : 'query']: {
+            _method: 'PUT',
+            ...(options?.query ?? options?.mergeQuery ?? {}),
+        }
+    }),
+    method: 'post',
+})
+
+/**
+* @see \App\Http\Controllers\AdminCourseController::update
+* @see app/Http/Controllers/AdminCourseController.php:70
+* @route '/admin/courses/{course}'
+*/
+updateForm.put = (args: { course: number | { id: number } } | [course: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
+    action: update.url(args, {
+        [options?.mergeQuery ? 'mergeQuery' : 'query']: {
+            _method: 'PUT',
+            ...(options?.query ?? options?.mergeQuery ?? {}),
+        }
+    }),
+    method: 'post',
+})
+
+/**
+* @see \App\Http\Controllers\AdminCourseController::update
+* @see app/Http/Controllers/AdminCourseController.php:70
+* @route '/admin/courses/{course}'
+*/
+updateForm.patch = (args: { course: number | { id: number } } | [course: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
+    action: update.url(args, {
+        [options?.mergeQuery ? 'mergeQuery' : 'query']: {
+            _method: 'PATCH',
+            ...(options?.query ?? options?.mergeQuery ?? {}),
+        }
+    }),
+    method: 'post',
+})
+
+update.form = updateForm
+
+/**
 * @see \App\Http\Controllers\AdminCourseController::destroy
 * @see app/Http/Controllers/AdminCourseController.php:83
 * @route '/admin/courses/{course}'
@@ -382,6 +599,38 @@ destroy.delete = (args: { course: number | { id: number } } | [course: number | 
     url: destroy.url(args, options),
     method: 'delete',
 })
+
+/**
+* @see \App\Http\Controllers\AdminCourseController::destroy
+* @see app/Http/Controllers/AdminCourseController.php:83
+* @route '/admin/courses/{course}'
+*/
+const destroyForm = (args: { course: number | { id: number } } | [course: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
+    action: destroy.url(args, {
+        [options?.mergeQuery ? 'mergeQuery' : 'query']: {
+            _method: 'DELETE',
+            ...(options?.query ?? options?.mergeQuery ?? {}),
+        }
+    }),
+    method: 'post',
+})
+
+/**
+* @see \App\Http\Controllers\AdminCourseController::destroy
+* @see app/Http/Controllers/AdminCourseController.php:83
+* @route '/admin/courses/{course}'
+*/
+destroyForm.delete = (args: { course: number | { id: number } } | [course: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
+    action: destroy.url(args, {
+        [options?.mergeQuery ? 'mergeQuery' : 'query']: {
+            _method: 'DELETE',
+            ...(options?.query ?? options?.mergeQuery ?? {}),
+        }
+    }),
+    method: 'post',
+})
+
+destroy.form = destroyForm
 
 /**
 * @see \App\Http\Controllers\CourseExportImportController::exportMethod
@@ -452,6 +701,43 @@ exportMethod.head = (args: { course: number | { id: number } } | [course: number
 })
 
 /**
+* @see \App\Http\Controllers\CourseExportImportController::exportMethod
+* @see app/Http/Controllers/CourseExportImportController.php:14
+* @route '/admin/courses/{course}/export'
+*/
+const exportMethodForm = (args: { course: number | { id: number } } | [course: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
+    action: exportMethod.url(args, options),
+    method: 'get',
+})
+
+/**
+* @see \App\Http\Controllers\CourseExportImportController::exportMethod
+* @see app/Http/Controllers/CourseExportImportController.php:14
+* @route '/admin/courses/{course}/export'
+*/
+exportMethodForm.get = (args: { course: number | { id: number } } | [course: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
+    action: exportMethod.url(args, options),
+    method: 'get',
+})
+
+/**
+* @see \App\Http\Controllers\CourseExportImportController::exportMethod
+* @see app/Http/Controllers/CourseExportImportController.php:14
+* @route '/admin/courses/{course}/export'
+*/
+exportMethodForm.head = (args: { course: number | { id: number } } | [course: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
+    action: exportMethod.url(args, {
+        [options?.mergeQuery ? 'mergeQuery' : 'query']: {
+            _method: 'HEAD',
+            ...(options?.query ?? options?.mergeQuery ?? {}),
+        }
+    }),
+    method: 'get',
+})
+
+exportMethod.form = exportMethodForm
+
+/**
 * @see \App\Http\Controllers\CourseExportImportController::importMethod
 * @see app/Http/Controllers/CourseExportImportController.php:65
 * @route '/admin/courses/import'
@@ -484,6 +770,28 @@ importMethod.post = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
     url: importMethod.url(options),
     method: 'post',
 })
+
+/**
+* @see \App\Http\Controllers\CourseExportImportController::importMethod
+* @see app/Http/Controllers/CourseExportImportController.php:65
+* @route '/admin/courses/import'
+*/
+const importMethodForm = (options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
+    action: importMethod.url(options),
+    method: 'post',
+})
+
+/**
+* @see \App\Http\Controllers\CourseExportImportController::importMethod
+* @see app/Http/Controllers/CourseExportImportController.php:65
+* @route '/admin/courses/import'
+*/
+importMethodForm.post = (options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
+    action: importMethod.url(options),
+    method: 'post',
+})
+
+importMethod.form = importMethodForm
 
 /**
 * @see \App\Http\Controllers\CourseExportImportController::importContent
@@ -542,6 +850,28 @@ importContent.post = (args: { course: number | { id: number } } | [course: numbe
     url: importContent.url(args, options),
     method: 'post',
 })
+
+/**
+* @see \App\Http\Controllers\CourseExportImportController::importContent
+* @see app/Http/Controllers/CourseExportImportController.php:136
+* @route '/admin/courses/{course}/import-content'
+*/
+const importContentForm = (args: { course: number | { id: number } } | [course: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
+    action: importContent.url(args, options),
+    method: 'post',
+})
+
+/**
+* @see \App\Http\Controllers\CourseExportImportController::importContent
+* @see app/Http/Controllers/CourseExportImportController.php:136
+* @route '/admin/courses/{course}/import-content'
+*/
+importContentForm.post = (args: { course: number | { id: number } } | [course: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
+    action: importContent.url(args, options),
+    method: 'post',
+})
+
+importContent.form = importContentForm
 
 const courses = {
     index: Object.assign(index, index),
