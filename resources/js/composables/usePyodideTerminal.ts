@@ -53,6 +53,8 @@ function setupStdout() {
 }
 
 async function runCode(code) {
+    setupStdout();
+    if (sab) setupStdinWithSAB(sab);
     try {
         await pyodide.loadPackagesFromImports(code);
         await pyodide.runPythonAsync(code);
