@@ -204,7 +204,7 @@ function submitResult() {
 }
 
 function reset() {
-    if (props.isAnswered) {
+    if (props.isAnswered && props.isCorrect) {
         return;
     }
 

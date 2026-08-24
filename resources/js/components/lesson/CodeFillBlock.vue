@@ -275,7 +275,7 @@ function submitAnswer() {
 }
 
 function reset() {
-    if (props.isAnswered) {
+    if (props.isAnswered && props.isCorrect) {
         return;
     }
 
@@ -373,7 +373,7 @@ function reset() {
             </button>
 
             <button
-                v-else-if="!isAnswered && !isCorrect"
+                v-else-if="!isCorrect"
                 type="button"
                 class="flex items-center gap-1.5 rounded-lg border px-5 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50"
                 @click="reset"

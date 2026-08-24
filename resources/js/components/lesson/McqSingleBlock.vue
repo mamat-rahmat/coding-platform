@@ -65,7 +65,7 @@ const submitAnswer = () => {
 };
 
 const reset = () => {
-    if (props.isAnswered) {
+    if (props.isAnswered && props.isCorrect) {
         return;
     }
 
@@ -137,7 +137,7 @@ const reset = () => {
             </button>
 
             <button
-                v-else-if="!isAnswered && !isCorrect"
+                v-else-if="!isCorrect"
                 type="button"
                 class="rounded-lg border px-5 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50"
                 @click="reset"
