@@ -223,7 +223,6 @@ export function usePyodideTerminal(): UsePyodideTerminalReturn {
     }
 
     function initWorker(): void {
-        stopped = false;
         pyodideLoading.value = true;
         pyodideError.value = null;
 
@@ -280,6 +279,7 @@ export function usePyodideTerminal(): UsePyodideTerminalReturn {
 
         switch (msg.type) {
             case 'ready':
+                stopped = false;
                 pyodideReady.value = true;
                 pyodideLoading.value = false;
                 break;
