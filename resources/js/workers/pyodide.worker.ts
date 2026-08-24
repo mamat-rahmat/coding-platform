@@ -74,6 +74,7 @@ function setupStdout(): void {
 
 async function runCode(code: string): Promise<void> {
     try {
+        setupStdout();
         await pyodide.loadPackagesFromImports(code);
         await pyodide.runPythonAsync(code);
         self.postMessage({ type: 'done' });

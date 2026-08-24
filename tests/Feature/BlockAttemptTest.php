@@ -197,3 +197,209 @@ test('answer is required for mcq single', function () {
         ->post(route('lesson-blocks.attempts.store', $block), [])
         ->assertSessionHasErrors(['answer']);
 });
+
+test('incorrect answer can be retried and updates the existing attempt', function () {
+    $user = User::factory()->create();
+    $block = LessonBlock::factory()->mcqSingle()->create();
+
+    $this->actingAs($user)
+        ->post(route('lesson-blocks.attempts.store', $block), ['answer' => 'a'])
+        ->assertRedirect();
+
+    $this->assertDatabaseHas('block_attempts', [
+        'user_id' => $user->id,
+        'lesson_block_id' => $block->id,
+        'selected_answer' => 'a',
+        'is_correct' => false,
+    ]);
+
+    $this->actingAs($user)
+        ->post(route('lesson-blocks.attempts.store', $block), ['answer' => 'c'])
+        ->assertRedirect();
+
+    $this->assertDatabaseHas('block_attempts', [
+        'user_id' => $user->id,
+        'lesson_block_id' => $block->id,
+        'selected_answer' => 'c',
+        'is_correct' => true,
+    ]);
+
+    expect(BlockAttempt::where('user_id', $user->id)
+        ->where('lesson_block_id', $block->id)
+        ->count())->toBe(1);
+});
+
+test('correct answer blocks further retries', function () {
+    $user = User::factory()->create();
+    $block = LessonBlock::factory()->mcqSingle()->create();
+
+    $this->actingAs($user)
+        ->post(route('lesson-blocks.attempts.store', $block), ['answer' => 'c'])
+        ->assertRedirect();
+
+    $response = $this->actingAs($user)
+        ->post(route('lesson-blocks.attempts.store', $block), ['answer' => 'a']);
+
+    $response->assertRedirect();
+
+    expect(BlockAttempt::where('user_id', $user->id)
+        ->where('lesson_block_id', $block->id)
+        ->count())->toBe(1);
+
+    expect(BlockAttempt::where('user_id', $user->id)
+        ->where('lesson_block_id', $block->id)
+        ->value('selected_answer'))->toBe('c');
+});
+
+test('wrong answer persisted then retried correctly updates attempt', function () {
+    $user = User::factory()->create();
+    $block = LessonBlock::factory()->mcqSingle()->create();
+
+    $this->actingAs($user)
+        ->post(route('lesson-blocks.attempts.store', $block), ['answer' => 'a']);
+
+    $this->actingAs($user)
+        ->post(route('lesson-blocks.attempts.store', $block), ['answer' => 'c']);
+
+    $attempt = BlockAttempt::where('user_id', $user->id)
+        ->where('lesson_block_id', $block->id)
+        ->first();
+
+    expect($attempt->selected_answer)->toBe('c')
+        ->and($attempt->is_correct)->toBeTrue()
+        ->and(BlockAttempt::where('user_id', $user->id)
+            ->where('lesson_block_id', $block->id)
+            ->count())->toBe(1);
+});
+
+test('mcq multiple can be retried after wrong answer', function () {
+    $user = User::factory()->create();
+    $block = LessonBlock::factory()->mcqMultiple()->create();
+
+    $this->actingAs($user)
+        ->post(route('lesson-blocks.attempts.store', $block), ['answer' => 'a,b'])
+        ->assertRedirect();
+
+    expect(BlockAttempt::where('user_id', $user->id)
+        ->where('lesson_block_id', $block->id)
+        ->value('is_correct'))->toBeFalse();
+
+    $this->actingAs($user)
+        ->post(route('lesson-blocks.attempts.store', $block), ['answer' => 'a,b,d'])
+        ->assertRedirect();
+
+    $attempt = BlockAttempt::where('user_id', $user->id)
+        ->where('lesson_block_id', $block->id)
+        ->first();
+
+    expect($attempt->selected_answer)->toBe('a,b,d')
+        ->and($attempt->is_correct)->toBeTrue();
+});
+
+test('code fill can be retried after wrong answer', function () {
+    $user = User::factory()->create();
+    $block = LessonBlock::factory()->codeFill()->create();
+
+    $this->actingAs($user)
+        ->post(route('lesson-blocks.attempts.store', $block), [
+            'answer' => 'A:"Wrong"',
+            'is_correct' => false,
+        ]);
+
+    $this->actingAs($user)
+        ->post(route('lesson-blocks.attempts.store', $block), [
+            'answer' => 'A:"Budi"',
+            'is_correct' => true,
+        ]);
+
+    $attempt = BlockAttempt::where('user_id', $user->id)
+        ->where('lesson_block_id', $block->id)
+        ->first();
+
+    expect($attempt->selected_answer)->toBe('A:"Budi"')
+        ->and($attempt->is_correct)->toBeTrue();
+});
+
+test('code reorder can be retried after wrong order', function () {
+    $user = User::factory()->create();
+    $block = LessonBlock::factory()->codeReorder()->create();
+
+    $this->actingAs($user)
+        ->post(route('lesson-blocks.attempts.store', $block), ['answer' => '0,1,2']);
+
+    $this->actingAs($user)
+        ->post(route('lesson-blocks.attempts.store', $block), ['answer' => '1,2,0']);
+
+    $attempt = BlockAttempt::where('user_id', $user->id)
+        ->where('lesson_block_id', $block->id)
+        ->first();
+
+    expect($attempt->selected_answer)->toBe('1,2,0')
+        ->and($attempt->is_correct)->toBeTrue();
+});
+
+test('code challenge can be retried after wrong attempt', function () {
+    $user = User::factory()->create();
+    $block = LessonBlock::factory()->codeChallenge()->create();
+
+    $this->actingAs($user)
+        ->post(route('lesson-blocks.attempts.store', $block), [
+            'answer' => '0/1',
+            'is_correct' => false,
+            'attempt_data' => ['tc1' => ['passed' => false]],
+            'score' => 0,
+        ]);
+
+    $this->actingAs($user)
+        ->post(route('lesson-blocks.attempts.store', $block), [
+            'answer' => '1/1',
+            'is_correct' => true,
+            'attempt_data' => ['tc1' => ['passed' => true]],
+            'score' => 100,
+        ]);
+
+    $attempt = BlockAttempt::where('user_id', $user->id)
+        ->where('lesson_block_id', $block->id)
+        ->first();
+
+    expect($attempt->selected_answer)->toBe('1/1')
+        ->and($attempt->is_correct)->toBeTrue()
+        ->and($attempt->attempt_data)->toBe(['tc1' => ['passed' => true]])
+        ->and($attempt->score)->toBe(100);
+});
+
+test('access block types cannot be retried', function () {
+    $user = User::factory()->create();
+    $block = LessonBlock::factory()->hint()->create();
+
+    $this->actingAs($user)
+        ->post(route('lesson-blocks.attempts.store', $block), ['answer' => '']);
+
+    $this->actingAs($user)
+        ->post(route('lesson-blocks.attempts.store', $block), ['answer' => '']);
+
+    expect(BlockAttempt::where('user_id', $user->id)
+        ->where('lesson_block_id', $block->id)
+        ->count())->toBe(1);
+});
+
+test('lesson completes when all graded blocks are correct after retry', function () {
+    $user = User::factory()->create();
+    $block = LessonBlock::factory()->mcqSingle()->create();
+
+    $this->actingAs($user)
+        ->post(route('lesson-blocks.attempts.store', $block), ['answer' => 'a']);
+
+    expect($user->lessonProgresses()
+        ->where('lesson_id', $block->lesson_id)
+        ->whereNotNull('completed_at')
+        ->exists())->toBeFalse();
+
+    $this->actingAs($user)
+        ->post(route('lesson-blocks.attempts.store', $block), ['answer' => 'c']);
+
+    expect($user->lessonProgresses()
+        ->where('lesson_id', $block->lesson_id)
+        ->whereNotNull('completed_at')
+        ->exists())->toBeTrue();
+});
