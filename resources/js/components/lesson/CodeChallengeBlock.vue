@@ -220,7 +220,6 @@ function reset() {
 <template>
     <div class="space-y-4">
         <div>
-            <h3 class="text-lg font-semibold text-gray-900">Tantangan Kode</h3>
             <p class="mt-2 text-sm text-gray-600">
                 <Markdown :content="content.prompt" />
             </p>
