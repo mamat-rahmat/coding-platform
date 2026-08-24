@@ -188,6 +188,7 @@ export function usePyodideTerminal(): UsePyodideTerminalReturn {
     let stdinResolve: ((value: string) => void) | null = null;
     let testcaseResolve: ((result: TestcaseResult) => void) | null = null;
     let pendingStdin: string | null = null;
+    let messageEpoch = 0;
 
     async function init(container: HTMLElement): Promise<void> {
         const { Terminal } = await import('@xterm/xterm');
@@ -222,6 +223,7 @@ export function usePyodideTerminal(): UsePyodideTerminalReturn {
     }
 
     function initWorker(): void {
+        messageEpoch++;
         pyodideLoading.value = true;
         pyodideError.value = null;
 
@@ -239,7 +241,7 @@ export function usePyodideTerminal(): UsePyodideTerminalReturn {
             return;
         }
 
-        worker.onmessage = handleWorkerMessage;
+        worker.onmessage = createMessageHandler(messageEpoch);
 
         worker.onerror = (err: ErrorEvent) => {
             const msg = err.message || 'Unknown worker error';
@@ -269,55 +271,57 @@ export function usePyodideTerminal(): UsePyodideTerminalReturn {
         }
     }
 
-    function handleWorkerMessage(e: MessageEvent): void {
-        const msg = e.data;
+    function createMessageHandler(epoch: number) {
+        return function handleWorkerMessage(e: MessageEvent): void {
+            if (epoch !== messageEpoch) {
+                return;
+            }
 
-        if (msg.type !== 'ready' && e.target !== worker) {
-            return;
-        }
+            const msg = e.data;
 
-        switch (msg.type) {
-            case 'ready':
-                pyodideReady.value = true;
-                pyodideLoading.value = false;
-                break;
+            switch (msg.type) {
+                case 'ready':
+                    pyodideReady.value = true;
+                    pyodideLoading.value = false;
+                    break;
 
-            case 'stdout':
-            case 'stderr':
-                term?.write(msg.data);
-                break;
+                case 'stdout':
+                case 'stderr':
+                    term?.write(msg.data);
+                    break;
 
-            case 'stdin_request':
-                promptStdin();
-                break;
+                case 'stdin_request':
+                    promptStdin();
+                    break;
 
-            case 'done':
-                term?.write('\r\n\x1b[33m--- Stopped ---\x1b[0m\r\n');
-                isRunning.value = false;
-                break;
+                case 'done':
+                    term?.write('\r\n\x1b[33m--- Stopped ---\x1b[0m\r\n');
+                    isRunning.value = false;
+                    break;
 
-            case 'error':
-                term?.write(`\r\n\x1b[31m${msg.data}\x1b[0m\r\n`);
-                term?.write('\r\n\x1b[33m--- Stopped ---\x1b[0m\r\n');
-                isRunning.value = false;
-                break;
+                case 'error':
+                    term?.write(`\r\n\x1b[31m${msg.data}\x1b[0m\r\n`);
+                    term?.write('\r\n\x1b[33m--- Stopped ---\x1b[0m\r\n');
+                    isRunning.value = false;
+                    break;
 
-            case 'testcase_result':
-                isRunning.value = false;
+                case 'testcase_result':
+                    isRunning.value = false;
 
-                if (testcaseResolve) {
-                    testcaseResolve({
-                        testcaseId: msg.testcaseId,
-                        passed: msg.passed,
-                        actual: msg.actual,
-                        expected: msg.expected,
-                        error: msg.error,
-                    });
-                    testcaseResolve = null;
-                }
+                    if (testcaseResolve) {
+                        testcaseResolve({
+                            testcaseId: msg.testcaseId,
+                            passed: msg.passed,
+                            actual: msg.actual,
+                            expected: msg.expected,
+                            error: msg.error,
+                        });
+                        testcaseResolve = null;
+                    }
 
-                break;
-        }
+                    break;
+            }
+        };
     }
 
     function handleTerminalInput(data: string): void {
