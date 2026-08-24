@@ -32,12 +32,12 @@ const blockAttemptData = (props.block as LessonBlock & { attempt_data?: Record<s
 
 <template>
     <div>
-        <p
+        <h2
             v-if="block.title"
             class="mb-2 text-sm font-medium text-gray-500"
         >
             [{{ blockTypeLabels[block.type] ?? block.type }}] {{ block.title }}
-        </p>
+        </h2>
 
         <TextBlock v-if="block.type === 'TEXT'" :block-id="block.id" :content="block.content" />
 
