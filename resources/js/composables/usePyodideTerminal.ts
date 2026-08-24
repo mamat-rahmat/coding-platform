@@ -448,6 +448,7 @@ export function usePyodideTerminal(): UsePyodideTerminalReturn {
             worker = null;
         }
 
+        term?.clear();
         isRunning.value = false;
         pyodideReady.value = false;
         pyodideLoading.value = false;
