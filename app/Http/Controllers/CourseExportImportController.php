@@ -161,7 +161,7 @@ class CourseExportImportController extends Controller
                 'lessons_added' => 0,
                 'lessons_merged' => 0,
                 'blocks_added' => 0,
-                'blocks_skipped' => 0,
+                'blocks_updated' => 0,
             ];
 
             $moduleOffset = ($course->modules()->max('sort_order') ?? -1) + 1;
@@ -171,6 +171,10 @@ class CourseExportImportController extends Controller
                 $existingModule = $course->modules()->where('slug', $moduleSlug)->first();
 
                 if ($existingModule) {
+                    $existingModule->update([
+                        'title' => $moduleData['title'] ?? $existingModule->title,
+                        'description' => $moduleData['description'] ?? $existingModule->description,
+                    ]);
                     $module = $existingModule;
                     $stats['modules_merged']++;
                 } else {
@@ -190,6 +194,12 @@ class CourseExportImportController extends Controller
                     $existingLesson = $module->lessons()->where('slug', $lessonSlug)->first();
 
                     if ($existingLesson) {
+                        $existingLesson->update([
+                            'title' => $lessonData['title'] ?? $existingLesson->title,
+                            'description' => $lessonData['description'] ?? $existingLesson->description,
+                            'is_published' => $lessonData['is_published'] ?? $existingLesson->is_published,
+                            'is_optional' => $lessonData['is_optional'] ?? $existingLesson->is_optional,
+                        ]);
                         $lesson = $existingLesson;
                         $stats['lessons_merged']++;
                     } else {
@@ -208,21 +218,26 @@ class CourseExportImportController extends Controller
 
                     foreach ($lessonData['blocks'] ?? [] as $blockData) {
                         $blockTitle = $blockData['title'] ?? null;
+                        $blockType = $blockData['type'] ?? 'TEXT';
 
                         if ($blockTitle !== null) {
                             $existingBlock = $lesson->blocks()
                                 ->where('title', $blockTitle)
-                                ->exists();
+                                ->where('type', $blockType)
+                                ->first();
 
                             if ($existingBlock) {
-                                $stats['blocks_skipped']++;
+                                $existingBlock->update([
+                                    'content' => $blockData['content'] ?? [],
+                                ]);
+                                $stats['blocks_updated']++;
 
                                 continue;
                             }
                         }
 
                         $lesson->blocks()->create([
-                            'type' => $blockData['type'] ?? 'TEXT',
+                            'type' => $blockType,
                             'title' => $blockTitle,
                             'content' => $blockData['content'] ?? [],
                             'sort_order' => $blockOffset++,

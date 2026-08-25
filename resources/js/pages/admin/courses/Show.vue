@@ -84,7 +84,7 @@ function importContent() {
                 throw new Error(data.message ?? 'Gagal import content.');
             }
 
-            importMessage.value = `Berhasil: ${data.modules_added} module baru, ${data.modules_merged} module digabung, ${data.lessons_added} lesson baru, ${data.lessons_merged} lesson digabung, ${data.blocks_added} block baru, ${data.blocks_skipped} block dilewati.`;
+            importMessage.value = `Berhasil: ${data.modules_added} module baru, ${data.modules_merged} module digabung, ${data.lessons_added} lesson baru, ${data.lessons_merged} lesson digabung, ${data.blocks_added} block baru, ${data.blocks_updated} block diperbarui.`;
             importFile.value = null;
 
             if (fileInput.value) {
