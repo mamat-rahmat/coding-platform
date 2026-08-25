@@ -2,9 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\Admin\MoveLessonBlockRequest;
 use App\Http\Requests\Admin\ReorderLessonBlocksRequest;
 use App\Http\Requests\Admin\StoreLessonBlockRequest;
 use App\Http\Requests\Admin\UpdateLessonBlockRequest;
+use App\Models\CourseModule;
 use App\Models\Lesson;
 use App\Models\LessonBlock;
 use Illuminate\Http\RedirectResponse;
@@ -24,8 +26,23 @@ class AdminLessonBlockController extends Controller
             'blocks' => fn ($q) => $q->orderBy('sort_order'),
         ]);
 
+        $courseLessons = CourseModule::where('course_id', $lesson->module->course_id)
+            ->with(['lessons' => fn ($q) => $q->orderBy('sort_order')])
+            ->orderBy('sort_order')
+            ->get()
+            ->map(fn (CourseModule $module) => [
+                'module_id' => $module->id,
+                'module_title' => $module->title,
+                'lessons' => $module->lessons->map(fn (Lesson $l) => [
+                    'id' => $l->id,
+                    'title' => $l->title,
+                    'is_optional' => $l->is_optional,
+                ]),
+            ]);
+
         return Inertia::render('admin/blocks/Index', [
             'lesson' => $lesson,
+            'courseLessons' => $courseLessons,
         ]);
     }
 
@@ -108,5 +125,40 @@ class AdminLessonBlockController extends Controller
         });
 
         return back()->with('success', 'Urutan block berhasil diperbarui.');
+    }
+
+    public function move(
+        MoveLessonBlockRequest $request,
+        LessonBlock $block,
+    ): RedirectResponse {
+        $this->authorize('update', $block);
+
+        $targetLessonId = $request->validated()['target_lesson_id'];
+        $sourceLessonId = $block->lesson_id;
+
+        if ($targetLessonId === $sourceLessonId) {
+            return back()->withErrors(['target_lesson_id' => 'Block sudah berada di lesson ini.']);
+        }
+
+        DB::transaction(function () use ($block, $targetLessonId, $sourceLessonId) {
+            $newSortOrder = (LessonBlock::where('lesson_id', $targetLessonId)->max('sort_order') ?? 0) + 1;
+
+            $block->update([
+                'lesson_id' => $targetLessonId,
+                'sort_order' => $newSortOrder,
+            ]);
+
+            $remaining = LessonBlock::where('lesson_id', $sourceLessonId)
+                ->orderBy('sort_order')
+                ->get();
+
+            foreach ($remaining as $index => $item) {
+                $item->update(['sort_order' => $index + 1]);
+            }
+        });
+
+        return redirect()
+            ->route('admin.blocks.index', $targetLessonId)
+            ->with('success', 'Block berhasil dipindahkan.');
     }
 }

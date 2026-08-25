@@ -8,11 +8,30 @@ import {
     GripVertical,
     Eye,
     Save,
+    MoveRight,
 } from '@lucide/vue';
-import { ref, watch } from 'vue';
+import { computed, ref, watch } from 'vue';
 import draggable from 'vuedraggable';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+    Dialog,
+    DialogClose,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+} from '@/components/ui/dialog';
+import {
+    Select,
+    SelectContent,
+    SelectGroup,
+    SelectItem,
+    SelectLabel,
+    SelectTrigger,
+    SelectValue,
+} from '@/components/ui/select';
 import adminRoutes from '@/routes/admin';
 import adminBlockRoutes from '@/routes/admin/blocks';
 import adminLessonRoutes from '@/routes/admin/lessons';
@@ -23,6 +42,18 @@ interface Block {
     title: string | null;
     sort_order: number;
     content: Record<string, unknown>;
+}
+
+interface CourseLesson {
+    id: number;
+    title: string;
+    is_optional: boolean;
+}
+
+interface CourseModuleGroup {
+    module_id: number;
+    module_title: string;
+    lessons: CourseLesson[];
 }
 
 interface Lesson {
@@ -39,11 +70,25 @@ interface Lesson {
 
 const props = defineProps<{
     lesson: Lesson;
+    courseLessons: CourseModuleGroup[];
 }>();
 
 const blocks = ref([...props.lesson.blocks]);
 const isDirty = ref(false);
 const isSaving = ref(false);
+const moveTarget = ref<Block | null>(null);
+const moveLessonId = ref<string>('');
+const isMoving = ref(false);
+
+const moveDialogOpen = computed({
+    get: () => moveTarget.value !== null,
+    set: (val: boolean) => {
+        if (!val) {
+            moveTarget.value = null;
+            moveLessonId.value = '';
+        }
+    },
+});
 
 watch(
     () => props.lesson.blocks,
@@ -100,6 +145,31 @@ function destroy(block: Block) {
     router.delete(adminBlockRoutes.destroy.url(block.id), {
         preserveScroll: true,
     });
+}
+
+function openMoveDialog(block: Block) {
+    moveTarget.value = block;
+    moveLessonId.value = '';
+}
+
+function moveBlock() {
+    if (!moveTarget.value || !moveLessonId.value) {
+        return;
+    }
+
+    isMoving.value = true;
+
+    router.patch(
+        adminBlockRoutes.move.url(moveTarget.value.id),
+        { target_lesson_id: Number(moveLessonId.value) },
+        {
+            onFinish: () => {
+                isMoving.value = false;
+                moveTarget.value = null;
+                moveLessonId.value = '';
+            },
+        },
+    );
 }
 
 function blockSummary(block: Block): string {
@@ -265,6 +335,14 @@ defineOptions({
                                 <Button
                                     variant="ghost"
                                     size="icon-sm"
+                                    @click="openMoveDialog(element)"
+                                >
+                                    <MoveRight class="h-4 w-4 text-blue-600" />
+                                </Button>
+
+                                <Button
+                                    variant="ghost"
+                                    size="icon-sm"
                                     @click="destroy(element)"
                                 >
                                     <Trash2 class="h-4 w-4 text-red-600" />
@@ -275,5 +353,62 @@ defineOptions({
                 </draggable>
             </CardContent>
         </Card>
+
+        <Dialog v-model:open="moveDialogOpen">
+            <DialogContent class="sm:max-w-md">
+                <DialogHeader>
+                    <DialogTitle>Pindahkan Block</DialogTitle>
+                    <DialogDescription>
+                        Pindahkan block
+                        <template v-if="moveTarget">
+                            <strong>{{
+                                moveTarget.title ?? moveTarget.type
+                            }}</strong>
+                        </template>
+                        ke lesson lain di course yang sama.
+                    </DialogDescription>
+                </DialogHeader>
+
+                <Select v-model="moveLessonId">
+                    <SelectTrigger class="w-full">
+                        <SelectValue placeholder="Pilih lesson tujuan..." />
+                    </SelectTrigger>
+                    <SelectContent>
+                        <SelectGroup
+                            v-for="mod in courseLessons"
+                            :key="mod.module_id"
+                        >
+                            <SelectLabel>{{ mod.module_title }}</SelectLabel>
+                            <SelectItem
+                                v-for="l in mod.lessons"
+                                :key="l.id"
+                                :value="String(l.id)"
+                                :disabled="l.id === lesson.id"
+                            >
+                                {{ l.title }}
+                                <span
+                                    v-if="l.id === lesson.id"
+                                    class="text-xs text-gray-400"
+                                >
+                                    (lesson saat ini)
+                                </span>
+                            </SelectItem>
+                        </SelectGroup>
+                    </SelectContent>
+                </Select>
+
+                <DialogFooter>
+                    <DialogClose as-child>
+                        <Button variant="outline">Batal</Button>
+                    </DialogClose>
+                    <Button
+                        :disabled="!moveLessonId || isMoving"
+                        @click="moveBlock"
+                    >
+                        Pindahkan
+                    </Button>
+                </DialogFooter>
+            </DialogContent>
+        </Dialog>
     </div>
 </template>

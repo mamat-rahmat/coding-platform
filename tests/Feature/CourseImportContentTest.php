@@ -80,7 +80,7 @@ test('import content into empty course creates all modules', function () {
     $response = uploadImportContent($course, $data);
 
     $response->assertOk();
-    $response->assertJson(['modules_added' => 1, 'modules_merged' => 0, 'lessons_added' => 1, 'lessons_merged' => 0, 'blocks_added' => 1, 'blocks_skipped' => 0]);
+    $response->assertJson(['modules_added' => 1, 'modules_merged' => 0, 'lessons_added' => 1, 'lessons_merged' => 0, 'blocks_added' => 1, 'blocks_updated' => 0]);
 
     expect(CourseModule::where('course_id', $course->id)->count())->toBe(1)
         ->and(Lesson::where('course_module_id', $course->modules()->first()->id)->count())->toBe(1)
@@ -140,7 +140,7 @@ test('import content merges lessons into existing module', function () {
     $response = uploadImportContent($course, $data);
 
     $response->assertOk();
-    $response->assertJson(['modules_added' => 0, 'modules_merged' => 1, 'lessons_added' => 1, 'lessons_merged' => 1, 'blocks_added' => 1, 'blocks_skipped' => 1]);
+    $response->assertJson(['modules_added' => 0, 'modules_merged' => 1, 'lessons_added' => 1, 'lessons_merged' => 1, 'blocks_added' => 1, 'blocks_updated' => 1]);
 
     expect($existingModule->fresh()->lessons()->count())->toBe(2)
         ->and($existingLesson->fresh()->blocks()->count())->toBe(2);
@@ -222,7 +222,7 @@ test('import content with null title block always adds', function () {
     $response = uploadImportContent($course, $data);
 
     $response->assertOk();
-    $response->assertJson(['blocks_added' => 1, 'blocks_skipped' => 0]);
+    $response->assertJson(['blocks_added' => 1, 'blocks_updated' => 0]);
 
     expect($lesson->fresh()->blocks()->count())->toBe(2);
 });

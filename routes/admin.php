@@ -55,6 +55,11 @@ Route::middleware(['auth', 'verified', 'admin'])->group(function () {
         [AdminLessonBlockController::class, 'reorder'],
     )->name('admin.blocks.reorder');
 
+    Route::patch(
+        'admin/blocks/{block}/move',
+        [AdminLessonBlockController::class, 'move'],
+    )->name('admin.blocks.move');
+
     Route::get(
         'admin/courses/{course}/export',
         [CourseExportImportController::class, 'export'],
