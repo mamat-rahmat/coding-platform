@@ -48,6 +48,7 @@
             "@php artisan key:generate",
             "@php artisan migrate --force",
             "npm install",
+            "php artisan wayfinder:generate",
             "npm run build"
         ],
         "dev": [
