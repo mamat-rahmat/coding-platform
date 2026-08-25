@@ -259,14 +259,10 @@ function toggleRow(entry: LeaderboardEntry) {
                                         </div>
 
                                         <span class="text-xs text-gray-500">
-                                            {{
-                                                entry.completed_lessons
-                                            }}
+                                            {{ entry.completed_lessons }}
                                             /
                                             {{ entry.total_lessons }}
-                                            lessons ({{
-                                                entry.percentage
-                                            }}%)
+                                            lessons ({{ entry.percentage }}%)
                                         </span>
                                     </div>
                                 </td>
@@ -284,9 +280,7 @@ function toggleRow(entry: LeaderboardEntry) {
                             >
                                 <td colspan="4" class="bg-gray-50 px-6 py-4">
                                     <div
-                                        v-if="
-                                            loadingUserId === entry.user_id
-                                        "
+                                        v-if="loadingUserId === entry.user_id"
                                         class="py-4 text-center text-sm text-gray-500"
                                     >
                                         Memuat detail pelajaran...
@@ -299,7 +293,9 @@ function toggleRow(entry: LeaderboardEntry) {
                                         class="space-y-4"
                                     >
                                         <div
-                                            v-for="mod in userProgressCache[entry.user_id]"
+                                            v-for="mod in userProgressCache[
+                                                entry.user_id
+                                            ]"
                                             :key="mod.id"
                                         >
                                             <h4
@@ -318,16 +314,22 @@ function toggleRow(entry: LeaderboardEntry) {
                                                         :class="
                                                             lesson.is_completed
                                                                 ? 'bg-green-50 text-green-700'
-                                                                : lesson.blocks_completed > 0
+                                                                : lesson.blocks_completed >
+                                                                    0
                                                                   ? 'bg-amber-50 text-amber-700'
                                                                   : 'text-gray-500'
                                                         "
-                                                        @click="toggleLesson(lesson.id)"
+                                                        @click="
+                                                            toggleLesson(
+                                                                lesson.id,
+                                                            )
+                                                        "
                                                     >
                                                         <ChevronRight
                                                             class="h-3.5 w-3.5 shrink-0 text-gray-400 transition-transform"
                                                             :class="
-                                                                expandedLessonId === lesson.id
+                                                                expandedLessonId ===
+                                                                lesson.id
                                                                     ? 'rotate-90'
                                                                     : ''
                                                             "
@@ -342,14 +344,25 @@ function toggleRow(entry: LeaderboardEntry) {
                                                             v-else
                                                             class="inline-block h-3.5 w-3.5 shrink-0 rounded-full border-2"
                                                             :class="
-                                                                lesson.blocks_completed > 0
+                                                                lesson.blocks_completed >
+                                                                0
                                                                     ? 'border-amber-400'
                                                                     : 'border-gray-300'
                                                             "
                                                         />
-                                                        <span class="truncate">{{ lesson.sort_order }} {{ lesson.title }}</span>
+                                                        <span class="truncate"
+                                                            >{{
+                                                                lesson.sort_order
+                                                            }}
+                                                            {{
+                                                                lesson.title
+                                                            }}</span
+                                                        >
                                                         <span
-                                                            v-if="lesson.blocks_total > 0"
+                                                            v-if="
+                                                                lesson.blocks_total >
+                                                                0
+                                                            "
                                                             class="ml-auto shrink-0 text-xs"
                                                             :class="
                                                                 lesson.is_completed
@@ -357,13 +370,22 @@ function toggleRow(entry: LeaderboardEntry) {
                                                                     : 'text-gray-400'
                                                             "
                                                         >
-                                                            {{ lesson.blocks_completed }}/{{ lesson.blocks_total }}
+                                                            {{
+                                                                lesson.blocks_completed
+                                                            }}/{{
+                                                                lesson.blocks_total
+                                                            }}
                                                         </span>
                                                     </div>
 
                                                     <div
-                                                        v-if="expandedLessonId === lesson.id && lesson.blocks.length > 0"
-                                                        class="ml-8 mt-1 space-y-0.5"
+                                                        v-if="
+                                                            expandedLessonId ===
+                                                                lesson.id &&
+                                                            lesson.blocks
+                                                                .length > 0
+                                                        "
+                                                        class="mt-1 ml-8 space-y-0.5"
                                                     >
                                                         <div
                                                             v-for="block in lesson.blocks"
@@ -383,8 +405,24 @@ function toggleRow(entry: LeaderboardEntry) {
                                                                         : 'bg-gray-300'
                                                                 "
                                                             />
-                                                            <span class="text-gray-500">{{ block.sort_order }}</span>
-                                                            <span>{{ blockTypeLabel(block.type) }}{{ block.title ? ': ' + block.title : '' }}</span>
+                                                            <span
+                                                                class="text-gray-500"
+                                                                >{{
+                                                                    block.sort_order
+                                                                }}</span
+                                                            >
+                                                            <span
+                                                                >{{
+                                                                    blockTypeLabel(
+                                                                        block.type,
+                                                                    )
+                                                                }}{{
+                                                                    block.title
+                                                                        ? ': ' +
+                                                                          block.title
+                                                                        : ''
+                                                                }}</span
+                                                            >
                                                         </div>
                                                     </div>
                                                 </div>

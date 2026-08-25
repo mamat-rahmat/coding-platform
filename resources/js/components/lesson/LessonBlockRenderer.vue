@@ -28,22 +28,33 @@ const blockTypeLabels: Record<string, string> = {
     CODE_CHALLENGE: 'Tantangan Kode',
 };
 
-const blockAnswered = (props.block as LessonBlock & { is_answered?: boolean }).is_answered ?? false;
-const blockCorrect = (props.block as LessonBlock & { is_correct?: boolean }).is_correct ?? null;
-const blockSelectedAnswer = (props.block as LessonBlock & { selected_answer?: string }).selected_answer ?? null;
-const blockAttemptData = (props.block as LessonBlock & { attempt_data?: Record<string, unknown> | null }).attempt_data ?? null;
+const blockAnswered =
+    (props.block as LessonBlock & { is_answered?: boolean }).is_answered ??
+    false;
+const blockCorrect =
+    (props.block as LessonBlock & { is_correct?: boolean }).is_correct ?? null;
+const blockSelectedAnswer =
+    (props.block as LessonBlock & { selected_answer?: string })
+        .selected_answer ?? null;
+const blockAttemptData =
+    (
+        props.block as LessonBlock & {
+            attempt_data?: Record<string, unknown> | null;
+        }
+    ).attempt_data ?? null;
 </script>
 
 <template>
     <div>
-        <h2
-            v-if="block.title"
-            class="mb-2 text-lg font-bold text-gray-900"
-        >
+        <h2 v-if="block.title" class="mb-2 text-lg font-bold text-gray-900">
             [{{ blockTypeLabels[block.type] ?? block.type }}] {{ block.title }}
         </h2>
 
-        <TextBlock v-if="block.type === 'TEXT'" :block-id="block.id" :content="block.content" />
+        <TextBlock
+            v-if="block.type === 'TEXT'"
+            :block-id="block.id"
+            :content="block.content"
+        />
 
         <CodeExampleBlock
             v-else-if="block.type === 'CODE_EXAMPLE'"

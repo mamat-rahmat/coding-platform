@@ -208,7 +208,10 @@ defineOptions({
 
                         <div class="flex-1">
                             <div class="font-medium text-gray-900">
-                                Block #{{ block.sort_order }}<template v-if="block.title">: {{ block.title }}</template>
+                                Block #{{ block.sort_order
+                                }}<template v-if="block.title"
+                                    >: {{ block.title }}</template
+                                >
                             </div>
                             <div class="truncate text-xs text-gray-500">
                                 {{ blockTypeLabels[block.type] ?? block.type }}

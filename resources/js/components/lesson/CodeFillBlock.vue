@@ -38,7 +38,9 @@ const props = defineProps<{
 }>();
 
 const submitted = ref(props.isAnswered ?? false);
-const isCorrect = ref<boolean | null>(props.isAnswered ? (props.isCorrect ?? null) : null);
+const isCorrect = ref<boolean | null>(
+    props.isAnswered ? (props.isCorrect ?? null) : null,
+);
 const blankResults = ref<boolean[]>([]);
 
 const shuffledOptions = ref<Option[]>(
@@ -109,7 +111,9 @@ function restoreFromAnswer(): (number | null)[] {
 }
 
 const optionPlacements = ref<(number | null)[]>(
-    props.isAnswered ? restoreFromAnswer() : props.content.blanks.map(() => null),
+    props.isAnswered
+        ? restoreFromAnswer()
+        : props.content.blanks.map(() => null),
 );
 
 if (props.isAnswered) {

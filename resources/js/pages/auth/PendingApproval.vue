@@ -25,9 +25,9 @@ defineOptions({
                 Akun Menunggu Persetujuan
             </h2>
             <p class="mt-2 text-sm text-gray-600">
-                Akun Anda telah berhasil dibuat dan sedang menunggu
-                persetujuan dari admin. Anda akan dapat mengakses platform
-                setelah akun disetujui.
+                Akun Anda telah berhasil dibuat dan sedang menunggu persetujuan
+                dari admin. Anda akan dapat mengakses platform setelah akun
+                disetujui.
             </p>
         </div>
 

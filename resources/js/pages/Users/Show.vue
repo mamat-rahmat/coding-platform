@@ -1,6 +1,13 @@
 <script setup lang="ts">
 import { Head, Link } from '@inertiajs/vue3';
-import { ChevronDown, ChevronRight, Check, User, BookOpen, Trophy } from '@lucide/vue';
+import {
+    ChevronDown,
+    ChevronRight,
+    Check,
+    User,
+    BookOpen,
+    Trophy,
+} from '@lucide/vue';
 import { ref } from 'vue';
 import courseRoutes from '@/routes/courses';
 
@@ -140,7 +147,9 @@ function formatDate(dateString: string): string {
                     </div>
 
                     <div>
-                        <h1 class="text-3xl font-bold tracking-tight text-gray-900">
+                        <h1
+                            class="text-3xl font-bold tracking-tight text-gray-900"
+                        >
                             {{ profileUser.name }}
                         </h1>
 
@@ -178,16 +187,15 @@ function formatDate(dateString: string): string {
                 </div>
 
                 <div v-else class="space-y-3">
-                    <template
-                        v-for="course in courses"
-                        :key="course.id"
-                    >
+                    <template v-for="course in courses" :key="course.id">
                         <div class="overflow-hidden rounded-xl border bg-white">
                             <div
                                 class="cursor-pointer p-5 transition-colors hover:bg-gray-50"
                                 @click="toggleCourse(course)"
                             >
-                                <div class="flex items-start justify-between gap-4">
+                                <div
+                                    class="flex items-start justify-between gap-4"
+                                >
                                     <div class="flex items-center gap-2">
                                         <ChevronDown
                                             class="h-4 w-4 shrink-0 text-gray-400 transition-transform"
@@ -197,7 +205,9 @@ function formatDate(dateString: string): string {
                                                     : ''
                                             "
                                         />
-                                        <h3 class="text-lg font-semibold text-gray-900">
+                                        <h3
+                                            class="text-lg font-semibold text-gray-900"
+                                        >
                                             {{ course.title }}
                                         </h3>
                                         <span
@@ -208,13 +218,20 @@ function formatDate(dateString: string): string {
                                                     : 'bg-gray-100 text-gray-600'
                                             "
                                         >
-                                            {{ course.percentage === 100 ? 'Selesai' : 'Dalam progress' }}
+                                            {{
+                                                course.percentage === 100
+                                                    ? 'Selesai'
+                                                    : 'Dalam progress'
+                                            }}
                                         </span>
                                     </div>
 
                                     <div class="flex items-center gap-3">
                                         <span class="text-xs text-gray-500">
-                                            {{ course.completed_lessons }}/{{ course.total_lessons }} lessons
+                                            {{ course.completed_lessons }}/{{
+                                                course.total_lessons
+                                            }}
+                                            lessons
                                         </span>
 
                                         <Link
@@ -228,14 +245,19 @@ function formatDate(dateString: string): string {
                                 </div>
 
                                 <p class="mt-1 ml-6 text-sm text-gray-500">
-                                    {{ course.language }} · {{ course.level }} · {{ course.xp_reward }} XP
+                                    {{ course.language }} · {{ course.level }} ·
+                                    {{ course.xp_reward }} XP
                                 </p>
 
                                 <div class="mt-3 ml-6">
-                                    <div class="h-2 overflow-hidden rounded-full bg-gray-200">
+                                    <div
+                                        class="h-2 overflow-hidden rounded-full bg-gray-200"
+                                    >
                                         <div
                                             class="h-full rounded-full bg-gray-900 transition-all"
-                                            :style="{ width: `${course.percentage}%` }"
+                                            :style="{
+                                                width: `${course.percentage}%`,
+                                            }"
                                         />
                                     </div>
                                     <p class="mt-1 text-xs text-gray-500">
@@ -260,7 +282,9 @@ function formatDate(dateString: string): string {
                                     class="space-y-4"
                                 >
                                     <div
-                                        v-for="mod in courseProgressCache[course.id]"
+                                        v-for="mod in courseProgressCache[
+                                            course.id
+                                        ]"
                                         :key="mod.id"
                                     >
                                         <h4
@@ -279,36 +303,49 @@ function formatDate(dateString: string): string {
                                                     :class="
                                                         lesson.is_completed
                                                             ? 'bg-green-50 text-green-700'
-                                                            : lesson.blocks_completed > 0
+                                                            : lesson.blocks_completed >
+                                                                0
                                                               ? 'bg-amber-50 text-amber-700'
                                                               : 'text-gray-500'
                                                     "
-                                                    @click="toggleLesson(lesson.id)"
+                                                    @click="
+                                                        toggleLesson(lesson.id)
+                                                    "
                                                 >
                                                     <ChevronRight
                                                         class="h-3.5 w-3.5 shrink-0 text-gray-400 transition-transform"
                                                         :class="
-                                                            expandedLessonId === lesson.id
+                                                            expandedLessonId ===
+                                                            lesson.id
                                                                 ? 'rotate-90'
                                                                 : ''
                                                         "
                                                     />
                                                     <Check
-                                                        v-if="lesson.is_completed"
+                                                        v-if="
+                                                            lesson.is_completed
+                                                        "
                                                         class="h-3.5 w-3.5 shrink-0 text-green-600"
                                                     />
                                                     <span
                                                         v-else
                                                         class="inline-block h-3.5 w-3.5 shrink-0 rounded-full border-2"
                                                         :class="
-                                                            lesson.blocks_completed > 0
+                                                            lesson.blocks_completed >
+                                                            0
                                                                 ? 'border-amber-400'
                                                                 : 'border-gray-300'
                                                         "
                                                     />
-                                                    <span class="truncate">{{ lesson.sort_order }} {{ lesson.title }}</span>
+                                                    <span class="truncate"
+                                                        >{{ lesson.sort_order }}
+                                                        {{ lesson.title }}</span
+                                                    >
                                                     <span
-                                                        v-if="lesson.blocks_total > 0"
+                                                        v-if="
+                                                            lesson.blocks_total >
+                                                            0
+                                                        "
                                                         class="ml-auto shrink-0 text-xs"
                                                         :class="
                                                             lesson.is_completed
@@ -316,13 +353,21 @@ function formatDate(dateString: string): string {
                                                                 : 'text-gray-400'
                                                         "
                                                     >
-                                                        {{ lesson.blocks_completed }}/{{ lesson.blocks_total }}
+                                                        {{
+                                                            lesson.blocks_completed
+                                                        }}/{{
+                                                            lesson.blocks_total
+                                                        }}
                                                     </span>
                                                 </div>
 
                                                 <div
-                                                    v-if="expandedLessonId === lesson.id && lesson.blocks.length > 0"
-                                                    class="ml-8 mt-1 space-y-0.5"
+                                                    v-if="
+                                                        expandedLessonId ===
+                                                            lesson.id &&
+                                                        lesson.blocks.length > 0
+                                                    "
+                                                    class="mt-1 ml-8 space-y-0.5"
                                                 >
                                                     <div
                                                         v-for="block in lesson.blocks"
@@ -342,8 +387,24 @@ function formatDate(dateString: string): string {
                                                                     : 'bg-gray-300'
                                                             "
                                                         />
-                                                        <span class="text-gray-500">{{ block.sort_order }}</span>
-                                                        <span>{{ blockTypeLabel(block.type) }}{{ block.title ? ': ' + block.title : '' }}</span>
+                                                        <span
+                                                            class="text-gray-500"
+                                                            >{{
+                                                                block.sort_order
+                                                            }}</span
+                                                        >
+                                                        <span
+                                                            >{{
+                                                                blockTypeLabel(
+                                                                    block.type,
+                                                                )
+                                                            }}{{
+                                                                block.title
+                                                                    ? ': ' +
+                                                                      block.title
+                                                                    : ''
+                                                            }}</span
+                                                        >
                                                     </div>
                                                 </div>
                                             </div>

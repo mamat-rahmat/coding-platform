@@ -312,7 +312,9 @@ defineOptions({
                                     {{
                                         blockTypeLabels[element.type] ??
                                         element.type
-                                    }}<template v-if="element.title">: {{ element.title }}</template>
+                                    }}<template v-if="element.title"
+                                        >: {{ element.title }}</template
+                                    >
                                 </div>
                                 <div class="truncate text-xs text-gray-500">
                                     {{ blockSummary(element) }}

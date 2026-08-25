@@ -131,14 +131,14 @@ const steps = [
                 <h1
                     class="mx-auto mt-6 max-w-3xl text-5xl font-bold tracking-tight text-balance"
                 >
-                    Belajar Coding Lewat 
+                    Belajar Coding Lewat
                     <span class="text-gray-400">Tantangan Interaktif</span>
                 </h1>
 
                 <p class="mx-auto mt-6 max-w-2xl text-lg text-gray-600">
                     Pelajari pemrograman dengan cara yang lebih menyenangkan.
-                    Ikuti pelajaran singkat, tulis kode sendiri,
-                    jalankan langsung di browser, dan selesaikan tantangan interaktif
+                    Ikuti pelajaran singkat, tulis kode sendiri, jalankan
+                    langsung di browser, dan selesaikan tantangan interaktif
                 </p>
 
                 <div

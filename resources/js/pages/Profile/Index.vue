@@ -66,20 +66,28 @@ defineOptions({
                                         : 'bg-gray-100 text-gray-600'
                                 "
                             >
-                                {{ course.percentage === 100 ? 'Selesai' : 'Dalam progress' }}
+                                {{
+                                    course.percentage === 100
+                                        ? 'Selesai'
+                                        : 'Dalam progress'
+                                }}
                             </span>
                         </div>
 
                         <p class="mt-1 text-sm text-gray-500">
                             {{ course.language }} · {{ course.level }} ·
-                            {{ course.completed_lessons }}/{{ course.total_lessons }} lessons ·
-                            {{ course.xp_reward }} XP
+                            {{ course.completed_lessons }}/{{
+                                course.total_lessons
+                            }}
+                            lessons · {{ course.xp_reward }} XP
                         </p>
                     </div>
 
                     <div class="flex gap-2">
                         <Link
-                            :href="profileRoutes['courseProgress'].url(course.slug)"
+                            :href="
+                                profileRoutes['courseProgress'].url(course.slug)
+                            "
                             class="rounded-lg bg-gray-900 px-4 py-2 text-sm font-medium text-white hover:bg-gray-700"
                         >
                             Lihat Progress

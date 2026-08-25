@@ -33,7 +33,11 @@ defineProps<Props>();
     <DropdownMenuSeparator />
     <DropdownMenuGroup>
         <DropdownMenuItem :as-child="true">
-            <Link class="block w-full cursor-pointer" :href="profileRoutes.index.url()" prefetch>
+            <Link
+                class="block w-full cursor-pointer"
+                :href="profileRoutes.index.url()"
+                prefetch
+            >
                 <UserIcon class="mr-2 h-4 w-4" />
                 Profil Saya
             </Link>

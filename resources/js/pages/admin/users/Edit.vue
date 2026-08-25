@@ -89,10 +89,7 @@ defineOptions({
                     <div>
                         <Label for="name">Name</Label>
                         <Input id="name" v-model="form.name" required />
-                        <p
-                            v-if="errors.name"
-                            class="mt-1 text-xs text-red-600"
-                        >
+                        <p v-if="errors.name" class="mt-1 text-xs text-red-600">
                             {{ errors.name }}
                         </p>
                     </div>
@@ -177,9 +174,7 @@ defineOptions({
 
         <Card v-if="!user.is_admin" class="mt-6">
             <CardHeader>
-                <CardTitle class="text-destructive">
-                    Danger Zone
-                </CardTitle>
+                <CardTitle class="text-destructive"> Danger Zone </CardTitle>
             </CardHeader>
 
             <CardContent>
@@ -189,8 +184,8 @@ defineOptions({
                     <div>
                         <p class="font-medium">Reset Progress</p>
                         <p class="text-sm text-gray-500">
-                            Hapus semua lesson selesai, jawaban block,
-                            dan enrollment course untuk user ini.
+                            Hapus semua lesson selesai, jawaban block, dan
+                            enrollment course untuk user ini.
                         </p>
                     </div>
 
@@ -206,17 +201,14 @@ defineOptions({
                                 <DialogDescription>
                                     Semua progress belajar
                                     <strong>{{ user.name }}</strong> akan
-                                    dihapus: lesson selesai, jawaban
-                                    block, dan enrollment course.
-                                    Tindakan ini tidak dapat
+                                    dihapus: lesson selesai, jawaban block, dan
+                                    enrollment course. Tindakan ini tidak dapat
                                     dibatalkan.
                                 </DialogDescription>
                             </DialogHeader>
                             <DialogFooter>
                                 <DialogClose as-child>
-                                    <Button variant="outline">
-                                        Batal
-                                    </Button>
+                                    <Button variant="outline"> Batal </Button>
                                 </DialogClose>
                                 <Button
                                     variant="destructive"

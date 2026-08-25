@@ -54,8 +54,8 @@ defineProps<{
 
 const page = usePage();
 
-const isAdmin = computed(
-    () => Boolean((page.props.auth?.user as { is_admin?: boolean })?.is_admin),
+const isAdmin = computed(() =>
+    Boolean((page.props.auth?.user as { is_admin?: boolean })?.is_admin),
 );
 </script>
 
@@ -224,7 +224,10 @@ const isAdmin = computed(
                                 <div>
                                     <div class="flex items-center gap-2">
                                         <h3 class="font-medium text-gray-900">
-                                            {{ module.sort_order }}.{{ lesson.sort_order }} {{ lesson.title }}
+                                            {{ module.sort_order }}.{{
+                                                lesson.sort_order
+                                            }}
+                                            {{ lesson.title }}
                                         </h3>
 
                                         <span

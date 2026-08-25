@@ -26,7 +26,9 @@ const props = defineProps<{
 const selectedAnswer = ref<string | null>(props.selectedAnswer ?? null);
 const submitted = ref(props.isAnswered ?? false);
 
-const isCorrect = ref<boolean | null>(props.isAnswered ? (props.isCorrect ?? null) : null);
+const isCorrect = ref<boolean | null>(
+    props.isAnswered ? (props.isCorrect ?? null) : null,
+);
 
 const submitAnswer = () => {
     if (!selectedAnswer.value) {

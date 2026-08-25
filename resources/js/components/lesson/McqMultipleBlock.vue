@@ -27,7 +27,9 @@ const selectedAnswers = ref<string[]>(
     props.selectedAnswer ? props.selectedAnswer.split(',') : [],
 );
 const submitted = ref(props.isAnswered ?? false);
-const isCorrect = ref<boolean | null>(props.isAnswered ? (props.isCorrect ?? null) : null);
+const isCorrect = ref<boolean | null>(
+    props.isAnswered ? (props.isCorrect ?? null) : null,
+);
 
 const toggleAnswer = (optionId: string) => {
     if (submitted.value) {

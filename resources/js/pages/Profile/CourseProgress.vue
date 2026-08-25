@@ -167,7 +167,9 @@ function blockTypeLabel(type: string): string {
                                         : 'text-gray-400'
                                 "
                             >
-                                {{ lesson.blocks_completed }}/{{ lesson.blocks_total }}
+                                {{ lesson.blocks_completed }}/{{
+                                    lesson.blocks_total
+                                }}
                             </span>
                         </div>
 
@@ -193,8 +195,15 @@ function blockTypeLabel(type: string): string {
                                             : 'bg-gray-300'
                                     "
                                 />
-                                <span class="text-gray-500">{{ block.sort_order }}.</span>
-                                <span>{{ blockTypeLabel(block.type) }}{{ block.title ? ': ' + block.title : '' }}</span>
+                                <span class="text-gray-500"
+                                    >{{ block.sort_order }}.</span
+                                >
+                                <span
+                                    >{{ blockTypeLabel(block.type)
+                                    }}{{
+                                        block.title ? ': ' + block.title : ''
+                                    }}</span
+                                >
                             </div>
                         </div>
                     </div>

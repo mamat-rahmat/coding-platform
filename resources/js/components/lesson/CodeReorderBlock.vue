@@ -44,7 +44,9 @@ const shuffledIndices = ref<number[]>(
 );
 
 const submitted = ref(props.isAnswered ?? false);
-const isCorrect = ref<boolean | null>(props.isAnswered ? (props.isCorrect ?? null) : null);
+const isCorrect = ref<boolean | null>(
+    props.isAnswered ? (props.isCorrect ?? null) : null,
+);
 
 const currentOrder = computed(() => [...shuffledIndices.value]);
 

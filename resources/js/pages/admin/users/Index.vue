@@ -98,9 +98,7 @@ function formatDate(dateString: string): string {
         <div class="flex items-center justify-between">
             <div>
                 <h1 class="text-2xl font-bold tracking-tight">Users</h1>
-                <p class="text-sm text-gray-500">
-                    Kelola semua pengguna.
-                </p>
+                <p class="text-sm text-gray-500">Kelola semua pengguna.</p>
             </div>
         </div>
 
@@ -170,11 +168,11 @@ function formatDate(dateString: string): string {
                             </div>
 
                             <p class="text-xs text-gray-500">
-                                {{ user.email }} · {{
-                                    user.lesson_progresses_count
-                                }} lessons completed · {{
-                                    user.block_attempts_count
-                                }} attempts · Joined
+                                {{ user.email }} ·
+                                {{ user.lesson_progresses_count }} lessons
+                                completed ·
+                                {{ user.block_attempts_count }} attempts ·
+                                Joined
                                 {{ formatDate(user.created_at) }}
                             </p>
                         </div>
@@ -199,11 +197,7 @@ function formatDate(dateString: string): string {
                             </Button>
 
                             <Button as-child variant="ghost" size="icon-sm">
-                                <Link
-                                    :href="
-                                        adminUserRoutes.edit.url(user.id)
-                                    "
-                                >
+                                <Link :href="adminUserRoutes.edit.url(user.id)">
                                     <Pencil class="h-4 w-4" />
                                 </Link>
                             </Button>
@@ -233,13 +227,11 @@ function formatDate(dateString: string): string {
                                         >
                                         <DialogDescription>
                                             Semua progress belajar
-                                            <strong>{{
-                                                user.name
-                                            }}</strong
-                                            > akan dihapus: lesson
-                                            selesai, jawaban block, dan
-                                            enrollment course. Tindakan
-                                            ini tidak dapat dibatalkan.
+                                            <strong>{{ user.name }}</strong>
+                                            akan dihapus: lesson selesai,
+                                            jawaban block, dan enrollment
+                                            course. Tindakan ini tidak dapat
+                                            dibatalkan.
                                         </DialogDescription>
                                     </DialogHeader>
                                     <DialogFooter>
