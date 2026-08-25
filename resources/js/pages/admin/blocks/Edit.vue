@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import type { FormDataConvertible } from '@inertiajs/core';
 import { Head, Link, router } from '@inertiajs/vue3';
 import { ArrowLeft, Eye } from '@lucide/vue';
 import { reactive } from 'vue';
@@ -33,7 +34,7 @@ const props = defineProps<{
 const form = reactive({
     type: props.block.type,
     title: props.block.title ?? '',
-    content: { ...props.block.content },
+    content: { ...props.block.content } as Record<string, FormDataConvertible>,
     sort_order: props.block.sort_order,
 });
 

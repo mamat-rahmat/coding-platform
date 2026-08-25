@@ -40,7 +40,8 @@ const user = computed(() => page.props.auth.user);
         />
 
         <Form
-            v-bind="ProfileController.update.form()"
+            :action="ProfileController.update.url()"
+            method="patch"
             class="space-y-6"
             v-slot="{ errors, processing }"
         >

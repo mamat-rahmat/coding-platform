@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import type { FormDataConvertible } from '@inertiajs/core';
 import { Head, Link, router } from '@inertiajs/vue3';
 import { ArrowLeft } from '@lucide/vue';
 import { reactive } from 'vue';
@@ -62,7 +63,7 @@ const blockTypes: { value: string; label: string; description: string }[] = [
     },
 ];
 
-const defaultContent: Record<string, Record<string, unknown>> = {
+const defaultContent: Record<string, Record<string, FormDataConvertible>> = {
     TEXT: { text: '' },
     CODE_EXAMPLE: { language: 'python', code: '' },
     HINT: { title: 'Petunjuk', text: '' },
