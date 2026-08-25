@@ -67,7 +67,7 @@ class CourseExportImportController extends Controller
         $this->authorize('create', Course::class);
 
         $request->validate([
-            'file' => ['required', 'file', 'extensions:json', 'max:10240'],
+            'file' => ['required', 'file', 'extensions:json', 'max:20480'],
         ]);
 
         $content = file_get_contents($request->file('file')->getRealPath());
@@ -138,7 +138,7 @@ class CourseExportImportController extends Controller
         $this->authorize('update', $course);
 
         $request->validate([
-            'file' => ['required', 'file', 'extensions:json', 'max:10240'],
+            'file' => ['required', 'file', 'extensions:json', 'max:20480'],
         ]);
 
         $content = file_get_contents($request->file('file')->getRealPath());
