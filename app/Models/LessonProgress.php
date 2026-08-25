@@ -23,11 +23,17 @@ class LessonProgress extends Model
         ];
     }
 
+    /**
+     * @return BelongsTo<User, LessonProgress>
+     */
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }
 
+    /**
+     * @return BelongsTo<Lesson, LessonProgress>
+     */
     public function lesson(): BelongsTo
     {
         return $this->belongsTo(Lesson::class);

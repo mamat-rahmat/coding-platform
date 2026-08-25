@@ -28,11 +28,17 @@ class LessonBlock extends Model
         ];
     }
 
+    /**
+     * @return BelongsTo<Lesson, LessonBlock>
+     */
     public function lesson(): BelongsTo
     {
         return $this->belongsTo(Lesson::class);
     }
 
+    /**
+     * @return HasMany<BlockAttempt, LessonBlock>
+     */
     public function blockAttempts(): HasMany
     {
         return $this->hasMany(BlockAttempt::class);

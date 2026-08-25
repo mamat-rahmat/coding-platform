@@ -61,16 +61,25 @@ class User extends Authenticatable
         ];
     }
 
+    /**
+     * @return HasMany<LessonProgress, User>
+     */
     public function lessonProgresses(): HasMany
     {
         return $this->hasMany(LessonProgress::class);
     }
 
+    /**
+     * @return HasMany<BlockAttempt, User>
+     */
     public function blockAttempts(): HasMany
     {
         return $this->hasMany(BlockAttempt::class);
     }
 
+    /**
+     * @return BelongsToMany<Course, User>
+     */
     public function courses(): BelongsToMany
     {
         return $this->belongsToMany(Course::class)->withTimestamps();

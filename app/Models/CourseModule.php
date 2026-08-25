@@ -20,11 +20,17 @@ class CourseModule extends Model
         'sort_order',
     ];
 
+    /**
+     * @return BelongsTo<Course, CourseModule>
+     */
     public function course(): BelongsTo
     {
         return $this->belongsTo(Course::class);
     }
 
+    /**
+     * @return HasMany<Lesson, CourseModule>
+     */
     public function lessons(): HasMany
     {
         return $this->hasMany(Lesson::class);

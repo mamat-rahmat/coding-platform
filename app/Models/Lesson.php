@@ -30,16 +30,25 @@ class Lesson extends Model
         ];
     }
 
+    /**
+     * @return BelongsTo<CourseModule, Lesson>
+     */
     public function module(): BelongsTo
     {
         return $this->belongsTo(CourseModule::class, 'course_module_id');
     }
 
+    /**
+     * @return HasMany<LessonBlock, Lesson>
+     */
     public function blocks(): HasMany
     {
         return $this->hasMany(LessonBlock::class);
     }
 
+    /**
+     * @return HasMany<LessonProgress, Lesson>
+     */
     public function progresses(): HasMany
     {
         return $this->hasMany(LessonProgress::class);

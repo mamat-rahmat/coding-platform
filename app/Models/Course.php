@@ -30,11 +30,17 @@ class Course extends Model
         ];
     }
 
+    /**
+     * @return HasMany<CourseModule, Course>
+     */
     public function modules(): HasMany
     {
         return $this->hasMany(CourseModule::class);
     }
 
+    /**
+     * @return HasManyThrough<Lesson, CourseModule, Course>
+     */
     public function lessons(): HasManyThrough
     {
         return $this->hasManyThrough(
@@ -45,6 +51,9 @@ class Course extends Model
         );
     }
 
+    /**
+     * @return BelongsToMany<Course, User>
+     */
     public function users(): BelongsToMany
     {
         return $this->belongsToMany(User::class)->withTimestamps();

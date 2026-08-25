@@ -30,11 +30,17 @@ class BlockAttempt extends Model
         ];
     }
 
+    /**
+     * @return BelongsTo<User, BlockAttempt>
+     */
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }
 
+    /**
+     * @return BelongsTo<LessonBlock, BlockAttempt>
+     */
     public function lessonBlock(): BelongsTo
     {
         return $this->belongsTo(LessonBlock::class);
