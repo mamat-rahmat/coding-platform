@@ -45,7 +45,7 @@ function destroy(course: Course) {
 }
 
 function exportCourse(course: Course) {
-    window.location.href = adminCourseRoutes.exportMethod.url(course.id);
+    window.location.href = adminCourseRoutes.export.url(course.id);
 }
 
 function onFileChange(event: Event) {
@@ -63,7 +63,7 @@ function importCourse() {
     const formData = new FormData();
     formData.append('file', importFile.value);
 
-    router.post(adminCourseRoutes.importMethod.url(), formData, {
+    router.post(adminCourseRoutes.import.url(), formData, {
         onFinish: () => {
             isImporting.value = false;
             importFile.value = null;
