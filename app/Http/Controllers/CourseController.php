@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\Course;
+use App\Models\CourseModule;
+use App\Models\LessonBlock;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -129,8 +131,9 @@ class CourseController extends Controller
 
         $totalLessons = $lessonIds->count();
 
-        $participants = $course->users()
+        $participants = User::query()
             ->where('is_admin', false)
+            ->whereHas('courses', fn ($query) => $query->whereKey($course->id))
             ->withCount([
                 'lessonProgresses' => fn ($query) => $query
                     ->whereIn('lesson_id', $lessonIds)
@@ -144,7 +147,7 @@ class CourseController extends Controller
             ->orderByDesc('lesson_progresses_count')
             ->get(['users.id', 'users.uuid', 'users.name']);
 
-        $currentUserId = $request->user()?->id ?? null;
+        $currentUserId = $request->user()?->id;
 
         $leaderboard = $participants->map(function ($participant, int $index) use ($totalLessons, $course, $currentUserId) {
             $completedCount = $participant->lesson_progresses_count;
@@ -207,36 +210,42 @@ class CourseController extends Controller
             ])
             ->get(['id', 'course_id', 'title', 'sort_order']);
 
-        $data = $modules->map(function ($module) use ($completedLessonIds, $correctBlockIds) {
+        $data = $modules->map(function (CourseModule $module) use ($completedLessonIds, $correctBlockIds): array {
+            $lessonsData = [];
+
+            foreach ($module->lessons->sortBy('sort_order') as $lesson) {
+                $blocksData = [];
+
+                foreach ($lesson->blocks->sortBy('sort_order') as $block) {
+                    $blocksData[] = [
+                        'id' => $block->id,
+                        'type' => $block->type->value,
+                        'title' => $block->title,
+                        'sort_order' => $block->sort_order,
+                        'is_completed' => $correctBlockIds->contains($block->id),
+                    ];
+                }
+
+                $totalBlocks = $lesson->blocks->count();
+                $completedBlocks = $lesson->blocks
+                    ->filter(fn (LessonBlock $block) => $correctBlockIds->contains($block->id))
+                    ->count();
+
+                $lessonsData[] = [
+                    'id' => $lesson->id,
+                    'title' => $lesson->title,
+                    'sort_order' => $lesson->sort_order,
+                    'is_completed' => $completedLessonIds->contains($lesson->id),
+                    'blocks_completed' => $completedBlocks,
+                    'blocks_total' => $totalBlocks,
+                    'blocks' => $blocksData,
+                ];
+            }
+
             return [
                 'id' => $module->id,
                 'title' => $module->title,
-                'lessons' => $module->lessons->sortBy('sort_order')->values()->map(function ($lesson) use ($completedLessonIds, $correctBlockIds) {
-                    $totalBlocks = $lesson->blocks->count();
-                    $completedBlocks = $lesson->blocks
-                        ->filter(fn ($block) => $correctBlockIds->contains($block->id))
-                        ->count();
-
-                    $blocks = $lesson->blocks->sortBy('sort_order')->values()->map(function ($block) use ($correctBlockIds) {
-                        return [
-                            'id' => $block->id,
-                            'type' => $block->type->value,
-                            'title' => $block->title,
-                            'sort_order' => $block->sort_order,
-                            'is_completed' => $correctBlockIds->contains($block->id),
-                        ];
-                    });
-
-                    return [
-                        'id' => $lesson->id,
-                        'title' => $lesson->title,
-                        'sort_order' => $lesson->sort_order,
-                        'is_completed' => $completedLessonIds->contains($lesson->id),
-                        'blocks_completed' => $completedBlocks,
-                        'blocks_total' => $totalBlocks,
-                        'blocks' => $blocks,
-                    ];
-                }),
+                'lessons' => $lessonsData,
             ];
         });
 

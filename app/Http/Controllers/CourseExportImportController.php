@@ -71,7 +71,7 @@ class CourseExportImportController extends Controller
         ]);
 
         $content = file_get_contents($request->file('file')->getRealPath());
-        $data = json_decode($content, true);
+        $data = json_decode((string) $content, true);
 
         if (json_last_error() !== JSON_ERROR_NONE) {
             abort(422, 'File JSON tidak valid.');
@@ -142,7 +142,7 @@ class CourseExportImportController extends Controller
         ]);
 
         $content = file_get_contents($request->file('file')->getRealPath());
-        $data = json_decode($content, true);
+        $data = json_decode((string) $content, true);
 
         if (json_last_error() !== JSON_ERROR_NONE) {
             abort(422, 'File JSON tidak valid.');

@@ -74,7 +74,6 @@ class BlockAttemptController extends Controller
             LessonBlockType::CODE_FILL => $this->verifyCodeFill($request, $lessonBlock),
             LessonBlockType::CODE_REORDER => $this->verifyCodeReorder($request, $lessonBlock),
             LessonBlockType::CODE_CHALLENGE => $this->verifyCodeChallenge($request, $lessonBlock),
-            default => ['answer' => '', 'is_correct' => false],
         };
 
         if ($existingAttempt) {
@@ -198,10 +197,15 @@ class BlockAttemptController extends Controller
         $correctAnswers = $block->content['correct_answers'] ?? [];
         abort_unless(is_array($correctAnswers) && count($correctAnswers) > 0, 422);
 
-        $selected = explode(',', $validated['answer']);
-        sort($selected);
-        $correctSorted = [...$correctAnswers];
-        sort($correctSorted);
+        $selected = collect(explode(',', $validated['answer']))
+            ->sort()
+            ->values()
+            ->implode(',');
+
+        $correctSorted = implode(
+            ',',
+            array_map(fn ($value): string => (string) $value, $correctAnswers),
+        );
 
         return [
             'answer' => $validated['answer'],
@@ -249,7 +253,7 @@ class BlockAttemptController extends Controller
     }
 
     /**
-     * @return array{answer: string, is_correct: bool, attempt_data: ?array, score: ?int}
+     * @return array{answer: string, is_correct: bool, attempt_data: ?array<int, mixed>, score: ?int}
      */
     private function verifyCodeChallenge(Request $request, LessonBlock $block): array
     {

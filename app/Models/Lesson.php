@@ -8,6 +8,10 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
+/**
+ * @property bool $is_completed
+ * @property bool $is_locked
+ */
 class Lesson extends Model
 {
     use HasFactory;
@@ -54,6 +58,9 @@ class Lesson extends Model
         return $this->hasMany(LessonProgress::class);
     }
 
+    /**
+     * @return Collection<int, Lesson>
+     */
     public function orderedInCourse(): Collection
     {
         $course = $this->module->course;

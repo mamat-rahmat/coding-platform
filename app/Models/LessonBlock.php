@@ -8,6 +8,12 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
+/**
+ * @property bool $is_answered
+ * @property bool|null $is_correct
+ * @property mixed|null $selected_answer
+ * @property mixed|null $attempt_data
+ */
 class LessonBlock extends Model
 {
     use HasFactory;

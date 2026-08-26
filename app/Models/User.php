@@ -6,6 +6,7 @@ namespace App\Models;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -27,6 +28,8 @@ use Illuminate\Support\Str;
  * @property string|null $remember_token
  * @property bool $is_admin
  * @property bool $is_approved
+ * @property int $lesson_progresses_count
+ * @property Collection<int, LessonProgress>|null $lessonProgresses
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
  */
