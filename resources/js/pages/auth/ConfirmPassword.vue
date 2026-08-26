@@ -20,6 +20,7 @@ defineOptions({
     <Head title="Confirm password" />
 
     <Form
+        method="post"
         :action="store.url()"
         reset-on-success
         v-slot="{ errors, processing }"

@@ -31,6 +31,7 @@ defineProps<{
     </div>
 
     <Form
+        method="post"
         :action="send.url()"
         class="space-y-6 text-center"
         v-slot="{ processing }"

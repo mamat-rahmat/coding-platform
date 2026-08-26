@@ -26,6 +26,7 @@ defineOptions({
     <Head title="Register" />
 
     <Form
+        method="post"
         :action="store.url()"
         :reset-on-success="['password', 'password_confirmation']"
         v-slot="{ errors, processing }"

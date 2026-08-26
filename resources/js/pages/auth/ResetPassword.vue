@@ -29,6 +29,7 @@ const inputEmail = ref(props.email);
     <Head title="Reset password" />
 
     <Form
+        method="post"
         :action="update.url()"
         :transform="(data) => ({ ...data, token, email })"
         :reset-on-success="['password', 'password_confirmation']"
