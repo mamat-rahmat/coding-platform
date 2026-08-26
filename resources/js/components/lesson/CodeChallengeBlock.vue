@@ -61,7 +61,7 @@ const userCode = ref(
 const terminalContainer = ref<HTMLElement | null>(null);
 const testcaseResults = ref<Record<string, TestcaseResult>>({});
 const hasRunTests = ref(false);
-const submitted = ref(props.isAnswered ?? false);
+const submitted = ref(props.isAnswered && props.isCorrect === true);
 
 onMounted(() => {
     if (terminalContainer.value) {
@@ -210,7 +210,7 @@ function submitResult() {
                     return;
                 }
 
-                submitted.value = true;
+                submitted.value = result.is_correct === true;
             },
         },
     );
