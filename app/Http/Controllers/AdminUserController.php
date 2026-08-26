@@ -3,8 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\Admin\UpdateUserRequest;
+use App\Models\BlockAttempt;
+use App\Models\LessonProgress;
 use App\Models\User;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -85,6 +88,21 @@ class AdminUserController extends Controller
         return redirect()
             ->route('admin.users.index')
             ->with('success', 'Progress user berhasil direset.');
+    }
+
+    public function resetAllProgress(): RedirectResponse
+    {
+        $this->authorize('resetAllProgress', User::class);
+
+        DB::transaction(function () {
+            LessonProgress::query()->delete();
+            BlockAttempt::query()->delete();
+            DB::table('course_user')->delete();
+        });
+
+        return redirect()
+            ->route('admin.users.index')
+            ->with('success', 'Progress semua user berhasil direset.');
     }
 
     public function approve(User $user): RedirectResponse

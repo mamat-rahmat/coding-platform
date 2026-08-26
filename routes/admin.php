@@ -25,6 +25,11 @@ Route::middleware(['auth', 'verified', 'admin'])->group(function () {
         [AdminUserController::class, 'resetProgress'],
     )->name('admin.users.resetProgress');
 
+    Route::post(
+        'admin/users/reset-all-progress',
+        [AdminUserController::class, 'resetAllProgress'],
+    )->name('admin.users.resetAllProgress');
+
     Route::patch(
         'admin/users/{user}/approve',
         [AdminUserController::class, 'approve'],

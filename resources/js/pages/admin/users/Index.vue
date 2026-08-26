@@ -72,6 +72,16 @@ function resetProgress(user: User) {
     router.delete(adminUserRoutes.resetProgress.url(user.id));
 }
 
+const resetAllOpen = ref(false);
+
+function resetAllProgress() {
+    router.post(adminUserRoutes.resetAllProgress.url(), undefined, {
+        onFinish: () => {
+            resetAllOpen.value = false;
+        },
+    });
+}
+
 function approve(user: User) {
     router.patch(adminUserRoutes.approve.url(user.id));
 }
@@ -100,6 +110,35 @@ function formatDate(dateString: string): string {
                 <h1 class="text-2xl font-bold tracking-tight">Users</h1>
                 <p class="text-sm text-gray-500">Kelola semua pengguna.</p>
             </div>
+
+            <Dialog v-model:open="resetAllOpen">
+                <DialogTrigger as-child>
+                    <Button variant="destructive" size="sm">
+                        <RotateCcw class="h-4 w-4" />
+                        Reset All Progress
+                    </Button>
+                </DialogTrigger>
+                <DialogContent>
+                    <DialogHeader>
+                        <DialogTitle>Reset Semua Progress</DialogTitle>
+                        <DialogDescription>
+                            Semua progress belajar
+                            <strong>seluruh user</strong> (termasuk admin) akan
+                            dihapus: lesson selesai, jawaban block, dan
+                            enrollment course. Tindakan ini tidak dapat
+                            dibatalkan.
+                        </DialogDescription>
+                    </DialogHeader>
+                    <DialogFooter>
+                        <DialogClose as-child>
+                            <Button variant="outline">Batal</Button>
+                        </DialogClose>
+                        <Button variant="destructive" @click="resetAllProgress">
+                            Reset Semua
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
         </div>
 
         <div class="flex items-center gap-2">
