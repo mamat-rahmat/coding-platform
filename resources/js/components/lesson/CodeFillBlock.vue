@@ -69,7 +69,8 @@ function restoreFromAnswer(): (number | null)[] {
         return props.content.blanks.map(() => null);
     }
 
-    const answerMap = new Map<string, string>();
+    const positional = new Map<number, string>();
+    const byId = new Map<string, string>();
 
     for (const part of props.selectedAnswer.split('|')) {
         const sep = part.indexOf(':');
@@ -78,34 +79,38 @@ function restoreFromAnswer(): (number | null)[] {
             continue;
         }
 
-        const id = part.slice(0, sep);
+        const key = part.slice(0, sep);
         const value = part.slice(sep + 1);
 
-        if (id) {
-            answerMap.set(id, value);
+        if (/^\d+$/.test(key)) {
+            positional.set(Number(key), value);
+        } else if (key !== '') {
+            byId.set(key, value);
         }
     }
 
     const usedOptIndices = new Set<number>();
-    const placements: (number | null)[] = props.content.blanks.map((blank) => {
-        const value = answerMap.get(blank.id);
+    const placements: (number | null)[] = props.content.blanks.map(
+        (blank, i) => {
+            const value = positional.get(i) ?? byId.get(blank.id);
 
-        if (value === undefined) {
+            if (value === undefined) {
+                return null;
+            }
+
+            const optIdx = shuffledOptions.value.findIndex(
+                (o, idx) => o.value === value && !usedOptIndices.has(idx),
+            );
+
+            if (optIdx >= 0) {
+                usedOptIndices.add(optIdx);
+
+                return shuffledOptions.value[optIdx].index;
+            }
+
             return null;
-        }
-
-        const optIdx = shuffledOptions.value.findIndex(
-            (o, idx) => o.value === value && !usedOptIndices.has(idx),
-        );
-
-        if (optIdx >= 0) {
-            usedOptIndices.add(optIdx);
-
-            return shuffledOptions.value[optIdx].index;
-        }
-
-        return null;
-    });
+        },
+    );
 
     return placements;
 }
@@ -248,7 +253,7 @@ function submitAnswer() {
     const allCorrect = results.every(Boolean);
 
     const answersPayload = props.content.blanks
-        .map((b, i) => `${b.id}:${getBlankDisplayValue(i)}`)
+        .map((_, i) => `${i}:${getBlankDisplayValue(i)}`)
         .join('|');
 
     router.post(
