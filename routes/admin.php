@@ -50,6 +50,11 @@ Route::middleware(['auth', 'verified', 'admin'])->group(function () {
         AdminLessonController::class,
     )->names('admin.lessons')->shallow();
 
+    Route::patch(
+        'admin/lessons/{lesson}/move',
+        [AdminLessonController::class, 'move'],
+    )->name('admin.lessons.move');
+
     Route::resource(
         'admin/lessons.blocks',
         AdminLessonBlockController::class,

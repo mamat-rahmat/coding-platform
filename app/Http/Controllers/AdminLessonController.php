@@ -2,11 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\Admin\MoveLessonRequest;
 use App\Http\Requests\Admin\StoreLessonRequest;
 use App\Http\Requests\Admin\UpdateLessonRequest;
 use App\Models\CourseModule;
 use App\Models\Lesson;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -22,8 +24,13 @@ class AdminLessonController extends Controller
             'lessons' => fn ($q) => $q->orderBy('sort_order'),
         ]);
 
+        $modules = CourseModule::where('course_id', $module->course_id)
+            ->orderBy('sort_order')
+            ->get(['id', 'title']);
+
         return Inertia::render('admin/lessons/Index', [
             'module' => $module,
+            'modules' => $modules,
         ]);
     }
 
@@ -100,5 +107,40 @@ class AdminLessonController extends Controller
         return redirect()
             ->route('admin.lessons.index', $lesson->course_module_id)
             ->with('success', 'Lesson berhasil dihapus.');
+    }
+
+    public function move(
+        MoveLessonRequest $request,
+        Lesson $lesson,
+    ): RedirectResponse {
+        $this->authorize('update', $lesson);
+
+        $targetModuleId = $request->validated()['target_module_id'];
+        $sourceModuleId = $lesson->course_module_id;
+
+        if ($targetModuleId === $sourceModuleId) {
+            return back()->withErrors(['target_module_id' => 'Lesson sudah berada di module ini.']);
+        }
+
+        DB::transaction(function () use ($lesson, $targetModuleId, $sourceModuleId) {
+            $newSortOrder = (Lesson::where('course_module_id', $targetModuleId)->max('sort_order') ?? 0) + 1;
+
+            $lesson->update([
+                'course_module_id' => $targetModuleId,
+                'sort_order' => $newSortOrder,
+            ]);
+
+            $remaining = Lesson::where('course_module_id', $sourceModuleId)
+                ->orderBy('sort_order')
+                ->get();
+
+            foreach ($remaining as $index => $item) {
+                $item->update(['sort_order' => $index + 1]);
+            }
+        });
+
+        return redirect()
+            ->route('admin.lessons.index', $targetModuleId)
+            ->with('success', 'Lesson berhasil dipindahkan.');
     }
 }

@@ -1,8 +1,25 @@
 <script setup lang="ts">
 import { Head, Link, router } from '@inertiajs/vue3';
-import { Plus, Pencil, Trash2, Eye, ArrowLeft } from '@lucide/vue';
+import { Plus, Pencil, Trash2, Eye, ArrowLeft, MoveRight } from '@lucide/vue';
+import { computed, ref } from 'vue';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+    Dialog,
+    DialogClose,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+} from '@/components/ui/dialog';
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from '@/components/ui/select';
 import adminRoutes from '@/routes/admin';
 import adminLessonRoutes from '@/routes/admin/lessons';
 import adminModuleRoutes from '@/routes/admin/modules';
@@ -23,9 +40,29 @@ interface Module {
     lessons: Lesson[];
 }
 
+interface ModuleOption {
+    id: number;
+    title: string;
+}
+
 defineProps<{
     module: Module;
+    modules: ModuleOption[];
 }>();
+
+const moveTarget = ref<Lesson | null>(null);
+const moveModuleId = ref<string>('');
+const isMoving = ref(false);
+
+const moveDialogOpen = computed({
+    get: () => moveTarget.value !== null,
+    set: (val: boolean) => {
+        if (!val) {
+            moveTarget.value = null;
+            moveModuleId.value = '';
+        }
+    },
+});
 
 defineOptions({
     layout: {
@@ -42,6 +79,31 @@ function destroy(lesson: Lesson) {
     }
 
     router.delete(adminLessonRoutes.destroy.url(lesson.id));
+}
+
+function openMoveDialog(lesson: Lesson) {
+    moveTarget.value = lesson;
+    moveModuleId.value = '';
+}
+
+function moveLesson() {
+    if (!moveTarget.value || !moveModuleId.value) {
+        return;
+    }
+
+    isMoving.value = true;
+
+    router.patch(
+        adminLessonRoutes.move.url(moveTarget.value.id),
+        { target_module_id: Number(moveModuleId.value) },
+        {
+            onFinish: () => {
+                isMoving.value = false;
+                moveTarget.value = null;
+                moveModuleId.value = '';
+            },
+        },
+    );
 }
 </script>
 
@@ -140,6 +202,14 @@ function destroy(lesson: Lesson) {
                             <Button
                                 variant="ghost"
                                 size="icon-sm"
+                                @click="openMoveDialog(lesson)"
+                            >
+                                <MoveRight class="h-4 w-4 text-blue-600" />
+                            </Button>
+
+                            <Button
+                                variant="ghost"
+                                size="icon-sm"
                                 @click="destroy(lesson)"
                             >
                                 <Trash2 class="h-4 w-4 text-red-600" />
@@ -149,5 +219,54 @@ function destroy(lesson: Lesson) {
                 </div>
             </CardContent>
         </Card>
+
+        <Dialog v-model:open="moveDialogOpen">
+            <DialogContent class="sm:max-w-md">
+                <DialogHeader>
+                    <DialogTitle>Pindahkan Lesson</DialogTitle>
+                    <DialogDescription>
+                        Pindahkan lesson
+                        <template v-if="moveTarget">
+                            <strong>{{ moveTarget.title }}</strong>
+                        </template>
+                        ke module lain di course yang sama.
+                    </DialogDescription>
+                </DialogHeader>
+
+                <Select v-model="moveModuleId">
+                    <SelectTrigger class="w-full">
+                        <SelectValue placeholder="Pilih module tujuan..." />
+                    </SelectTrigger>
+                    <SelectContent>
+                        <SelectItem
+                            v-for="m in modules"
+                            :key="m.id"
+                            :value="String(m.id)"
+                            :disabled="m.id === module.id"
+                        >
+                            {{ m.title }}
+                            <span
+                                v-if="m.id === module.id"
+                                class="text-xs text-gray-400"
+                            >
+                                (module saat ini)
+                            </span>
+                        </SelectItem>
+                    </SelectContent>
+                </Select>
+
+                <DialogFooter>
+                    <DialogClose as-child>
+                        <Button variant="outline">Batal</Button>
+                    </DialogClose>
+                    <Button
+                        :disabled="!moveModuleId || isMoving"
+                        @click="moveLesson"
+                    >
+                        Pindahkan
+                    </Button>
+                </DialogFooter>
+            </DialogContent>
+        </Dialog>
     </div>
 </template>
