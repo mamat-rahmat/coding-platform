@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Head, Link, router } from '@inertiajs/vue3';
+import { Head, Link, router, usePage } from '@inertiajs/vue3';
 import { Pencil, Trash2, ShieldCheck, RotateCcw, Check, X } from '@lucide/vue';
 import { computed, ref } from 'vue';
 import { Button } from '@/components/ui/button';
@@ -34,6 +34,9 @@ interface User {
 const props = defineProps<{
     users: User[];
 }>();
+
+const page = usePage();
+const currentUserId = computed(() => page.props.auth.user.id);
 
 defineOptions({
     layout: {
@@ -246,13 +249,13 @@ function formatDate(dateString: string): string {
                                     <Button
                                         variant="ghost"
                                         size="icon-sm"
-                                        :disabled="user.is_admin"
+                                        :disabled="user.id === currentUserId"
                                         @click="resetTarget = user"
                                     >
                                         <RotateCcw
                                             class="h-4 w-4"
                                             :class="
-                                                user.is_admin
+                                                user.id === currentUserId
                                                     ? 'text-gray-300'
                                                     : 'text-orange-600'
                                             "
