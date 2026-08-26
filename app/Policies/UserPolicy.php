@@ -28,7 +28,7 @@ class UserPolicy
 
     public function resetProgress(User $user, User $model): bool
     {
-        return $user->is_admin && $user->id !== $model->id;
+        return $user->is_admin;
     }
 
     public function resetAllProgress(User $user): bool

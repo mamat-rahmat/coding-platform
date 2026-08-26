@@ -24,15 +24,16 @@ test('admin can reset another admin progress', function () {
         ->and($targetAdmin->fresh()->courses()->count())->toBe(0);
 });
 
-test('admin cannot reset their own progress', function () {
+test('admin can reset their own progress', function () {
     $admin = User::factory()->admin()->create();
     LessonProgress::factory()->create(['user_id' => $admin->id]);
 
     $this->actingAs($admin)
         ->delete(route('admin.users.resetProgress', $admin->id))
-        ->assertForbidden();
+        ->assertRedirect()
+        ->assertSessionHas('success');
 
-    expect(LessonProgress::where('user_id', $admin->id)->count())->toBe(1);
+    expect(LessonProgress::where('user_id', $admin->id)->count())->toBe(0);
 });
 
 test('non-admin cannot reset progress', function () {
