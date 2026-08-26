@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\LessonBlockType;
+use Database\Factories\LessonBlockFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -16,6 +17,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  */
 class LessonBlock extends Model
 {
+    /** @use HasFactory<LessonBlockFactory> */
     use HasFactory;
 
     protected $fillable = [
@@ -35,7 +37,7 @@ class LessonBlock extends Model
     }
 
     /**
-     * @return BelongsTo<Lesson, LessonBlock>
+     * @return BelongsTo<Lesson, $this>
      */
     public function lesson(): BelongsTo
     {
@@ -43,7 +45,7 @@ class LessonBlock extends Model
     }
 
     /**
-     * @return HasMany<BlockAttempt, LessonBlock>
+     * @return HasMany<BlockAttempt, $this>
      */
     public function blockAttempts(): HasMany
     {

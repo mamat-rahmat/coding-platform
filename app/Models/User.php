@@ -65,7 +65,7 @@ class User extends Authenticatable
     }
 
     /**
-     * @return HasMany<LessonProgress, User>
+     * @return HasMany<LessonProgress, $this>
      */
     public function lessonProgresses(): HasMany
     {
@@ -73,7 +73,7 @@ class User extends Authenticatable
     }
 
     /**
-     * @return HasMany<BlockAttempt, User>
+     * @return HasMany<BlockAttempt, $this>
      */
     public function blockAttempts(): HasMany
     {
@@ -81,7 +81,7 @@ class User extends Authenticatable
     }
 
     /**
-     * @return BelongsToMany<Course, User>
+     * @return BelongsToMany<Course, $this>
      */
     public function courses(): BelongsToMany
     {

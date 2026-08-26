@@ -856,6 +856,9 @@ PYTHON, [
         ]);
     }
 
+    /**
+     * @param  array<int, array<string, string>>  $options
+     */
     private function mcqSingle(Lesson $lesson, int $sort, string $question, ?string $code, array $options, string $correctAnswer): void
     {
         $content = [
@@ -874,6 +877,10 @@ PYTHON, [
         ]);
     }
 
+    /**
+     * @param  array<int, array<string, string>>  $options
+     * @param  array<string>  $correctAnswers
+     */
     private function mcqMultiple(Lesson $lesson, int $sort, string $question, ?string $code, array $options, array $correctAnswers): void
     {
         $content = [
@@ -892,6 +899,9 @@ PYTHON, [
         ]);
     }
 
+    /**
+     * @param  array<int, array<string, string>>  $blanks
+     */
     private function codeFill(Lesson $lesson, int $sort, string $template, array $blanks, string $markdown = ''): void
     {
         $content = ['code_template' => $template, 'blanks' => $blanks];
@@ -906,6 +916,10 @@ PYTHON, [
         ]);
     }
 
+    /**
+     * @param  array<string>  $lines
+     * @param  array<int, int>  $correctOrder
+     */
     private function codeReorder(Lesson $lesson, int $sort, array $lines, array $correctOrder): void
     {
         $lesson->blocks()->create([
@@ -915,6 +929,9 @@ PYTHON, [
         ]);
     }
 
+    /**
+     * @param  array<int, mixed>  $testcases
+     */
     private function codeChallenge(Lesson $lesson, int $sort, string $prompt, string $starterCode, array $testcases): void
     {
         $lesson->blocks()->create([

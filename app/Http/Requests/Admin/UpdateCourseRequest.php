@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\Admin;
 
+use App\Models\Course;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -13,6 +14,7 @@ class UpdateCourseRequest extends FormRequest
     public function rules(): array
     {
         $course = $this->route('course');
+        $courseId = $course instanceof Course ? $course->id : (is_string($course) ? $course : null);
 
         return [
             'title' => ['required', 'string', 'max:255'],
@@ -20,7 +22,7 @@ class UpdateCourseRequest extends FormRequest
                 'required',
                 'string',
                 'max:255',
-                Rule::unique('courses', 'slug')->ignore($course->id),
+                Rule::unique('courses', 'slug')->ignore($courseId),
             ],
             'description' => ['nullable', 'string'],
             'language' => ['required', 'string', 'max:50'],

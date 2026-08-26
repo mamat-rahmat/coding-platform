@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Database\Factories\CourseFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -10,6 +11,7 @@ use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 
 class Course extends Model
 {
+    /** @use HasFactory<CourseFactory> */
     use HasFactory;
 
     protected $fillable = [
@@ -31,7 +33,7 @@ class Course extends Model
     }
 
     /**
-     * @return HasMany<CourseModule, Course>
+     * @return HasMany<CourseModule, $this>
      */
     public function modules(): HasMany
     {
@@ -39,7 +41,7 @@ class Course extends Model
     }
 
     /**
-     * @return HasManyThrough<Lesson, CourseModule, Course>
+     * @return HasManyThrough<Lesson, CourseModule, $this>
      */
     public function lessons(): HasManyThrough
     {
@@ -52,7 +54,7 @@ class Course extends Model
     }
 
     /**
-     * @return BelongsToMany<Course, User>
+     * @return BelongsToMany<User, $this>
      */
     public function users(): BelongsToMany
     {

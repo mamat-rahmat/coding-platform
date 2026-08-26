@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Database\Factories\LessonProgressFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -11,6 +12,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  */
 class LessonProgress extends Model
 {
+    /** @use HasFactory<LessonProgressFactory> */
     use HasFactory;
 
     protected $fillable = [
@@ -27,7 +29,7 @@ class LessonProgress extends Model
     }
 
     /**
-     * @return BelongsTo<User, LessonProgress>
+     * @return BelongsTo<User, $this>
      */
     public function user(): BelongsTo
     {
@@ -35,7 +37,7 @@ class LessonProgress extends Model
     }
 
     /**
-     * @return BelongsTo<Lesson, LessonProgress>
+     * @return BelongsTo<Lesson, $this>
      */
     public function lesson(): BelongsTo
     {

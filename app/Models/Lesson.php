@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Database\Factories\LessonFactory;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -14,6 +15,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  */
 class Lesson extends Model
 {
+    /** @use HasFactory<LessonFactory> */
     use HasFactory;
 
     protected $fillable = [
@@ -35,7 +37,7 @@ class Lesson extends Model
     }
 
     /**
-     * @return BelongsTo<CourseModule, Lesson>
+     * @return BelongsTo<CourseModule, $this>
      */
     public function module(): BelongsTo
     {
@@ -43,7 +45,7 @@ class Lesson extends Model
     }
 
     /**
-     * @return HasMany<LessonBlock, Lesson>
+     * @return HasMany<LessonBlock, $this>
      */
     public function blocks(): HasMany
     {
@@ -51,7 +53,7 @@ class Lesson extends Model
     }
 
     /**
-     * @return HasMany<LessonProgress, Lesson>
+     * @return HasMany<LessonProgress, $this>
      */
     public function progresses(): HasMany
     {

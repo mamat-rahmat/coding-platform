@@ -119,35 +119,45 @@ class ProfileController extends Controller
             ])
             ->get(['id', 'course_id', 'title', 'sort_order']);
 
-        $data = $modules->map(function ($module) use ($completedLessonIds, $correctBlockIds) {
-            return [
+        $data = [];
+
+        foreach ($modules as $module) {
+            $lessonsData = [];
+
+            foreach ($module->lessons->sortBy('sort_order') as $lesson) {
+                $blocksData = [];
+
+                foreach ($lesson->blocks->sortBy('sort_order') as $block) {
+                    $blocksData[] = [
+                        'id' => $block->id,
+                        'type' => $block->type->value,
+                        'sort_order' => $block->sort_order,
+                        'is_completed' => $correctBlockIds->contains($block->id),
+                    ];
+                }
+
+                $totalBlocks = $lesson->blocks->count();
+                $completedBlocks = collect($blocksData)
+                    ->filter(fn ($block) => $block['is_completed'])
+                    ->count();
+
+                $lessonsData[] = [
+                    'id' => $lesson->id,
+                    'title' => $lesson->title,
+                    'sort_order' => $lesson->sort_order,
+                    'is_completed' => $completedLessonIds->contains($lesson->id),
+                    'blocks_completed' => $completedBlocks,
+                    'blocks_total' => $totalBlocks,
+                    'blocks' => $blocksData,
+                ];
+            }
+
+            $data[] = [
                 'id' => $module->id,
                 'title' => $module->title,
-                'lessons' => $module->lessons->sortBy('sort_order')->values()->map(function ($lesson) use ($completedLessonIds, $correctBlockIds) {
-                    $blocks = $lesson->blocks->sortBy('sort_order')->values()->map(function ($block) use ($correctBlockIds) {
-                        return [
-                            'id' => $block->id,
-                            'type' => $block->type->value,
-                            'sort_order' => $block->sort_order,
-                            'is_completed' => $correctBlockIds->contains($block->id),
-                        ];
-                    });
-
-                    $totalBlocks = $blocks->count();
-                    $completedBlocks = $blocks->filter->is_completed->count();
-
-                    return [
-                        'id' => $lesson->id,
-                        'title' => $lesson->title,
-                        'sort_order' => $lesson->sort_order,
-                        'is_completed' => $completedLessonIds->contains($lesson->id),
-                        'blocks_completed' => $completedBlocks,
-                        'blocks_total' => $totalBlocks,
-                        'blocks' => $blocks,
-                    ];
-                }),
+                'lessons' => $lessonsData,
             ];
-        });
+        }
 
         return response()->json(['modules' => $data]);
     }
@@ -254,36 +264,46 @@ class ProfileController extends Controller
         $totalLessons = $publishedLessonIds->count();
         $completedLessons = $completedLessonIds->count();
 
-        $data = $modules->map(function ($module) use ($completedLessonIds, $correctBlockIds) {
-            return [
+        $data = [];
+
+        foreach ($modules as $module) {
+            $lessonsData = [];
+
+            foreach ($module->lessons->sortBy('sort_order') as $lesson) {
+                $blocksData = [];
+
+                foreach ($lesson->blocks->sortBy('sort_order') as $block) {
+                    $blocksData[] = [
+                        'id' => $block->id,
+                        'type' => $block->type->value,
+                        'title' => $block->title,
+                        'sort_order' => $block->sort_order,
+                        'is_completed' => $correctBlockIds->contains($block->id),
+                    ];
+                }
+
+                $totalBlocks = $lesson->blocks->count();
+                $completedBlocks = collect($blocksData)
+                    ->filter(fn ($block) => $block['is_completed'])
+                    ->count();
+
+                $lessonsData[] = [
+                    'id' => $lesson->id,
+                    'title' => $lesson->title,
+                    'sort_order' => $lesson->sort_order,
+                    'is_completed' => $completedLessonIds->contains($lesson->id),
+                    'blocks_completed' => $completedBlocks,
+                    'blocks_total' => $totalBlocks,
+                    'blocks' => $blocksData,
+                ];
+            }
+
+            $data[] = [
                 'id' => $module->id,
                 'title' => $module->title,
-                'lessons' => $module->lessons->sortBy('sort_order')->values()->map(function ($lesson) use ($completedLessonIds, $correctBlockIds) {
-                    $blocks = $lesson->blocks->sortBy('sort_order')->values()->map(function ($block) use ($correctBlockIds) {
-                        return [
-                            'id' => $block->id,
-                            'type' => $block->type->value,
-                            'title' => $block->title,
-                            'sort_order' => $block->sort_order,
-                            'is_completed' => $correctBlockIds->contains($block->id),
-                        ];
-                    });
-
-                    $totalBlocks = $blocks->count();
-                    $completedBlocks = $blocks->filter->is_completed->count();
-
-                    return [
-                        'id' => $lesson->id,
-                        'title' => $lesson->title,
-                        'sort_order' => $lesson->sort_order,
-                        'is_completed' => $completedLessonIds->contains($lesson->id),
-                        'blocks_completed' => $completedBlocks,
-                        'blocks_total' => $totalBlocks,
-                        'blocks' => $blocks,
-                    ];
-                }),
+                'lessons' => $lessonsData,
             ];
-        });
+        }
 
         return Inertia::render('Profile/CourseProgress', [
             'course' => $course->only(['id', 'title', 'slug']),

@@ -2,12 +2,14 @@
 
 namespace App\Models;
 
+use Database\Factories\BlockAttemptFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class BlockAttempt extends Model
 {
+    /** @use HasFactory<BlockAttemptFactory> */
     use HasFactory;
 
     protected $fillable = [
@@ -25,13 +27,12 @@ class BlockAttempt extends Model
         return [
             'is_correct' => 'boolean',
             'attempt_data' => 'array',
-            'score' => 'integer',
             'answered_at' => 'datetime',
         ];
     }
 
     /**
-     * @return BelongsTo<User, BlockAttempt>
+     * @return BelongsTo<User, $this>
      */
     public function user(): BelongsTo
     {
@@ -39,7 +40,7 @@ class BlockAttempt extends Model
     }
 
     /**
-     * @return BelongsTo<LessonBlock, BlockAttempt>
+     * @return BelongsTo<LessonBlock, $this>
      */
     public function lessonBlock(): BelongsTo
     {
