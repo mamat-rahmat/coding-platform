@@ -168,7 +168,7 @@ async function runAllTestcases() {
 }
 
 function submitResult() {
-    if (!hasRunTests.value) {
+    if (!hasRunTests.value || !allTestcasesPassed.value) {
         return;
     }
 
@@ -425,12 +425,33 @@ function reset() {
         </div>
 
         <div v-if="hasRunTests && !submitted" class="flex gap-2">
-            <Button :disabled="isRunning" @click="submitResult">
-                Submit Hasil
-            </Button>
+            <template v-if="allTestcasesPassed">
+                <Button :disabled="isRunning" @click="submitResult">
+                    Submit Hasil
+                </Button>
 
-            <Button variant="outline" @click="reset">Reset</Button>
+                <Button variant="outline" @click="reset">Reset</Button>
+            </template>
+
+            <template v-else>
+                <Button
+                    :disabled="isRunning || !pyodideReady"
+                    @click="runAllTestcases"
+                >
+                    Coba Lagi
+                </Button>
+
+                <Button variant="outline" @click="reset">Reset</Button>
+            </template>
         </div>
+
+        <p
+            v-if="hasRunTests && !submitted && !allTestcasesPassed"
+            class="text-xs text-gray-500"
+        >
+            Luluskan semua testcase untuk dapat mengirim jawaban. Klik "Coba
+            Lagi" untuk mencobanya.
+        </p>
 
         <div v-if="submitted" class="rounded-lg bg-green-50 p-4 text-green-700">
             <p class="font-medium">
