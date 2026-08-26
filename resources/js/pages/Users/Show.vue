@@ -8,7 +8,7 @@ import {
     BookOpen,
     Trophy,
 } from '@lucide/vue';
-import { ref } from 'vue';
+import { ref, onMounted } from 'vue';
 import courseRoutes from '@/routes/courses';
 
 interface BlockProgress {
@@ -66,6 +66,25 @@ const expandedLessonId = ref<number | null>(null);
 const loadingCourseId = ref<number | null>(null);
 const courseProgressCache = ref<Record<number, ModuleProgress[]>>({});
 
+function loadCourseProgress(course: Course): Promise<void> {
+    if (courseProgressCache.value[course.id]) {
+        return Promise.resolve();
+    }
+
+    loadingCourseId.value = course.id;
+
+    const url = `/users/${props.profileUser.uuid}/progress/${course.slug}`;
+
+    return fetch(url)
+        .then((res) => res.json())
+        .then((data) => {
+            courseProgressCache.value[course.id] = data.modules;
+        })
+        .finally(() => {
+            loadingCourseId.value = null;
+        });
+}
+
 function toggleCourse(course: Course) {
     if (expandedCourseId.value === course.id) {
         expandedCourseId.value = null;
@@ -77,28 +96,29 @@ function toggleCourse(course: Course) {
     expandedCourseId.value = course.id;
     expandedLessonId.value = null;
 
-    if (courseProgressCache.value[course.id]) {
-        return;
-    }
-
-    loadingCourseId.value = course.id;
-
-    const url = `/users/${props.profileUser.uuid}/progress/${course.slug}`;
-
-    fetch(url)
-        .then((res) => res.json())
-        .then((data) => {
-            courseProgressCache.value[course.id] = data.modules;
-        })
-        .finally(() => {
-            loadingCourseId.value = null;
-        });
+    loadCourseProgress(course);
 }
 
 function toggleLesson(lessonId: number) {
     expandedLessonId.value =
         expandedLessonId.value === lessonId ? null : lessonId;
 }
+
+onMounted(() => {
+    if (props.courses.length === 0) {
+        return;
+    }
+
+    const firstCourse = props.courses[0];
+    expandedCourseId.value = firstCourse.id;
+
+    loadCourseProgress(firstCourse).then(() => {
+        const modules = courseProgressCache.value[firstCourse.id] ?? [];
+        const firstLesson = modules[0]?.lessons?.[0];
+
+        expandedLessonId.value = firstLesson ? firstLesson.id : null;
+    });
+});
 
 function blockTypeLabel(type: string): string {
     const labels: Record<string, string> = {
