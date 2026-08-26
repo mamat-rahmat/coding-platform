@@ -40,6 +40,11 @@ Route::middleware(['auth', 'verified', 'admin'])->group(function () {
         AdminModuleController::class,
     )->names('admin.modules')->shallow();
 
+    Route::patch(
+        'admin/modules/{module}/move',
+        [AdminModuleController::class, 'move'],
+    )->name('admin.modules.move');
+
     Route::resource(
         'admin/modules.lessons',
         AdminLessonController::class,

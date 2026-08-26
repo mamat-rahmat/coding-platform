@@ -1,8 +1,25 @@
 <script setup lang="ts">
 import { Head, Link, router } from '@inertiajs/vue3';
-import { Plus, Pencil, Trash2, Eye, ArrowLeft } from '@lucide/vue';
+import { Plus, Pencil, Trash2, Eye, ArrowLeft, MoveRight } from '@lucide/vue';
+import { computed, ref } from 'vue';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+    Dialog,
+    DialogClose,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+} from '@/components/ui/dialog';
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from '@/components/ui/select';
 import adminRoutes from '@/routes/admin';
 import adminCourseRoutes from '@/routes/admin/courses';
 import adminModuleRoutes from '@/routes/admin/modules';
@@ -23,9 +40,29 @@ interface Course {
     lessons_count: number;
 }
 
+interface CourseOption {
+    id: number;
+    title: string;
+}
+
 defineProps<{
     course: Course;
+    courses: CourseOption[];
 }>();
+
+const moveTarget = ref<Module | null>(null);
+const moveCourseId = ref<string>('');
+const isMoving = ref(false);
+
+const moveDialogOpen = computed({
+    get: () => moveTarget.value !== null,
+    set: (val: boolean) => {
+        if (!val) {
+            moveTarget.value = null;
+            moveCourseId.value = '';
+        }
+    },
+});
 
 defineOptions({
     layout: {
@@ -46,6 +83,31 @@ function destroy(module: Module) {
     }
 
     router.delete(adminModuleRoutes.destroy.url(module.id));
+}
+
+function openMoveDialog(module: Module) {
+    moveTarget.value = module;
+    moveCourseId.value = '';
+}
+
+function moveModule() {
+    if (!moveTarget.value || !moveCourseId.value) {
+        return;
+    }
+
+    isMoving.value = true;
+
+    router.patch(
+        adminModuleRoutes.move.url(moveTarget.value.id),
+        { target_course_id: Number(moveCourseId.value) },
+        {
+            onFinish: () => {
+                isMoving.value = false;
+                moveTarget.value = null;
+                moveCourseId.value = '';
+            },
+        },
+    );
 }
 </script>
 
@@ -134,6 +196,14 @@ function destroy(module: Module) {
                             <Button
                                 variant="ghost"
                                 size="icon-sm"
+                                @click="openMoveDialog(module)"
+                            >
+                                <MoveRight class="h-4 w-4 text-blue-600" />
+                            </Button>
+
+                            <Button
+                                variant="ghost"
+                                size="icon-sm"
                                 @click="destroy(module)"
                             >
                                 <Trash2 class="h-4 w-4 text-red-600" />
@@ -143,5 +213,47 @@ function destroy(module: Module) {
                 </div>
             </CardContent>
         </Card>
+
+        <Dialog v-model:open="moveDialogOpen">
+            <DialogContent class="sm:max-w-md">
+                <DialogHeader>
+                    <DialogTitle>Pindahkan Module</DialogTitle>
+                    <DialogDescription>
+                        Pindahkan module
+                        <template v-if="moveTarget">
+                            <strong>{{ moveTarget.title }}</strong>
+                        </template>
+                        ke course lain.
+                    </DialogDescription>
+                </DialogHeader>
+
+                <Select v-model="moveCourseId">
+                    <SelectTrigger class="w-full">
+                        <SelectValue placeholder="Pilih course tujuan..." />
+                    </SelectTrigger>
+                    <SelectContent>
+                        <SelectItem
+                            v-for="c in courses"
+                            :key="c.id"
+                            :value="String(c.id)"
+                        >
+                            {{ c.title }}
+                        </SelectItem>
+                    </SelectContent>
+                </Select>
+
+                <DialogFooter>
+                    <DialogClose as-child>
+                        <Button variant="outline">Batal</Button>
+                    </DialogClose>
+                    <Button
+                        :disabled="!moveCourseId || isMoving"
+                        @click="moveModule"
+                    >
+                        Pindahkan
+                    </Button>
+                </DialogFooter>
+            </DialogContent>
+        </Dialog>
     </div>
 </template>

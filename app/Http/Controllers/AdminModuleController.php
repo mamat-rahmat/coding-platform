@@ -2,11 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\Admin\MoveModuleRequest;
 use App\Http\Requests\Admin\StoreModuleRequest;
 use App\Http\Requests\Admin\UpdateModuleRequest;
 use App\Models\Course;
 use App\Models\CourseModule;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -23,8 +25,13 @@ class AdminModuleController extends Controller
 
         $course->loadCount(['modules', 'lessons']);
 
+        $courses = Course::where('id', '!=', $course->id)
+            ->orderBy('title')
+            ->get(['id', 'title']);
+
         return Inertia::render('admin/modules/Index', [
             'course' => $course,
+            'courses' => $courses,
         ]);
     }
 
@@ -105,5 +112,40 @@ class AdminModuleController extends Controller
         return redirect()
             ->route('admin.modules.index', $courseId)
             ->with('success', 'Module berhasil dihapus.');
+    }
+
+    public function move(
+        MoveModuleRequest $request,
+        CourseModule $module,
+    ): RedirectResponse {
+        $this->authorize('update', $module);
+
+        $targetCourseId = $request->validated()['target_course_id'];
+        $sourceCourseId = $module->course_id;
+
+        if ($targetCourseId === $sourceCourseId) {
+            return back()->withErrors(['target_course_id' => 'Module sudah berada di course ini.']);
+        }
+
+        DB::transaction(function () use ($module, $targetCourseId, $sourceCourseId) {
+            $newSortOrder = (CourseModule::where('course_id', $targetCourseId)->max('sort_order') ?? 0) + 1;
+
+            $module->update([
+                'course_id' => $targetCourseId,
+                'sort_order' => $newSortOrder,
+            ]);
+
+            $remaining = CourseModule::where('course_id', $sourceCourseId)
+                ->orderBy('sort_order')
+                ->get();
+
+            foreach ($remaining as $index => $item) {
+                $item->update(['sort_order' => $index + 1]);
+            }
+        });
+
+        return redirect()
+            ->route('admin.modules.index', $targetCourseId)
+            ->with('success', 'Module berhasil dipindahkan.');
     }
 }
