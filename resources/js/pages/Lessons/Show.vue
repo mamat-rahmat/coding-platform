@@ -165,7 +165,10 @@ const isCurrentAnswered = computed(() => {
     }
 
     if (isCurrentCodeExample.value) {
-        return runBlockIds.value.has(currentBlock.value.id);
+        return (
+            runBlockIds.value.has(currentBlock.value.id) ||
+            answeredBlockIds.value.has(currentBlock.value.id)
+        );
     }
 
     return true;
