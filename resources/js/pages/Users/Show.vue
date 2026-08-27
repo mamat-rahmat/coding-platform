@@ -414,16 +414,25 @@ function formatDate(dateString: string): string {
                                                             }}</span
                                                         >
                                                         <span
+                                                            class="font-medium"
                                                             >{{
-                                                                blockTypeLabel(
-                                                                    block.type,
-                                                                )
-                                                            }}{{
                                                                 block.title
-                                                                    ? ': ' +
-                                                                      block.title
-                                                                    : ''
-                                                            }}</span
+                                                                    ? block.title
+                                                                    : blockTypeLabel(
+                                                                          block.type,
+                                                                      )
+                                                            }}<span
+                                                                v-if="
+                                                                    block.title
+                                                                "
+                                                                class="font-normal opacity-70"
+                                                                >&middot;
+                                                                {{
+                                                                    blockTypeLabel(
+                                                                        block.type,
+                                                                    )
+                                                                }}</span
+                                                            ></span
                                                         >
                                                     </div>
                                                 </div>
