@@ -283,6 +283,7 @@ function reset() {
                 language="python"
                 :readonly="submitted"
                 placeholder="Tulis kode Python di sini..."
+                class="code-challenge-editor"
             />
         </div>
 
@@ -461,3 +462,9 @@ function reset() {
         </div>
     </div>
 </template>
+
+<style scoped>
+.code-challenge-editor :deep(.cm-editor) {
+    min-height: calc(1.5em * 5 + 0.5rem);
+}
+</style>
