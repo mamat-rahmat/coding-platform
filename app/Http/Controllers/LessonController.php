@@ -71,7 +71,7 @@ class LessonController extends Controller
 
         $latestAttempts = $request->user()
             ->blockAttempts()
-            ->whereIn('lesson_block_id', $gradedBlockIds)
+            ->whereIn('lesson_block_id', $lesson->blocks->pluck('id')->all())
             ->orderByDesc('answered_at')
             ->get()
             ->keyBy('lesson_block_id');
@@ -87,7 +87,7 @@ class LessonController extends Controller
 
         $totalGraded = count($gradedBlockIds);
         $correctGraded = $latestAttempts
-            ->filter(fn ($attempt) => $attempt->is_correct)
+            ->filter(fn ($attempt) => in_array($attempt->lesson_block_id, $gradedBlockIds, true) && $attempt->is_correct)
             ->count();
 
         $allGradedCorrect = $totalGraded > 0

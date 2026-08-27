@@ -41,7 +41,9 @@ class BlockAttemptController extends Controller
 
         abort_unless($lesson->is_published, 404);
 
-        abort_unless($lesson->isUnlockedFor($request->user()), 403);
+        if (in_array($type, $gradedTypes, true)) {
+            abort_unless($lesson->isUnlockedFor($request->user()), 403);
+        }
 
         $existingAttempt = $request->user()
             ->blockAttempts()
