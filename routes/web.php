@@ -50,6 +50,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/courses/{course:slug}', [CourseController::class, 'show'])
         ->name('courses.show');
 
+    Route::get('/courses/{course:slug}/syllabus', [
+        CourseController::class,
+        'syllabus',
+    ])->name('courses.syllabus');
+
     Route::get('/lessons/{lesson:slug}', [LessonController::class, 'show'])
         ->name('lessons.show');
 

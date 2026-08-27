@@ -121,6 +121,101 @@ class CourseController extends Controller
         ]);
     }
 
+    public function syllabus(Request $request, Course $course): Response
+    {
+        abort_unless($course->is_published, 404);
+
+        $publishedLessonIds = $course->lessons()
+            ->where('is_published', true)
+            ->pluck('lessons.id');
+
+        $completedLessonIds = $request->user()
+            ->lessonProgresses()
+            ->whereIn('lesson_id', $publishedLessonIds)
+            ->whereNotNull('completed_at')
+            ->pluck('lesson_id');
+
+        $correctBlockIds = $request->user()
+            ->blockAttempts()
+            ->where('is_correct', true)
+            ->whereIn('lesson_block_id', fn ($query) => $query
+                ->select('id')
+                ->from('lesson_blocks')
+                ->whereIn('lesson_id', $publishedLessonIds))
+            ->pluck('lesson_block_id');
+
+        $modules = $course->modules()
+            ->orderBy('sort_order')
+            ->with([
+                'lessons' => fn ($query) => $query
+                    ->where('is_published', true)
+                    ->orderBy('sort_order')
+                    ->with('blocks:id,lesson_id,type,title,sort_order')
+                    ->select([
+                        'id',
+                        'course_module_id',
+                        'title',
+                        'slug',
+                        'sort_order',
+                        'is_optional',
+                    ]),
+            ])
+            ->get(['id', 'course_id', 'title', 'sort_order']);
+
+        $data = $modules->map(function (CourseModule $module) use ($completedLessonIds, $correctBlockIds) {
+            $lessonsData = [];
+
+            foreach ($module->lessons->sortBy('sort_order') as $lesson) {
+                $blocksData = [];
+
+                foreach ($lesson->blocks->sortBy('sort_order') as $block) {
+                    $blocksData[] = [
+                        'id' => $block->id,
+                        'type' => $block->type->value,
+                        'title' => $block->title,
+                        'sort_order' => $block->sort_order,
+                        'is_completed' => $correctBlockIds->contains($block->id),
+                    ];
+                }
+
+                $completedBlocks = $lesson->blocks
+                    ->filter(fn (LessonBlock $block) => $correctBlockIds->contains($block->id))
+                    ->count();
+
+                $lessonsData[] = [
+                    'id' => $lesson->id,
+                    'title' => $lesson->title,
+                    'slug' => $lesson->slug,
+                    'sort_order' => $lesson->sort_order,
+                    'is_optional' => $lesson->is_optional,
+                    'is_completed' => $completedLessonIds->contains($lesson->id),
+                    'blocks_completed' => $completedBlocks,
+                    'blocks_total' => $lesson->blocks->count(),
+                    'blocks' => $blocksData,
+                ];
+            }
+
+            return [
+                'id' => $module->id,
+                'title' => $module->title,
+                'lessons' => $lessonsData,
+            ];
+        });
+
+        return Inertia::render('Courses/Syllabus', [
+            'course' => $course->only([
+                'id',
+                'title',
+                'slug',
+                'description',
+                'language',
+                'level',
+                'xp_reward',
+            ]),
+            'modules' => $data->values(),
+        ]);
+    }
+
     public function leaderboard(Request $request, Course $course): Response
     {
         abort_unless($course->is_published, 404);

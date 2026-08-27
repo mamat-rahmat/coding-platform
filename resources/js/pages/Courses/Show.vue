@@ -134,6 +134,13 @@ const isAdmin = computed(() =>
                     </Link>
 
                     <Link
+                        :href="courseRoutes.syllabus.url(course.slug)"
+                        class="inline-flex items-center gap-2 rounded-lg border border-gray-200 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+                    >
+                        Silabus
+                    </Link>
+
+                    <Link
                         v-if="isAdmin"
                         :href="adminCourseRoutes.edit.url(course.id)"
                         class="inline-flex items-center gap-2 rounded-lg border border-gray-200 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
