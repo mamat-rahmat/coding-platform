@@ -83,7 +83,6 @@ class AdminUserController extends Controller
 
         $user->lessonProgresses()->delete();
         $user->blockAttempts()->delete();
-        $user->courses()->detach();
 
         return redirect()
             ->route('admin.users.index')
@@ -97,7 +96,6 @@ class AdminUserController extends Controller
         DB::transaction(function () {
             LessonProgress::query()->delete();
             BlockAttempt::query()->delete();
-            DB::table('course_user')->delete();
         });
 
         return redirect()

@@ -24,7 +24,7 @@ test('admin can reset progress for all users including admin', function () {
 
     expect(LessonProgress::count())->toBe(0)
         ->and(BlockAttempt::count())->toBe(0)
-        ->and(DB::table('course_user')->count())->toBe(0);
+        ->and(DB::table('course_user')->count())->toBe(2);
 });
 
 test('non-admin cannot reset all progress', function () {

@@ -21,7 +21,7 @@ test('admin can reset another admin progress', function () {
 
     expect(LessonProgress::where('user_id', $targetAdmin->id)->count())->toBe(0)
         ->and(BlockAttempt::where('user_id', $targetAdmin->id)->count())->toBe(0)
-        ->and($targetAdmin->fresh()->courses()->count())->toBe(0);
+        ->and($targetAdmin->fresh()->courses()->count())->toBe(1);
 });
 
 test('admin can reset their own progress', function () {
