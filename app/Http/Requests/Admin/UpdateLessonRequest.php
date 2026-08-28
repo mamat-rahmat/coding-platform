@@ -17,6 +17,7 @@ class UpdateLessonRequest extends FormRequest
             'description' => ['nullable', 'string'],
             'sort_order' => ['required', 'integer', 'min:0'],
             'is_published' => ['boolean'],
+            'is_optional' => ['boolean'],
         ];
     }
 }

@@ -16,6 +16,7 @@ interface Lesson {
     description: string | null;
     sort_order: number;
     is_published: boolean;
+    is_optional: boolean;
     module: {
         id: number;
         title: string;
@@ -33,6 +34,7 @@ const form = reactive({
     description: props.lesson.description ?? '',
     sort_order: props.lesson.sort_order,
     is_published: props.lesson.is_published,
+    is_optional: props.lesson.is_optional,
 });
 
 const errors = reactive<Record<string, string>>({});
@@ -116,6 +118,16 @@ defineOptions({
                             class="h-4 w-4 rounded border-gray-300"
                         />
                         <Label for="is_published">Published</Label>
+                    </div>
+
+                    <div class="flex items-center gap-2">
+                        <input
+                            id="is_optional"
+                            v-model="form.is_optional"
+                            type="checkbox"
+                            class="h-4 w-4 rounded border-gray-300"
+                        />
+                        <Label for="is_optional">Optional</Label>
                     </div>
 
                     <div class="flex gap-2 pt-4">
