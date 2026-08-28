@@ -26,6 +26,7 @@ interface User {
     is_admin: boolean;
     is_approved: boolean;
     email_verified_at: string | null;
+    last_login_at: string | null;
     created_at: string;
     lesson_progresses_count: number;
     block_attempts_count: number;
@@ -97,6 +98,20 @@ function formatDate(dateString: string): string {
         day: 'numeric',
         month: 'short',
         year: 'numeric',
+    });
+}
+
+function formatDateTime(dateString: string | null): string {
+    if (!dateString) {
+        return 'Belum pernah';
+    }
+
+    return new Date(dateString).toLocaleString('id-ID', {
+        day: 'numeric',
+        month: 'short',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
     });
 }
 </script>
@@ -211,8 +226,9 @@ function formatDate(dateString: string): string {
                                 {{ user.lesson_progresses_count }} lessons
                                 completed ·
                                 {{ user.block_attempts_count }} attempts ·
-                                Joined
-                                {{ formatDate(user.created_at) }}
+                                Joined {{ formatDate(user.created_at) }} · Login
+                                terakhir
+                                {{ formatDateTime(user.last_login_at) }}
                             </p>
                         </div>
 

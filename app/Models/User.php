@@ -21,6 +21,7 @@ use Illuminate\Support\Str;
  * @property string $name
  * @property string $email
  * @property Carbon|null $email_verified_at
+ * @property Carbon|null $last_login_at
  * @property string $password
  * @property string|null $two_factor_secret
  * @property string|null $two_factor_recovery_codes
@@ -58,6 +59,7 @@ class User extends Authenticatable
     {
         return [
             'email_verified_at' => 'datetime',
+            'last_login_at' => 'datetime',
             'password' => 'hashed',
             'is_admin' => 'boolean',
             'is_approved' => 'boolean',

@@ -28,6 +28,7 @@ class AdminUserController extends Controller
                 'is_admin',
                 'is_approved',
                 'email_verified_at',
+                'last_login_at',
                 'created_at',
             ]);
 
