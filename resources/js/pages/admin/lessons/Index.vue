@@ -1,7 +1,17 @@
 <script setup lang="ts">
 import { Head, Link, router } from '@inertiajs/vue3';
-import { Plus, Pencil, Trash2, Eye, ArrowLeft, MoveRight } from '@lucide/vue';
+import {
+    Plus,
+    Pencil,
+    Trash2,
+    Eye,
+    ArrowLeft,
+    MoveRight,
+    GripVertical,
+    Save,
+} from '@lucide/vue';
 import { computed, ref } from 'vue';
+import draggable from 'vuedraggable';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
@@ -45,7 +55,7 @@ interface ModuleOption {
     title: string;
 }
 
-defineProps<{
+const props = defineProps<{
     module: Module;
     modules: ModuleOption[];
 }>();
@@ -53,6 +63,38 @@ defineProps<{
 const moveTarget = ref<Lesson | null>(null);
 const moveModuleId = ref<string>('');
 const isMoving = ref(false);
+
+const lessons = ref<Lesson[]>([...props.module.lessons]);
+const isDirty = ref(false);
+const isSaving = ref(false);
+
+function onDragEnd() {
+    lessons.value.forEach((lesson, index) => {
+        lesson.sort_order = index + 1;
+    });
+    isDirty.value = true;
+}
+
+function saveOrder() {
+    isSaving.value = true;
+
+    router.patch(
+        adminLessonRoutes.reorder.url(props.module.id),
+        {
+            lessons: lessons.value.map((lesson) => ({
+                id: lesson.id,
+                sort_order: lesson.sort_order,
+            })),
+        },
+        {
+            preserveScroll: true,
+            onFinish: () => {
+                isSaving.value = false;
+                isDirty.value = false;
+            },
+        },
+    );
+}
 
 const moveDialogOpen = computed({
     get: () => moveTarget.value !== null,
@@ -129,14 +171,27 @@ function moveLesson() {
                 </p>
             </div>
 
-            <Button as-child>
-                <Link
-                    :href="adminLessonRoutes.create.url({ module: module.id })"
+            <div class="flex items-center gap-2">
+                <Button
+                    v-if="lessons.length > 1 && isDirty"
+                    :disabled="isSaving"
+                    @click="saveOrder"
                 >
-                    <Plus class="h-4 w-4" />
-                    Lesson Baru
-                </Link>
-            </Button>
+                    <Save class="h-4 w-4" />
+                    Simpan Urutan
+                </Button>
+
+                <Button as-child>
+                    <Link
+                        :href="
+                            adminLessonRoutes.create.url({ module: module.id })
+                        "
+                    >
+                        <Plus class="h-4 w-4" />
+                        Lesson Baru
+                    </Link>
+                </Button>
+            </div>
         </div>
 
         <Card>
@@ -152,71 +207,91 @@ function moveLesson() {
                     Belum ada lesson.
                 </div>
 
-                <div v-else class="divide-y">
-                    <div
-                        v-for="lesson in module.lessons"
-                        :key="lesson.id"
-                        class="flex items-center justify-between py-3"
-                    >
-                        <div class="flex-1">
-                            <div class="font-medium text-gray-900">
-                                {{ lesson.sort_order }}. {{ lesson.title }}
+                <draggable
+                    v-else
+                    v-model="lessons"
+                    :item-key="(item: Lesson) => String(item.id)"
+                    handle=".drag-handle"
+                    class="divide-y"
+                    @end="onDragEnd"
+                >
+                    <template #item="{ element: lesson }">
+                        <div class="flex items-center justify-between py-3">
+                            <div class="flex flex-1 items-center gap-2">
+                                <span
+                                    class="drag-handle flex h-6 w-6 shrink-0 cursor-move items-center justify-center text-gray-400"
+                                >
+                                    <GripVertical class="h-4 w-4" />
+                                </span>
+
+                                <div class="flex-1">
+                                    <div class="font-medium text-gray-900">
+                                        {{ lesson.sort_order }}.
+                                        {{ lesson.title }}
+                                    </div>
+                                    <div class="text-xs text-gray-500">
+                                        /{{ lesson.slug }}
+                                    </div>
+                                </div>
                             </div>
-                            <div class="text-xs text-gray-500">
-                                /{{ lesson.slug }}
+
+                            <span
+                                class="mr-3 rounded-full px-2 py-0.5 text-xs font-medium"
+                                :class="
+                                    lesson.is_published
+                                        ? 'bg-green-100 text-green-700'
+                                        : 'bg-gray-100 text-gray-600'
+                                "
+                            >
+                                {{
+                                    lesson.is_published ? 'Published' : 'Draft'
+                                }}
+                            </span>
+
+                            <div class="flex gap-1">
+                                <Button as-child variant="ghost" size="icon-sm">
+                                    <Link
+                                        :href="
+                                            adminLessonRoutes.show.url(
+                                                lesson.id,
+                                            )
+                                        "
+                                    >
+                                        <Eye class="h-4 w-4" />
+                                    </Link>
+                                </Button>
+
+                                <Button as-child variant="ghost" size="icon-sm">
+                                    <Link
+                                        :href="
+                                            adminLessonRoutes.edit.url(
+                                                lesson.id,
+                                            )
+                                        "
+                                    >
+                                        <Pencil class="h-4 w-4" />
+                                    </Link>
+                                </Button>
+
+                                <Button
+                                    variant="ghost"
+                                    size="icon-sm"
+                                    @click="openMoveDialog(lesson)"
+                                >
+                                    <MoveRight class="h-4 w-4 text-blue-600" />
+                                </Button>
+
+                                <Button
+                                    variant="ghost"
+                                    size="icon-sm"
+                                    @click="destroy(lesson)"
+                                >
+                                    <Trash2 class="h-4 w-4 text-red-600" />
+                                </Button>
                             </div>
                         </div>
-
-                        <span
-                            class="mr-3 rounded-full px-2 py-0.5 text-xs font-medium"
-                            :class="
-                                lesson.is_published
-                                    ? 'bg-green-100 text-green-700'
-                                    : 'bg-gray-100 text-gray-600'
-                            "
-                        >
-                            {{ lesson.is_published ? 'Published' : 'Draft' }}
-                        </span>
-
-                        <div class="flex gap-1">
-                            <Button as-child variant="ghost" size="icon-sm">
-                                <Link
-                                    :href="
-                                        adminLessonRoutes.show.url(lesson.id)
-                                    "
-                                >
-                                    <Eye class="h-4 w-4" />
-                                </Link>
-                            </Button>
-
-                            <Button as-child variant="ghost" size="icon-sm">
-                                <Link
-                                    :href="
-                                        adminLessonRoutes.edit.url(lesson.id)
-                                    "
-                                >
-                                    <Pencil class="h-4 w-4" />
-                                </Link>
-                            </Button>
-
-                            <Button
-                                variant="ghost"
-                                size="icon-sm"
-                                @click="openMoveDialog(lesson)"
-                            >
-                                <MoveRight class="h-4 w-4 text-blue-600" />
-                            </Button>
-
-                            <Button
-                                variant="ghost"
-                                size="icon-sm"
-                                @click="destroy(lesson)"
-                            >
-                                <Trash2 class="h-4 w-4 text-red-600" />
-                            </Button>
-                        </div>
-                    </div>
-                </div>
+                    </template>
+                </draggable>
             </CardContent>
         </Card>
 

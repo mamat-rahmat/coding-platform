@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\Admin\MoveLessonRequest;
+use App\Http\Requests\Admin\ReorderLessonsRequest;
 use App\Http\Requests\Admin\StoreLessonRequest;
 use App\Http\Requests\Admin\UpdateLessonRequest;
 use App\Models\CourseModule;
@@ -142,5 +143,22 @@ class AdminLessonController extends Controller
         return redirect()
             ->route('admin.lessons.index', $targetModuleId)
             ->with('success', 'Lesson berhasil dipindahkan.');
+    }
+
+    public function reorder(
+        ReorderLessonsRequest $request,
+        CourseModule $module,
+    ): RedirectResponse {
+        $this->authorize('update', $module);
+
+        DB::transaction(function () use ($request, $module) {
+            foreach ($request->validated()['lessons'] as $item) {
+                Lesson::where('id', $item['id'])
+                    ->where('course_module_id', $module->id)
+                    ->update(['sort_order' => $item['sort_order']]);
+            }
+        });
+
+        return back()->with('success', 'Urutan lesson berhasil diperbarui.');
     }
 }

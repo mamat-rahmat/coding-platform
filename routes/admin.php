@@ -60,6 +60,11 @@ Route::middleware(['auth', 'verified', 'admin'])->group(function () {
         [AdminLessonController::class, 'move'],
     )->name('admin.lessons.move');
 
+    Route::patch(
+        'admin/modules/{module}/lessons/reorder',
+        [AdminLessonController::class, 'reorder'],
+    )->name('admin.lessons.reorder');
+
     Route::resource(
         'admin/lessons.blocks',
         AdminLessonBlockController::class,
