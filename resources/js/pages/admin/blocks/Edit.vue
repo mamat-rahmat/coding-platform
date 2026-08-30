@@ -83,7 +83,13 @@ defineOptions({
             </div>
 
             <Button as-child variant="outline" size="sm">
-                <Link :href="lessonRoutes.show.url(lesson.slug)">
+                <Link
+                    :href="
+                        lessonRoutes.show.url(lesson.slug, {
+                            query: { block: block.sort_order },
+                        })
+                    "
+                >
                     <Eye class="h-3.5 w-3.5" />
                     Preview as Student
                 </Link>
