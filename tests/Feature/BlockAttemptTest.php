@@ -1,7 +1,9 @@
 <?php
 
 use App\Models\BlockAttempt;
+use App\Models\Lesson;
 use App\Models\LessonBlock;
+use App\Models\LessonProgress;
 use App\Models\User;
 
 test('guests cannot submit block attempts', function () {
@@ -229,7 +231,7 @@ test('incorrect answer can be retried and updates the existing attempt', functio
         ->count())->toBe(1);
 });
 
-test('correct answer blocks further retries', function () {
+test('correct answer can be retried and keeps completion while persisting new answer', function () {
     $user = User::factory()->create();
     $block = LessonBlock::factory()->mcqSingle()->create();
 
@@ -237,18 +239,20 @@ test('correct answer blocks further retries', function () {
         ->post(route('lesson-blocks.attempts.store', $block), ['answer' => 'c'])
         ->assertRedirect();
 
-    $response = $this->actingAs($user)
-        ->post(route('lesson-blocks.attempts.store', $block), ['answer' => 'a']);
+    $this->actingAs($user)
+        ->post(route('lesson-blocks.attempts.store', $block), ['answer' => 'a'])
+        ->assertRedirect();
 
-    $response->assertRedirect();
+    $attempt = BlockAttempt::where('user_id', $user->id)
+        ->where('lesson_block_id', $block->id)
+        ->first();
 
     expect(BlockAttempt::where('user_id', $user->id)
         ->where('lesson_block_id', $block->id)
         ->count())->toBe(1);
 
-    expect(BlockAttempt::where('user_id', $user->id)
-        ->where('lesson_block_id', $block->id)
-        ->value('selected_answer'))->toBe('c');
+    expect($attempt->selected_answer)->toBe('a')
+        ->and($attempt->is_correct)->toBeTrue();
 });
 
 test('wrong answer persisted then retried correctly updates attempt', function () {
@@ -366,6 +370,45 @@ test('code challenge can be retried after wrong attempt', function () {
         ->and($attempt->is_correct)->toBeTrue()
         ->and($attempt->attempt_data)->toBe(['tc1' => ['passed' => true]])
         ->and($attempt->score)->toBe(100);
+});
+
+test('code challenge retry after correct answer keeps completion and persists new code', function () {
+    $user = User::factory()->create();
+    $lesson = Lesson::factory()->create();
+    $block = LessonBlock::factory()->codeChallenge()->create(['lesson_id' => $lesson->id]);
+
+    $this->actingAs($user)
+        ->post(route('lesson-blocks.attempts.store', $block), [
+            'answer' => '1/1',
+            'is_correct' => true,
+            'attempt_data' => ['code' => 'print("hello")', 'tc1' => ['passed' => true]],
+            'score' => 100,
+        ])
+        ->assertRedirect();
+
+    $this->actingAs($user)
+        ->post(route('lesson-blocks.attempts.store', $block), [
+            'answer' => '0/1',
+            'is_correct' => false,
+            'attempt_data' => ['code' => 'print("x")', 'tc1' => ['passed' => false]],
+            'score' => 0,
+        ])
+        ->assertRedirect();
+
+    $attempt = BlockAttempt::where('user_id', $user->id)
+        ->where('lesson_block_id', $block->id)
+        ->first();
+
+    expect($attempt->attempt_data['code'])->toBe('print("x")')
+        ->and($attempt->selected_answer)->toBe('0/1')
+        ->and($attempt->is_correct)->toBeTrue()
+        ->and($attempt->score)->toBe(100)
+        ->and(BlockAttempt::where('user_id', $user->id)
+            ->where('lesson_block_id', $block->id)
+            ->count())->toBe(1)
+        ->and(LessonProgress::where('user_id', $user->id)
+            ->where('lesson_id', $lesson->id)
+            ->exists())->toBeTrue();
 });
 
 test('access block types cannot be retried', function () {

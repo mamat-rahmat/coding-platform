@@ -66,10 +66,6 @@ class BlockAttemptController extends Controller
             return back();
         }
 
-        if ($existingAttempt && $existingAttempt->is_correct) {
-            return back();
-        }
-
         $payload = match ($type) {
             LessonBlockType::MCQ_SINGLE => $this->verifyMcqSingle($request, $lessonBlock),
             LessonBlockType::MCQ_MULTIPLE => $this->verifyMcqMultiple($request, $lessonBlock),
@@ -78,12 +74,18 @@ class BlockAttemptController extends Controller
             LessonBlockType::CODE_CHALLENGE => $this->verifyCodeChallenge($request, $lessonBlock),
         };
 
+        $attemptCorrect = $existingAttempt
+            ? ($existingAttempt->is_correct || $payload['is_correct'])
+            : $payload['is_correct'];
+
         if ($existingAttempt) {
             $existingAttempt->update([
                 'selected_answer' => $payload['answer'],
-                'is_correct' => $payload['is_correct'],
+                'is_correct' => $attemptCorrect,
                 'attempt_data' => $payload['attempt_data'] ?? null,
-                'score' => $payload['score'] ?? null,
+                'score' => isset($payload['score'])
+                    ? max((int) ($existingAttempt->score ?? 0), (int) $payload['score'])
+                    : $existingAttempt->score,
                 'answered_at' => now(),
             ]);
         } else {
@@ -91,14 +93,14 @@ class BlockAttemptController extends Controller
                 'user_id' => $request->user()->id,
                 'lesson_block_id' => $lessonBlock->id,
                 'selected_answer' => $payload['answer'],
-                'is_correct' => $payload['is_correct'],
+                'is_correct' => $attemptCorrect,
                 'attempt_data' => $payload['attempt_data'] ?? null,
                 'score' => $payload['score'] ?? null,
                 'answered_at' => now(),
             ]);
         }
 
-        if ($payload['is_correct']) {
+        if ($attemptCorrect) {
             $this->maybeCompleteLesson($request, $lessonBlock);
         }
 

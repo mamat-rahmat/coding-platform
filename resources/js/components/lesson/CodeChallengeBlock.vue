@@ -7,6 +7,7 @@ import {
     Loader2,
     Square,
     Terminal,
+    RotateCcw,
 } from '@lucide/vue';
 import { computed, onMounted, onUnmounted, ref } from 'vue';
 import CodeEditor from '@/components/CodeEditor.vue';
@@ -217,7 +218,11 @@ function submitResult() {
 }
 
 function reset() {
-    if (props.isAnswered && props.isCorrect) {
+    if (
+        !confirm(
+            'Yakin ingin mencoba lagi? Jawaban tersimpan tetap dihitung sebagai selesai.',
+        )
+    ) {
         return;
     }
 
@@ -263,6 +268,16 @@ function reset() {
                             class="h-3.5 w-3.5 animate-spin"
                         />
                         Run Testcases
+                    </Button>
+
+                    <Button
+                        variant="outline"
+                        size="sm"
+                        :disabled="isRunning"
+                        @click="reset"
+                    >
+                        <RotateCcw class="h-3.5 w-3.5" />
+                        Reset
                     </Button>
 
                     <Button
@@ -430,8 +445,6 @@ function reset() {
                 <Button :disabled="isRunning" @click="submitResult">
                     Submit Hasil
                 </Button>
-
-                <Button variant="outline" @click="reset">Reset</Button>
             </template>
 
             <template v-else>
@@ -441,8 +454,6 @@ function reset() {
                 >
                     Coba Lagi
                 </Button>
-
-                <Button variant="outline" @click="reset">Reset</Button>
             </template>
         </div>
 
@@ -459,6 +470,16 @@ function reset() {
                 ✓ Tantangan selesai! Skor: {{ passedCount }}/{{ totalCount }}
                 testcase lulus.
             </p>
+
+            <Button
+                variant="outline"
+                size="sm"
+                class="mt-3 border-green-300 text-green-700 hover:bg-green-100"
+                @click="reset"
+            >
+                <RotateCcw class="h-3.5 w-3.5" />
+                Ulangi Tantangan
+            </Button>
         </div>
     </div>
 </template>
