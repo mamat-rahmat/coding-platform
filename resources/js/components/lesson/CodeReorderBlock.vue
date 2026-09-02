@@ -95,7 +95,11 @@ const submitAnswer = () => {
 };
 
 const reset = () => {
-    if (props.isAnswered && props.isCorrect) {
+    if (
+        !confirm(
+            'Yakin ingin mencoba lagi? Jawaban tersimpan tetap dihitung sebagai selesai.',
+        )
+    ) {
         return;
     }
 
@@ -191,6 +195,15 @@ const reset = () => {
             <p v-if="!isCorrect" class="mt-1 text-sm">
                 Baris yang salah ditandai merah. Coba susun ulang.
             </p>
+
+            <button
+                v-if="isCorrect"
+                type="button"
+                class="mt-3 rounded-lg border border-green-300 px-4 py-1.5 text-sm font-medium text-green-700 hover:bg-green-100"
+                @click="reset"
+            >
+                Coba lagi
+            </button>
         </div>
     </div>
 </template>
