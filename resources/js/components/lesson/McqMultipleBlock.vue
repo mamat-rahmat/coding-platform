@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { router } from '@inertiajs/vue3';
 import { computed, ref } from 'vue';
+import Markdown from '@/components/Markdown.vue';
 import attemptRoutes from '@/routes/lesson-blocks/attempts';
 
 interface QuizOption {
@@ -108,9 +109,9 @@ const reset = () => {
 
 <template>
     <div>
-        <h3 class="text-lg font-semibold text-gray-900">
-            {{ content.question }}
-        </h3>
+        <div class="text-lg font-semibold text-gray-900">
+            <Markdown :content="content.question" />
+        </div>
 
         <p class="mt-1 text-xs text-gray-500">
             Pilih semua jawaban yang benar.
